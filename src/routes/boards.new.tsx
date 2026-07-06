@@ -14,7 +14,7 @@ import {
   Globe,
 } from "lucide-react";
 
-export const Route = createFileRoute("/decisions/new")({
+export const Route = createFileRoute("/boards/new")({
   head: () => ({
     meta: [{ title: "New Decision Board — Axiora" }],
   }),
@@ -22,31 +22,11 @@ export const Route = createFileRoute("/decisions/new")({
 });
 
 const dimensions = [
-  {
-    name: "Customer Validation",
-    icon: Users,
-    desc: "Interviews, feedback, usage signals",
-  },
-  {
-    name: "Product & Technical Readiness",
-    icon: Cog,
-    desc: "Architecture, dependencies, feasibility",
-  },
-  {
-    name: "Business Readiness",
-    icon: Briefcase,
-    desc: "GTM, pricing, revenue impact",
-  },
-  {
-    name: "Operational Readiness",
-    icon: Workflow,
-    desc: "Support, SLAs, runbooks",
-  },
-  {
-    name: "Stakeholder Alignment",
-    icon: Handshake,
-    desc: "Cross-functional sign-off",
-  },
+  { name: "Customer Validation", icon: Users, desc: "Interviews, feedback, usage signals" },
+  { name: "Product & Technical Readiness", icon: Cog, desc: "Architecture, dependencies, feasibility" },
+  { name: "Business Readiness", icon: Briefcase, desc: "GTM, pricing, revenue impact" },
+  { name: "Operational Readiness", icon: Workflow, desc: "Support, SLAs, runbooks" },
+  { name: "Stakeholder Alignment", icon: Handshake, desc: "Cross-functional sign-off" },
 ];
 
 const templates = [
@@ -59,32 +39,23 @@ const templates = [
 function NewBoard() {
   const navigate = useNavigate();
   return (
-    <AppShell
-      title="New Decision Board"
-      subtitle="Set up the scope, dimensions, and collaborators"
-    >
+    <AppShell title="New Decision Board" subtitle="Set up the scope, dimensions, and collaborators">
       <div className="mx-auto max-w-5xl space-y-6">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-        >
+        <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-3.5 w-3.5" /> Back to home
         </Link>
 
         <div className="rounded-2xl border border-border bg-surface">
-          {/* Header */}
           <div className="border-b border-border px-6 py-5 md:px-8">
             <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-accent">
               <Sparkles className="h-3.5 w-3.5" /> Step 1 of 3 · Board setup
             </div>
             <h1 className="mt-2 font-display text-3xl md:text-4xl">Create decision board</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              A board frames the decision. Axiora will help you gather evidence across five
-              dimensions.
+              A board frames the decision. Axiora will help you gather evidence across five dimensions.
             </p>
           </div>
 
-          {/* Form */}
           <div className="space-y-8 p-6 md:p-8">
             <div className="grid gap-6 md:grid-cols-2">
               <div className="md:col-span-2">
@@ -124,7 +95,6 @@ function NewBoard() {
               </div>
             </div>
 
-            {/* Templates */}
             <div>
               <div className="flex items-baseline justify-between">
                 <h2 className="text-sm font-semibold">Choose a template</h2>
@@ -152,13 +122,10 @@ function NewBoard() {
               </div>
             </div>
 
-            {/* Dimensions */}
             <div>
               <div className="flex items-baseline justify-between">
                 <h2 className="text-sm font-semibold">Assessment dimensions</h2>
-                <span className="text-xs text-muted-foreground">
-                  All 5 enabled by default
-                </span>
+                <span className="text-xs text-muted-foreground">All 5 enabled by default</span>
               </div>
               <div className="mt-3 grid gap-2 md:grid-cols-2">
                 {dimensions.map((d) => (
@@ -166,11 +133,7 @@ function NewBoard() {
                     key={d.name}
                     className="flex items-start gap-3 rounded-lg border border-border bg-surface p-3 hover:bg-surface-muted"
                   >
-                    <input
-                      type="checkbox"
-                      defaultChecked
-                      className="mt-1 h-4 w-4 accent-[color:var(--accent)]"
-                    />
+                    <input type="checkbox" defaultChecked className="mt-1 h-4 w-4 accent-[color:var(--accent)]" />
                     <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-surface-muted">
                       <d.icon className="h-4 w-4 text-accent" />
                     </div>
@@ -183,7 +146,6 @@ function NewBoard() {
               </div>
             </div>
 
-            {/* Visibility */}
             <div>
               <h2 className="text-sm font-semibold">Visibility</h2>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -193,9 +155,7 @@ function NewBoard() {
                     <div className="flex items-center gap-2 text-sm font-medium">
                       <Lock className="h-4 w-4" /> Team
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      Only invited teammates can view and edit.
-                    </div>
+                    <div className="text-xs text-muted-foreground">Only invited teammates can view and edit.</div>
                   </div>
                 </label>
                 <label className="flex items-start gap-3 rounded-lg border border-border bg-surface p-4">
@@ -204,21 +164,15 @@ function NewBoard() {
                     <div className="flex items-center gap-2 text-sm font-medium">
                       <Globe className="h-4 w-4" /> Organization
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      Anyone in Axiora Labs can discover this board.
-                    </div>
+                    <div className="text-xs text-muted-foreground">Anyone in Axiora Labs can discover this board.</div>
                   </div>
                 </label>
               </div>
             </div>
           </div>
 
-          {/* Footer */}
           <div className="flex flex-col-reverse gap-3 border-t border-border px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
-            <Link
-              to="/"
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
+            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
               Cancel
             </Link>
             <div className="flex gap-2">
@@ -226,7 +180,7 @@ function NewBoard() {
                 Save draft
               </button>
               <button
-                onClick={() => navigate({ to: "/decisions/overview" })}
+                onClick={() => navigate({ to: "/boards/$id", params: { id: "new-board" } })}
                 className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
               >
                 Create board <ArrowRight className="h-4 w-4" />

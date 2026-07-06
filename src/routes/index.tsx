@@ -89,13 +89,14 @@ function Home() {
             </div>
             <div className="flex flex-wrap gap-2">
               <Link
-                to="/decisions/new"
+                to="/boards/new"
                 className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90"
               >
                 <Plus className="h-4 w-4" /> New decision board
               </Link>
               <Link
-                to="/decisions/overview"
+                to="/boards/$id"
+                params={{ id: "demo" }}
                 className="inline-flex items-center gap-2 rounded-md border border-border bg-surface px-4 py-2.5 text-sm font-medium hover:bg-surface-muted"
               >
                 View overview <ArrowUpRight className="h-4 w-4" />
@@ -134,17 +135,19 @@ function Home() {
                 </p>
               </div>
               <Link
-                to="/decisions/overview"
+                to="/boards/$id"
+                params={{ id: "demo" }}
                 className="text-xs font-medium text-accent hover:underline"
               >
                 See all
               </Link>
             </div>
             <ul className="divide-y divide-border">
-              {boards.map((b) => (
+              {boards.map((b, idx) => (
                 <li key={b.title}>
                   <Link
-                    to="/decisions/overview"
+                    to="/boards/$id"
+                    params={{ id: `board-${idx + 1}` }}
                     className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-6 py-4 hover:bg-surface-muted"
                   >
                     <div className="min-w-0">

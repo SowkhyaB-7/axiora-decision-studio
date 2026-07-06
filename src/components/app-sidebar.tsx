@@ -11,8 +11,8 @@ import { cn } from "@/lib/utils";
 
 const nav = [
   { title: "Home", to: "/", icon: LayoutDashboard },
-  { title: "New Decision Board", to: "/decisions/new", icon: PlusCircle },
-  { title: "Decision Overview", to: "/decisions/overview", icon: ClipboardList },
+  { title: "New Decision Board", to: "/boards/new", icon: PlusCircle },
+  { title: "Decision Overview", to: "/boards/demo", icon: ClipboardList },
 ];
 
 const secondary = [
@@ -72,10 +72,11 @@ export function AppSidebar() {
             "Mobile onboarding v3",
             "AI copilot rollout",
             "Enterprise SSO GA",
-          ].map((t) => (
+          ].map((t, idx) => (
             <li key={t}>
               <Link
-                to="/decisions/overview"
+                to="/boards/$id"
+                params={{ id: `board-${idx + 1}` }}
                 className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-surface-muted hover:text-foreground"
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-accent/70" />

@@ -10,53 +10,88 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DecisionsOverviewRouteImport } from './routes/decisions.overview'
-import { Route as DecisionsNewRouteImport } from './routes/decisions.new'
+import { Route as BoardsNewRouteImport } from './routes/boards.new'
+import { Route as BoardsIdRouteImport } from './routes/boards.$id'
+import { Route as BoardsIdCustomerValidationRouteImport } from './routes/boards.$id.customer-validation'
+import { Route as BoardsIdAnalysisRouteImport } from './routes/boards.$id.analysis'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DecisionsOverviewRoute = DecisionsOverviewRouteImport.update({
-  id: '/decisions/overview',
-  path: '/decisions/overview',
+const BoardsNewRoute = BoardsNewRouteImport.update({
+  id: '/boards/new',
+  path: '/boards/new',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DecisionsNewRoute = DecisionsNewRouteImport.update({
-  id: '/decisions/new',
-  path: '/decisions/new',
+const BoardsIdRoute = BoardsIdRouteImport.update({
+  id: '/boards/$id',
+  path: '/boards/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const BoardsIdCustomerValidationRoute =
+  BoardsIdCustomerValidationRouteImport.update({
+    id: '/customer-validation',
+    path: '/customer-validation',
+    getParentRoute: () => BoardsIdRoute,
+  } as any)
+const BoardsIdAnalysisRoute = BoardsIdAnalysisRouteImport.update({
+  id: '/analysis',
+  path: '/analysis',
+  getParentRoute: () => BoardsIdRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/decisions/new': typeof DecisionsNewRoute
-  '/decisions/overview': typeof DecisionsOverviewRoute
+  '/boards/$id': typeof BoardsIdRouteWithChildren
+  '/boards/new': typeof BoardsNewRoute
+  '/boards/$id/analysis': typeof BoardsIdAnalysisRoute
+  '/boards/$id/customer-validation': typeof BoardsIdCustomerValidationRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/decisions/new': typeof DecisionsNewRoute
-  '/decisions/overview': typeof DecisionsOverviewRoute
+  '/boards/$id': typeof BoardsIdRouteWithChildren
+  '/boards/new': typeof BoardsNewRoute
+  '/boards/$id/analysis': typeof BoardsIdAnalysisRoute
+  '/boards/$id/customer-validation': typeof BoardsIdCustomerValidationRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/decisions/new': typeof DecisionsNewRoute
-  '/decisions/overview': typeof DecisionsOverviewRoute
+  '/boards/$id': typeof BoardsIdRouteWithChildren
+  '/boards/new': typeof BoardsNewRoute
+  '/boards/$id/analysis': typeof BoardsIdAnalysisRoute
+  '/boards/$id/customer-validation': typeof BoardsIdCustomerValidationRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/decisions/new' | '/decisions/overview'
+  fullPaths:
+    | '/'
+    | '/boards/$id'
+    | '/boards/new'
+    | '/boards/$id/analysis'
+    | '/boards/$id/customer-validation'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/decisions/new' | '/decisions/overview'
-  id: '__root__' | '/' | '/decisions/new' | '/decisions/overview'
+  to:
+    | '/'
+    | '/boards/$id'
+    | '/boards/new'
+    | '/boards/$id/analysis'
+    | '/boards/$id/customer-validation'
+  id:
+    | '__root__'
+    | '/'
+    | '/boards/$id'
+    | '/boards/new'
+    | '/boards/$id/analysis'
+    | '/boards/$id/customer-validation'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DecisionsNewRoute: typeof DecisionsNewRoute
-  DecisionsOverviewRoute: typeof DecisionsOverviewRoute
+  BoardsIdRoute: typeof BoardsIdRouteWithChildren
+  BoardsNewRoute: typeof BoardsNewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,27 +103,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/decisions/overview': {
-      id: '/decisions/overview'
-      path: '/decisions/overview'
-      fullPath: '/decisions/overview'
-      preLoaderRoute: typeof DecisionsOverviewRouteImport
+    '/boards/new': {
+      id: '/boards/new'
+      path: '/boards/new'
+      fullPath: '/boards/new'
+      preLoaderRoute: typeof BoardsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/decisions/new': {
-      id: '/decisions/new'
-      path: '/decisions/new'
-      fullPath: '/decisions/new'
-      preLoaderRoute: typeof DecisionsNewRouteImport
+    '/boards/$id': {
+      id: '/boards/$id'
+      path: '/boards/$id'
+      fullPath: '/boards/$id'
+      preLoaderRoute: typeof BoardsIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/boards/$id/customer-validation': {
+      id: '/boards/$id/customer-validation'
+      path: '/customer-validation'
+      fullPath: '/boards/$id/customer-validation'
+      preLoaderRoute: typeof BoardsIdCustomerValidationRouteImport
+      parentRoute: typeof BoardsIdRoute
+    }
+    '/boards/$id/analysis': {
+      id: '/boards/$id/analysis'
+      path: '/analysis'
+      fullPath: '/boards/$id/analysis'
+      preLoaderRoute: typeof BoardsIdAnalysisRouteImport
+      parentRoute: typeof BoardsIdRoute
     }
   }
 }
 
+interface BoardsIdRouteChildren {
+  BoardsIdAnalysisRoute: typeof BoardsIdAnalysisRoute
+  BoardsIdCustomerValidationRoute: typeof BoardsIdCustomerValidationRoute
+}
+
+const BoardsIdRouteChildren: BoardsIdRouteChildren = {
+  BoardsIdAnalysisRoute: BoardsIdAnalysisRoute,
+  BoardsIdCustomerValidationRoute: BoardsIdCustomerValidationRoute,
+}
+
+const BoardsIdRouteWithChildren = BoardsIdRoute._addFileChildren(
+  BoardsIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DecisionsNewRoute: DecisionsNewRoute,
-  DecisionsOverviewRoute: DecisionsOverviewRoute,
+  BoardsIdRoute: BoardsIdRouteWithChildren,
+  BoardsNewRoute: BoardsNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
