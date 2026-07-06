@@ -10,53 +10,33 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DecisionsOverviewRouteImport } from './routes/decisions.overview'
-import { Route as DecisionsNewRouteImport } from './routes/decisions.new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DecisionsOverviewRoute = DecisionsOverviewRouteImport.update({
-  id: '/decisions/overview',
-  path: '/decisions/overview',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DecisionsNewRoute = DecisionsNewRouteImport.update({
-  id: '/decisions/new',
-  path: '/decisions/new',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/decisions/new': typeof DecisionsNewRoute
-  '/decisions/overview': typeof DecisionsOverviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/decisions/new': typeof DecisionsNewRoute
-  '/decisions/overview': typeof DecisionsOverviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/decisions/new': typeof DecisionsNewRoute
-  '/decisions/overview': typeof DecisionsOverviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/decisions/new' | '/decisions/overview'
+  fullPaths: '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/decisions/new' | '/decisions/overview'
-  id: '__root__' | '/' | '/decisions/new' | '/decisions/overview'
+  to: '/'
+  id: '__root__' | '/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DecisionsNewRoute: typeof DecisionsNewRoute
-  DecisionsOverviewRoute: typeof DecisionsOverviewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,38 +48,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/decisions/overview': {
-      id: '/decisions/overview'
-      path: '/decisions/overview'
-      fullPath: '/decisions/overview'
-      preLoaderRoute: typeof DecisionsOverviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/decisions/new': {
-      id: '/decisions/new'
-      path: '/decisions/new'
-      fullPath: '/decisions/new'
-      preLoaderRoute: typeof DecisionsNewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DecisionsNewRoute: DecisionsNewRoute,
-  DecisionsOverviewRoute: DecisionsOverviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
