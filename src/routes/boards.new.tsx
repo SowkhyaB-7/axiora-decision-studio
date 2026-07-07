@@ -1,5 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,6 +15,7 @@ import {
   Calendar,
   Lock,
   Globe,
+  Loader2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/boards/new")({
@@ -20,6 +24,7 @@ export const Route = createFileRoute("/boards/new")({
   }),
   component: NewBoard,
 });
+
 
 const dimensions = [
   { name: "Customer Validation", icon: Users, desc: "Interviews, feedback, usage signals" },
@@ -38,12 +43,59 @@ const templates = [
 
 function NewBoard() {
   const navigate = useNavigate();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [targetDate, setTargetDate] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleCreate = async () => {
+    if (!title.trim()) {
+      toast.error("Decision title is required");
+      return;
+    }
+    if (!description.trim()) {
+      toast.error("Decision description is required");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userData.user) {
+        toast.error("You must be signed in to create a board");
+        setSubmitting(false);
+        return;
+      }
+      const { data, error } = await supabase
+        .from("decision_boards")
+        .insert({
+          title: title.trim(),
+          description: description.trim(),
+          owner_id: userData.user.id,
+          target_date: targetDate || null,
+          status: "Draft",
+        })
+        .select("id")
+        .single();
+      if (error || !data) {
+        toast.error(error?.message ?? "Failed to create board");
+        setSubmitting(false);
+        return;
+      }
+      toast.success("Decision board created");
+      navigate({ to: "/boards/$id", params: { id: data.id } });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to create board");
+      setSubmitting(false);
+    }
+  };
+
   return (
     <AppShell title="New Decision Board" subtitle="Set up the scope, dimensions, and collaborators">
       <div className="mx-auto max-w-5xl space-y-6">
         <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-3.5 w-3.5" /> Back to home
         </Link>
+
 
         <div className="rounded-2xl border border-border bg-surface">
           <div className="border-b border-border px-6 py-5 md:px-8">
@@ -62,18 +114,28 @@ function NewBoard() {
                 <label className="text-sm font-medium">Decision title</label>
                 <input
                   type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  maxLength={200}
+                  required
                   placeholder="e.g. Should we launch the AI copilot to enterprise customers in Q1?"
                   className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                 />
+
               </div>
               <div className="md:col-span-2">
                 <label className="text-sm font-medium">Context</label>
                 <textarea
                   rows={4}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  maxLength={2000}
+                  required
                   placeholder="Briefly describe the decision, its scope, and why now."
                   className="mt-2 w-full resize-none rounded-md border border-input bg-background px-3 py-2.5 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                 />
               </div>
+
 
               <div>
                 <label className="text-sm font-medium">Decision owner</label>
@@ -89,8 +151,11 @@ function NewBoard() {
                   <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <input
                     type="date"
+                    value={targetDate}
+                    onChange={(e) => setTargetDate(e.target.value)}
                     className="w-full rounded-md border border-input bg-background pl-9 pr-3 py-2.5 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                   />
+
                 </div>
               </div>
             </div>
@@ -180,11 +245,21 @@ function NewBoard() {
                 Save draft
               </button>
               <button
-                onClick={() => navigate({ to: "/boards/$id", params: { id: "new-board" } })}
-                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                onClick={handleCreate}
+                disabled={submitting}
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Create board <ArrowRight className="h-4 w-4" />
+                {submitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" /> Creating…
+                  </>
+                ) : (
+                  <>
+                    Create board <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
               </button>
+
             </div>
           </div>
         </div>
