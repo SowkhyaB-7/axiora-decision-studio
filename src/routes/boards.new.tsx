@@ -127,10 +127,15 @@ function NewBoard() {
                 <label className="text-sm font-medium">Context</label>
                 <textarea
                   rows={4}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  maxLength={2000}
+                  required
                   placeholder="Briefly describe the decision, its scope, and why now."
                   className="mt-2 w-full resize-none rounded-md border border-input bg-background px-3 py-2.5 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                 />
               </div>
+
 
               <div>
                 <label className="text-sm font-medium">Decision owner</label>
