@@ -245,11 +245,21 @@ function NewBoard() {
                 Save draft
               </button>
               <button
-                onClick={() => navigate({ to: "/boards/$id", params: { id: "new-board" } })}
-                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"
+                onClick={handleCreate}
+                disabled={submitting}
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Create board <ArrowRight className="h-4 w-4" />
+                {submitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" /> Creating…
+                  </>
+                ) : (
+                  <>
+                    Create board <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
               </button>
+
             </div>
           </div>
         </div>
