@@ -43,12 +43,59 @@ const templates = [
 
 function NewBoard() {
   const navigate = useNavigate();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [targetDate, setTargetDate] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleCreate = async () => {
+    if (!title.trim()) {
+      toast.error("Decision title is required");
+      return;
+    }
+    if (!description.trim()) {
+      toast.error("Decision description is required");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userData.user) {
+        toast.error("You must be signed in to create a board");
+        setSubmitting(false);
+        return;
+      }
+      const { data, error } = await supabase
+        .from("decision_boards")
+        .insert({
+          title: title.trim(),
+          description: description.trim(),
+          owner_id: userData.user.id,
+          target_date: targetDate || null,
+          status: "Draft",
+        })
+        .select("id")
+        .single();
+      if (error || !data) {
+        toast.error(error?.message ?? "Failed to create board");
+        setSubmitting(false);
+        return;
+      }
+      toast.success("Decision board created");
+      navigate({ to: "/boards/$id", params: { id: data.id } });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to create board");
+      setSubmitting(false);
+    }
+  };
+
   return (
     <AppShell title="New Decision Board" subtitle="Set up the scope, dimensions, and collaborators">
       <div className="mx-auto max-w-5xl space-y-6">
         <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-3.5 w-3.5" /> Back to home
         </Link>
+
 
         <div className="rounded-2xl border border-border bg-surface">
           <div className="border-b border-border px-6 py-5 md:px-8">
