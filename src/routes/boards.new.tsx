@@ -1,5 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
   ArrowRight,
@@ -12,6 +15,7 @@ import {
   Calendar,
   Lock,
   Globe,
+  Loader2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/boards/new")({
@@ -20,6 +24,7 @@ export const Route = createFileRoute("/boards/new")({
   }),
   component: NewBoard,
 });
+
 
 const dimensions = [
   { name: "Customer Validation", icon: Users, desc: "Interviews, feedback, usage signals" },
