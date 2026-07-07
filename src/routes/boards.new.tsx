@@ -151,8 +151,11 @@ function NewBoard() {
                   <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <input
                     type="date"
+                    value={targetDate}
+                    onChange={(e) => setTargetDate(e.target.value)}
                     className="w-full rounded-md border border-input bg-background pl-9 pr-3 py-2.5 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                   />
+
                 </div>
               </div>
             </div>
