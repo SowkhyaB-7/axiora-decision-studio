@@ -14,7 +14,221 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ai_analyses: {
+        Row: {
+          analysis_version: number
+          board_id: string
+          created_at: string
+          decision_brief: string | null
+          dimension_results: Json | null
+          id: string
+          overall_readiness: number | null
+          recommendation: string | null
+        }
+        Insert: {
+          analysis_version?: number
+          board_id: string
+          created_at?: string
+          decision_brief?: string | null
+          dimension_results?: Json | null
+          id?: string
+          overall_readiness?: number | null
+          recommendation?: string | null
+        }
+        Update: {
+          analysis_version?: number
+          board_id?: string
+          created_at?: string
+          decision_brief?: string | null
+          dimension_results?: Json | null
+          id?: string
+          overall_readiness?: number | null
+          recommendation?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_analyses_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "decision_boards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessment_dimensions: {
+        Row: {
+          blocking_condition_reason: string | null
+          board_id: string
+          created_at: string
+          dimension_name: string
+          id: string
+          readiness_level: string | null
+          readiness_score: number | null
+          status: string
+        }
+        Insert: {
+          blocking_condition_reason?: string | null
+          board_id: string
+          created_at?: string
+          dimension_name: string
+          id?: string
+          readiness_level?: string | null
+          readiness_score?: number | null
+          status?: string
+        }
+        Update: {
+          blocking_condition_reason?: string | null
+          board_id?: string
+          created_at?: string
+          dimension_name?: string
+          id?: string
+          readiness_level?: string | null
+          readiness_score?: number | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_dimensions_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "decision_boards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decision_boards: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          owner_id: string
+          status: string
+          target_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          owner_id: string
+          status?: string
+          target_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          owner_id?: string
+          status?: string
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      evidence: {
+        Row: {
+          created_at: string
+          description: string | null
+          dimension_id: string
+          evidence_strength: string | null
+          evidence_type: string | null
+          file_url: string | null
+          id: string
+          notes: string | null
+          recency: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          dimension_id: string
+          evidence_strength?: string | null
+          evidence_type?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          recency?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          dimension_id?: string
+          evidence_strength?: string | null
+          evidence_type?: string | null
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          recency?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_dimension_id_fkey"
+            columns: ["dimension_id"]
+            isOneToOne: false
+            referencedRelation: "assessment_dimensions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      final_decisions: {
+        Row: {
+          board_id: string
+          created_at: string
+          id: string
+          reasoning: string | null
+          user_decision: string | null
+        }
+        Insert: {
+          board_id: string
+          created_at?: string
+          id?: string
+          reasoning?: string | null
+          user_decision?: string | null
+        }
+        Update: {
+          board_id?: string
+          created_at?: string
+          id?: string
+          reasoning?: string | null
+          user_decision?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "final_decisions_board_id_fkey"
+            columns: ["board_id"]
+            isOneToOne: false
+            referencedRelation: "decision_boards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
