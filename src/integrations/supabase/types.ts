@@ -104,6 +104,7 @@ export type Database = {
           owner_id: string
           status: string
           target_date: string | null
+          template: string | null
           title: string
           updated_at: string
         }
@@ -114,6 +115,7 @@ export type Database = {
           owner_id: string
           status?: string
           target_date?: string | null
+          template?: string | null
           title: string
           updated_at?: string
         }
@@ -124,6 +126,7 @@ export type Database = {
           owner_id?: string
           status?: string
           target_date?: string | null
+          template?: string | null
           title?: string
           updated_at?: string
         }
