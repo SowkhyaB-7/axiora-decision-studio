@@ -1,17 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowLeft,
   Sparkles,
   CheckCircle2,
   AlertTriangle,
-  TrendingUp,
   Users,
-  Cog,
-  Briefcase,
-  Workflow,
-  Handshake,
-  type LucideIcon,
+  Loader2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/boards/$id/analysis")({
@@ -21,17 +18,17 @@ export const Route = createFileRoute("/boards/$id/analysis")({
   component: Analysis,
 });
 
-const dims: { name: string; icon: LucideIcon; score: number }[] = [
-  { name: "Customer Validation", icon: Users, score: 82 },
-  { name: "Product & Technical Readiness", icon: Cog, score: 64 },
-  { name: "Business Readiness", icon: Briefcase, score: 71 },
-  { name: "Operational Readiness", icon: Workflow, score: 48 },
-  { name: "Stakeholder Alignment", icon: Handshake, score: 88 },
-];
+type CVResult = {
+  readiness?: string;
+  readiness_score?: number;
+  supporting_evidence?: string[];
+  missing_evidence?: string[];
+  key_risk?: string;
+  overall_status?: string;
+};
 
-const overall = Math.round(dims.reduce((s, d) => s + d.score, 0) / dims.length);
-
-function scoreColor(s: number) {
+function scoreColor(s?: number | null) {
+  if (s == null) return "text-muted-foreground";
   if (s >= 75) return "text-success";
   if (s >= 55) return "text-info";
   return "text-warning";
@@ -39,8 +36,28 @@ function scoreColor(s: number) {
 
 function Analysis() {
   const { id } = Route.useParams();
+
+  const analysisQuery = useQuery({
+    queryKey: ["latest-analysis", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ai_analyses")
+        .select("*")
+        .eq("board_id", id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const analysis = analysisQuery.data;
+  const dimResults = (analysis?.dimension_results ?? {}) as Record<string, CVResult>;
+  const cv: CVResult = dimResults.customer_validation ?? {};
+
   return (
-    <AppShell title="Analysis Results" subtitle="Axiora's readiness synthesis across five dimensions">
+    <AppShell title="Analysis Results" subtitle="Mocked analysis · MVP placeholder for AI output">
       <div className="mx-auto max-w-6xl space-y-6">
         <Link
           to="/boards/$id"
@@ -50,101 +67,105 @@ function Analysis() {
           <ArrowLeft className="h-3.5 w-3.5" /> Back to board
         </Link>
 
-        <section className="rounded-2xl border border-border bg-primary p-6 text-primary-foreground md:p-8">
-          <div className="flex items-center gap-2 text-xs uppercase tracking-widest opacity-70">
-            <Sparkles className="h-3.5 w-3.5" /> Overall readiness
+        {analysisQuery.isLoading ? (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading analysis…
           </div>
-          <div className="mt-3 flex flex-wrap items-end gap-6">
-            <div className="font-display text-6xl leading-none">{overall}</div>
-            <div className="max-w-xl text-sm opacity-90">
-              You're on track for a Q1 launch. Operational readiness is the primary blocker —
-              staffing on-call rotation and completing runbooks unblocks the decision.
-            </div>
-          </div>
-        </section>
-
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {dims.map((d) => (
-            <article key={d.name} className="rounded-xl border border-border bg-surface p-5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="grid h-9 w-9 place-items-center rounded-lg bg-surface-muted">
-                    <d.icon className="h-4 w-4 text-accent" />
-                  </div>
-                  <div className="text-sm font-semibold">{d.name}</div>
+        ) : !analysis ? (
+          <section className="rounded-2xl border border-border bg-surface p-8 text-center">
+            <h1 className="font-display text-2xl">No analysis yet</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Run "Analyze decision" on the board overview to generate analysis output.
+            </p>
+            <Link
+              to="/boards/$id"
+              params={{ id }}
+              className="mt-4 inline-block text-sm text-accent hover:underline"
+            >
+              Back to board
+            </Link>
+          </section>
+        ) : (
+          <>
+            <section className="rounded-2xl border border-border bg-primary p-6 text-primary-foreground md:p-8">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-widest opacity-70">
+                <Sparkles className="h-3.5 w-3.5" /> Overall readiness
+              </div>
+              <div className="mt-3 flex flex-wrap items-end gap-6">
+                <div className="font-display text-6xl leading-none">
+                  {analysis.overall_readiness ?? "—"}
                 </div>
-                <div className={`font-display text-2xl ${scoreColor(d.score)}`}>{d.score}</div>
+                <div className="max-w-xl text-sm opacity-90">
+                  {analysis.recommendation ?? analysis.decision_brief ?? ""}
+                </div>
               </div>
-              <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-border">
-                <div className="h-full rounded-full bg-accent" style={{ width: `${d.score}%` }} />
+              <div className="mt-4 flex flex-wrap gap-4 text-[11px] uppercase tracking-widest opacity-70">
+                <span>Version {analysis.analysis_version}</span>
+                <span>{new Date(analysis.created_at).toLocaleString()}</span>
               </div>
-            </article>
-          ))}
-        </section>
+            </section>
 
-        <section className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-xl border border-border bg-surface p-6">
-            <h2 className="flex items-center gap-2 text-sm font-semibold">
-              <CheckCircle2 className="h-4 w-4 text-success" /> Strengths
-            </h2>
-            <ul className="mt-4 space-y-3 text-sm">
-              <li className="flex items-start gap-2">
-                <TrendingUp className="mt-0.5 h-4 w-4 text-success" />
-                Strong customer pull in mid-market with 14 validating interviews.
-              </li>
-              <li className="flex items-start gap-2">
-                <TrendingUp className="mt-0.5 h-4 w-4 text-success" />
-                Stakeholder alignment nearly complete — 6 of 7 sign-offs secured.
-              </li>
-              <li className="flex items-start gap-2">
-                <TrendingUp className="mt-0.5 h-4 w-4 text-success" />
-                Business case validated; pricing v3 in final finance review.
-              </li>
-            </ul>
-          </div>
+            <section className="rounded-xl border border-border bg-surface p-6">
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-lg bg-surface-muted">
+                  <Users className="h-5 w-5 text-accent" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-sm font-semibold">Customer Validation</h2>
+                  <p className="text-xs text-muted-foreground">
+                    {cv.overall_status ?? "—"}
+                  </p>
+                </div>
+                <div className={`font-display text-2xl ${scoreColor(cv.readiness_score)}`}>
+                  {cv.readiness ?? "—"}
+                </div>
+              </div>
 
-          <div className="rounded-xl border border-border bg-surface p-6">
-            <h2 className="flex items-center gap-2 text-sm font-semibold">
-              <AlertTriangle className="h-4 w-4 text-warning" /> Risks & gaps
-            </h2>
-            <ul className="mt-4 space-y-3 text-sm">
-              <li className="flex items-start gap-2">
-                <AlertTriangle className="mt-0.5 h-4 w-4 text-warning" />
-                Operational readiness at 48 — on-call rotation not staffed.
-              </li>
-              <li className="flex items-start gap-2">
-                <AlertTriangle className="mt-0.5 h-4 w-4 text-warning" />
-                3 support runbooks outstanding; SLA not yet defined.
-              </li>
-              <li className="flex items-start gap-2">
-                <AlertTriangle className="mt-0.5 h-4 w-4 text-warning" />
-                P95 latency 820ms exceeds 500ms target for enterprise tier.
-              </li>
-            </ul>
-          </div>
-        </section>
+              <div className="mt-6 grid gap-6 lg:grid-cols-2">
+                <div>
+                  <h3 className="flex items-center gap-2 text-sm font-semibold">
+                    <CheckCircle2 className="h-4 w-4 text-success" /> Supporting evidence
+                  </h3>
+                  <ul className="mt-3 space-y-2 text-sm">
+                    {(cv.supporting_evidence ?? []).map((e, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" /> {e}
+                      </li>
+                    ))}
+                    {(cv.supporting_evidence?.length ?? 0) === 0 && (
+                      <li className="text-muted-foreground">None</li>
+                    )}
+                  </ul>
+                </div>
 
-        <section className="rounded-xl border border-border bg-surface p-6">
-          <h2 className="text-sm font-semibold">Recommended next actions</h2>
-          <ol className="mt-4 space-y-3 text-sm text-muted-foreground">
-            <li>
-              <span className="text-foreground">1.</span> Staff copilot on-call rotation with 2
-              engineers from Platform team.
-            </li>
-            <li>
-              <span className="text-foreground">2.</span> Complete remaining 3 support runbooks
-              before Jan 15.
-            </li>
-            <li>
-              <span className="text-foreground">3.</span> Confirm finance sign-off on pricing v3 and
-              lock GTM narrative.
-            </li>
-            <li>
-              <span className="text-foreground">4.</span> Schedule final security review for
-              enterprise SSO integration.
-            </li>
-          </ol>
-        </section>
+                <div>
+                  <h3 className="flex items-center gap-2 text-sm font-semibold">
+                    <AlertTriangle className="h-4 w-4 text-warning" /> Missing evidence
+                  </h3>
+                  <ul className="mt-3 space-y-2 text-sm">
+                    {(cv.missing_evidence ?? []).map((e, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" /> {e}
+                      </li>
+                    ))}
+                    {(cv.missing_evidence?.length ?? 0) === 0 && (
+                      <li className="text-muted-foreground">None</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+
+              {cv.key_risk && (
+                <div className="mt-6 rounded-lg border border-warning/30 bg-warning/5 p-4 text-sm">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-warning">
+                    <AlertTriangle className="h-3.5 w-3.5" /> Key risk
+                  </div>
+                  <p className="mt-1">{cv.key_risk}</p>
+                </div>
+              )}
+            </section>
+          </>
+        )}
       </div>
     </AppShell>
   );
