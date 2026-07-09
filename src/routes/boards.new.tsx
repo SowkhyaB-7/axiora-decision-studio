@@ -32,6 +32,7 @@ function NewBoard() {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [decisionType, setDecisionType] = useState<string>("Launch");
   const [targetDate, setTargetDate] = useState("");
   const [template, setTemplate] = useState<string>("feature_launch");
   const [submitting, setSubmitting] = useState(false);
@@ -62,6 +63,7 @@ function NewBoard() {
           target_date: targetDate || null,
           status: "Draft",
           template,
+          decision_type: decisionType,
         } as never)
         .select("id")
         .single();
@@ -158,6 +160,16 @@ function NewBoard() {
                     className="w-full rounded-md border border-input bg-background pl-9 pr-3 py-2.5 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                   />
                 </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Decision type</label>
+                <select
+                  value={decisionType}
+                  onChange={(e) => setDecisionType(e.target.value)}
+                  className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                >
+                  <option value="Launch">Launch</option>
+                </select>
               </div>
             </div>
 

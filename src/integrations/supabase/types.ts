@@ -99,6 +99,7 @@ export type Database = {
       decision_boards: {
         Row: {
           created_at: string
+          decision_type: string | null
           description: string | null
           id: string
           owner_id: string
@@ -110,6 +111,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          decision_type?: string | null
           description?: string | null
           id?: string
           owner_id: string
@@ -121,6 +123,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          decision_type?: string | null
           description?: string | null
           id?: string
           owner_id?: string

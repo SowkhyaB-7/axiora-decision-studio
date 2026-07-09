@@ -227,6 +227,11 @@ function BoardOverview() {
                 <span className="rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 font-medium text-accent">
                   {board.status}
                 </span>
+                {(board as { decision_type?: string | null }).decision_type && (
+                  <span className="rounded-full border border-border bg-surface-muted px-2 py-0.5 font-medium text-muted-foreground">
+                    {(board as { decision_type?: string | null }).decision_type}
+                  </span>
+                )}
                 {(board as { template?: string | null }).template && (
                   <span className="text-muted-foreground">Template · {(board as { template?: string | null }).template}</span>
                 )}
@@ -299,6 +304,11 @@ function BoardOverview() {
                 <div>
                   <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Decide by</div>
                   <div className="text-sm font-medium">{formatDate(board.target_date)}</div>
+                </div>
+                <div className="h-10 w-px bg-border" />
+                <div>
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Created</div>
+                  <div className="text-sm font-medium">{formatDate(board.created_at)}</div>
                 </div>
               </div>
             </div>
