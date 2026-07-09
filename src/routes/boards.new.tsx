@@ -161,6 +161,16 @@ function NewBoard() {
                   />
                 </div>
               </div>
+              <div>
+                <label className="text-sm font-medium">Decision type</label>
+                <select
+                  value={decisionType}
+                  onChange={(e) => setDecisionType(e.target.value)}
+                  className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                >
+                  <option value="Launch">Launch</option>
+                </select>
+              </div>
             </div>
 
             <div>
