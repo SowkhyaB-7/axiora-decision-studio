@@ -7,11 +7,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { DIMENSIONS, type DimensionKey } from "@/lib/dimensions";
 import {
   ArrowUpRight,
-  Share2,
-  MoreHorizontal,
   Sparkles,
   Loader2,
   Users,
+  Pencil,
+  Archive,
+  Trash2,
+  X,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/boards/$id")({
@@ -43,6 +45,96 @@ function BoardOverview() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [analyzing, setAnalyzing] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [archiving, setArchiving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editDecisionType, setEditDecisionType] = useState("Launch");
+  const [editTargetDate, setEditTargetDate] = useState("");
+  const [editStatus, setEditStatus] = useState("Draft");
+
+  const openEdit = () => {
+    if (!board) return;
+    setEditTitle(board.title ?? "");
+    setEditDescription(board.description ?? "");
+    setEditDecisionType(
+      (board as { decision_type?: string | null }).decision_type ?? "Launch",
+    );
+    setEditTargetDate(board.target_date ?? "");
+    setEditStatus(board.status ?? "Draft");
+    setEditOpen(true);
+  };
+
+  const invalidateBoards = async () => {
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ["board", id] }),
+      qc.invalidateQueries({ queryKey: ["boards", "mine"] }),
+    ]);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editTitle.trim()) {
+      toast.error("Title is required");
+      return;
+    }
+    setEditSaving(true);
+    try {
+      const { error } = await supabase
+        .from("decision_boards")
+        .update({
+          title: editTitle.trim(),
+          description: editDescription.trim() || null,
+          decision_type: editDecisionType,
+          target_date: editTargetDate || null,
+          status: editStatus,
+        })
+        .eq("id", id);
+      if (error) throw error;
+      toast.success("Board updated");
+      setEditOpen(false);
+      await invalidateBoards();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to update board");
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  const handleArchive = async () => {
+    if (!board) return;
+    const isArchived = (board.status ?? "").toLowerCase() === "archived";
+    setArchiving(true);
+    try {
+      const { error } = await supabase
+        .from("decision_boards")
+        .update({ status: isArchived ? "Draft" : "Archived" })
+        .eq("id", id);
+      if (error) throw error;
+      toast.success(isArchived ? "Board restored" : "Board archived");
+      await invalidateBoards();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to archive");
+    } finally {
+      setArchiving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      const { error } = await supabase.from("decision_boards").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("Board deleted");
+      await invalidateBoards();
+      navigate({ to: "/" });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to delete");
+      setDeleting(false);
+    }
+  };
 
   const boardQuery = useQuery({
     queryKey: ["board", id],
@@ -264,13 +356,53 @@ function BoardOverview() {
             </div>
 
             <div className="flex flex-col items-end gap-3">
-              <div className="flex gap-2">
-                <button className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-muted">
-                  <Share2 className="h-4 w-4" /> Share
+              <div className="flex flex-wrap justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={openEdit}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-muted"
+                >
+                  <Pencil className="h-4 w-4" /> Edit
                 </button>
-                <button className="grid h-9 w-9 place-items-center rounded-md border border-border bg-surface hover:bg-surface-muted">
-                  <MoreHorizontal className="h-4 w-4" />
+                <button
+                  type="button"
+                  onClick={handleArchive}
+                  disabled={archiving}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-muted disabled:opacity-60"
+                >
+                  {archiving ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Archive className="h-4 w-4" />
+                  )}
+                  {(board.status ?? "").toLowerCase() === "archived" ? "Restore" : "Archive"}
                 </button>
+                {(() => {
+                  const neverAnalyzed = !latestAnalysisQuery.data;
+                  const notRecorded =
+                    (board.status ?? "").toLowerCase() !== "decision recorded";
+                  const canDelete = neverAnalyzed && notRecorded;
+                  const reason = !neverAnalyzed
+                    ? "Cannot delete: this board has been analyzed"
+                    : !notRecorded
+                      ? "Cannot delete: decision already recorded"
+                      : "";
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!canDelete) {
+                          toast.error(reason);
+                          return;
+                        }
+                        setConfirmDelete(true);
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" /> Delete
+                    </button>
+                  );
+                })()}
                 <button
                   type="button"
                   onClick={handleAnalyze}
@@ -394,6 +526,126 @@ function BoardOverview() {
           </div>
         </section>
       </div>
+
+      {editOpen && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
+          <div className="w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-2xl">Edit board</h2>
+              <button
+                type="button"
+                onClick={() => setEditOpen(false)}
+                className="grid h-8 w-8 place-items-center rounded-md hover:bg-surface-muted"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="mt-4 space-y-4">
+              <div>
+                <label className="text-sm font-medium">Title</label>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Description</label>
+                <textarea
+                  rows={3}
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  className="mt-1 w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="text-sm font-medium">Decision type</label>
+                  <select
+                    value={editDecisionType}
+                    onChange={(e) => setEditDecisionType(e.target.value)}
+                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  >
+                    <option value="Launch">Launch</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Status</label>
+                  <select
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value)}
+                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  >
+                    <option value="Draft">Draft</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="In Review">In Review</option>
+                    <option value="Decision Recorded">Decision Recorded</option>
+                    <option value="Archived">Archived</option>
+                  </select>
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-sm font-medium">Target date</label>
+                  <input
+                    type="date"
+                    value={editTargetDate}
+                    onChange={(e) => setEditTargetDate(e.target.value)}
+                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setEditOpen(false)}
+                className="rounded-md border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-muted"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveEdit}
+                disabled={editSaving}
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
+              >
+                {editSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+                Save changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
+            <h2 className="font-display text-2xl">Delete this board?</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              This will permanently delete the board and all its data. This action cannot be undone.
+            </p>
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(false)}
+                className="rounded-md border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-muted"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={deleting}
+                className="inline-flex items-center gap-2 rounded-md bg-destructive px-3 py-2 text-sm font-medium text-destructive-foreground hover:opacity-90 disabled:opacity-60"
+              >
+                {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+                Delete board
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppShell>
   );
 }
+
