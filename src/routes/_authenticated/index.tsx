@@ -1,14 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowUpRight,
   Plus,
-  TrendingUp,
-  Clock,
-  CheckCircle2,
-  AlertTriangle,
-  Users,
   FileText,
+  Loader2,
+  Sparkles,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -18,56 +17,61 @@ export const Route = createFileRoute("/_authenticated/")({
   component: Home,
 });
 
-const stats = [
-  { label: "Active boards", value: "12", delta: "+3 this week", icon: FileText },
-  { label: "Decisions shipped", value: "48", delta: "+6 this month", icon: CheckCircle2 },
-  { label: "Avg. time to decide", value: "6.2d", delta: "-1.4d vs. Q3", icon: Clock },
-  { label: "Stakeholders engaged", value: "37", delta: "9 teams", icon: Users },
-];
-
-const boards = [
-  {
-    title: "Pricing tier restructure — Q4",
-    owner: "Maya Ramirez",
-    status: "In review",
-    tone: "info",
-    progress: 72,
-    updated: "2h ago",
-  },
-  {
-    title: "Mobile onboarding v3",
-    owner: "Jordan Klein",
-    status: "Evidence gathering",
-    tone: "warning",
-    progress: 41,
-    updated: "Yesterday",
-  },
-  {
-    title: "AI copilot rollout",
-    owner: "Priya Natarajan",
-    status: "Aligned",
-    tone: "success",
-    progress: 96,
-    updated: "3d ago",
-  },
-  {
-    title: "Enterprise SSO GA",
-    owner: "Elliot Chen",
-    status: "Blocked",
-    tone: "destructive",
-    progress: 28,
-    updated: "1w ago",
-  },
-];
-
-const toneClass: Record<string, string> = {
-  info: "bg-info/10 text-info border-info/20",
-  success: "bg-success/10 text-success border-success/20",
-  warning: "bg-warning/10 text-warning border-warning/20",
-  destructive: "bg-destructive/10 text-destructive border-destructive/20",
+type BoardRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  status: string;
+  decision_type: string | null;
+  target_date: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
+function statusTone(status: string) {
+  const s = (status || "").toLowerCase();
+  if (s === "archived") return "bg-muted text-muted-foreground border-border";
+  if (s === "decision recorded" || s === "decided")
+    return "bg-success/10 text-success border-success/20";
+  if (s === "in review") return "bg-info/10 text-info border-info/20";
+  if (s === "blocked") return "bg-destructive/10 text-destructive border-destructive/20";
+  return "bg-accent/10 text-accent border-accent/20";
+}
+
+function formatDate(d: string | null | undefined) {
+  if (!d) return "—";
+  try {
+    return new Date(d).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return d;
+  }
+}
+
 function Home() {
+  const boardsQuery = useQuery({
+    queryKey: ["boards", "mine"],
+    queryFn: async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) return [] as BoardRow[];
+      const { data, error } = await supabase
+        .from("decision_boards")
+        .select("id, title, description, status, decision_type, target_date, created_at, updated_at")
+        .eq("owner_id", uid)
+        .order("updated_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as BoardRow[];
+    },
+  });
+
+  const boards = boardsQuery.data ?? [];
+  const active = boards.filter((b) => (b.status || "").toLowerCase() !== "archived");
+  const archivedCount = boards.length - active.length;
+
   return (
     <AppShell title="Home" subtitle="Overview of decision preparation across your org">
       <div className="mx-auto max-w-7xl space-y-8">
@@ -76,15 +80,14 @@ function Home() {
           <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
             <div className="min-w-0">
               <div className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                Monday, July 6
+                Decision intelligence
               </div>
               <h1 className="mt-3 font-display text-4xl leading-tight md:text-5xl">
-                Good morning, Maya.
+                Your decision boards
               </h1>
               <p className="mt-3 max-w-xl text-sm text-muted-foreground md:text-base">
-                Four boards need your attention this week. Axiora surfaced{" "}
-                <span className="text-foreground">12 new pieces of evidence</span> across
-                Customer, Technical, and Business dimensions.
+                Frame each decision, gather evidence across five dimensions, and let Axiora surface
+                where you're ready — and where you're not.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -94,137 +97,107 @@ function Home() {
               >
                 <Plus className="h-4 w-4" /> New decision board
               </Link>
-              <Link
-                to="/boards/$id"
-                params={{ id: "demo" }}
-                className="inline-flex items-center gap-2 rounded-md border border-border bg-surface px-4 py-2.5 text-sm font-medium hover:bg-surface-muted"
-              >
-                View overview <ArrowUpRight className="h-4 w-4" />
-              </Link>
             </div>
           </div>
         </section>
 
         {/* Stats */}
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((s) => (
-            <div
-              key={s.label}
-              className="rounded-xl border border-border bg-surface p-5"
-            >
-              <div className="flex items-center justify-between">
-                <div className="text-xs font-medium text-muted-foreground">{s.label}</div>
-                <s.icon className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div className="mt-3 font-display text-3xl">{s.value}</div>
-              <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                <TrendingUp className="h-3 w-3 text-success" /> {s.delta}
-              </div>
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded-xl border border-border bg-surface p-5">
+            <div className="flex items-center justify-between">
+              <div className="text-xs font-medium text-muted-foreground">Active boards</div>
+              <FileText className="h-4 w-4 text-muted-foreground" />
             </div>
-          ))}
+            <div className="mt-3 font-display text-3xl">{active.length}</div>
+          </div>
+          <div className="rounded-xl border border-border bg-surface p-5">
+            <div className="flex items-center justify-between">
+              <div className="text-xs font-medium text-muted-foreground">Archived</div>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="mt-3 font-display text-3xl">{archivedCount}</div>
+          </div>
+          <div className="rounded-xl border border-border bg-surface p-5">
+            <div className="flex items-center justify-between">
+              <div className="text-xs font-medium text-muted-foreground">Total boards</div>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="mt-3 font-display text-3xl">{boards.length}</div>
+          </div>
         </section>
 
         {/* Boards */}
-        <section className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 rounded-xl border border-border bg-surface">
-            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+        <section className="rounded-xl border border-border bg-surface">
+          <div className="flex items-center justify-between border-b border-border px-6 py-4">
+            <div>
+              <h2 className="text-sm font-semibold">Your decision boards</h2>
+              <p className="text-xs text-muted-foreground">
+                Most recently updated first
+              </p>
+            </div>
+          </div>
+
+          {boardsQuery.isLoading ? (
+            <div className="flex items-center gap-2 px-6 py-10 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading boards…
+            </div>
+          ) : boards.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
+              <div className="grid h-12 w-12 place-items-center rounded-xl bg-surface-muted">
+                <Sparkles className="h-6 w-6 text-accent" />
+              </div>
               <div>
-                <h2 className="text-sm font-semibold">Active decision boards</h2>
-                <p className="text-xs text-muted-foreground">
-                  Prioritized by upcoming review dates
+                <h3 className="font-display text-2xl">No decision boards yet</h3>
+                <p className="mt-1 max-w-md text-sm text-muted-foreground">
+                  Create your first board to start organizing evidence and preparing your next
+                  product decision.
                 </p>
               </div>
               <Link
-                to="/boards/$id"
-                params={{ id: "demo" }}
-                className="text-xs font-medium text-accent hover:underline"
+                to="/boards/new"
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90"
               >
-                See all
+                <Plus className="h-4 w-4" /> Create your first board
               </Link>
             </div>
+          ) : (
             <ul className="divide-y divide-border">
-              {boards.map((b, idx) => (
-                <li key={b.title}>
+              {boards.map((b) => (
+                <li key={b.id}>
                   <Link
                     to="/boards/$id"
-                    params={{ id: `board-${idx + 1}` }}
+                    params={{ id: b.id }}
                     className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-6 py-4 hover:bg-surface-muted"
                   >
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="truncate font-medium">{b.title}</span>
                         <span
-                          className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium ${toneClass[b.tone]}`}
+                          className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium ${statusTone(b.status)}`}
                         >
                           {b.status}
                         </span>
+                        {b.decision_type && (
+                          <span className="shrink-0 rounded-full border border-border bg-surface-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                            {b.decision_type}
+                          </span>
+                        )}
                       </div>
-                      <div className="mt-1 text-xs text-muted-foreground">
-                        Owner · {b.owner} · Updated {b.updated}
-                      </div>
-                      <div className="mt-2 h-1 w-full max-w-xs overflow-hidden rounded-full bg-border">
-                        <div
-                          className="h-full rounded-full bg-accent"
-                          style={{ width: `${b.progress}%` }}
-                        />
+                      {b.description && (
+                        <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
+                          {b.description}
+                        </div>
+                      )}
+                      <div className="mt-1 text-[11px] text-muted-foreground">
+                        Target · {formatDate(b.target_date)} · Created {formatDate(b.created_at)}
                       </div>
                     </div>
-                    <div className="shrink-0 text-right">
-                      <div className="text-sm font-semibold">{b.progress}%</div>
-                      <div className="text-[10px] text-muted-foreground">ready</div>
-                    </div>
+                    <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
                   </Link>
                 </li>
               ))}
             </ul>
-          </div>
-
-          <div className="space-y-6">
-            <div className="rounded-xl border border-border bg-surface p-5">
-              <h3 className="text-sm font-semibold">Needs attention</h3>
-              <ul className="mt-3 space-y-3 text-sm">
-                <li className="flex items-start gap-3">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 text-warning" />
-                  <div>
-                    <div className="font-medium">Missing customer evidence</div>
-                    <div className="text-xs text-muted-foreground">
-                      Mobile onboarding v3 · 2 interviews pending
-                    </div>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 text-destructive" />
-                  <div>
-                    <div className="font-medium">Blocked stakeholder alignment</div>
-                    <div className="text-xs text-muted-foreground">
-                      Enterprise SSO GA · Security review needed
-                    </div>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-success" />
-                  <div>
-                    <div className="font-medium">Ready to decide</div>
-                    <div className="text-xs text-muted-foreground">
-                      AI copilot rollout · All 5 dimensions green
-                    </div>
-                  </div>
-                </li>
-              </ul>
-            </div>
-
-            <div className="rounded-xl border border-border bg-primary p-5 text-primary-foreground">
-              <div className="text-xs uppercase tracking-widest opacity-70">
-                Weekly digest
-              </div>
-              <div className="mt-2 font-display text-2xl leading-snug">
-                Your team decided 3× faster than last quarter.
-              </div>
-              <button className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-primary-foreground/10 px-3 py-1.5 text-xs font-medium hover:bg-primary-foreground/20">
-                Read the summary <ArrowUpRight className="h-3.5 w-3.5" />
-              </button>
-            </div>
-          </div>
+          )}
         </section>
       </div>
     </AppShell>
