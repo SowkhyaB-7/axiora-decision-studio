@@ -32,6 +32,7 @@ function NewBoard() {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [decisionType, setDecisionType] = useState<string>("Launch");
   const [targetDate, setTargetDate] = useState("");
   const [template, setTemplate] = useState<string>("feature_launch");
   const [submitting, setSubmitting] = useState(false);
