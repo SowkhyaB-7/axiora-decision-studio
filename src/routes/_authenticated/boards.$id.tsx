@@ -7,11 +7,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { DIMENSIONS, type DimensionKey } from "@/lib/dimensions";
 import {
   ArrowUpRight,
-  Share2,
-  MoreHorizontal,
   Sparkles,
   Loader2,
   Users,
+  Pencil,
+  Archive,
+  Trash2,
+  X,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/boards/$id")({
