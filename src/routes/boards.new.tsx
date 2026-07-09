@@ -63,6 +63,7 @@ function NewBoard() {
           target_date: targetDate || null,
           status: "Draft",
           template,
+          decision_type: decisionType,
         } as never)
         .select("id")
         .single();
