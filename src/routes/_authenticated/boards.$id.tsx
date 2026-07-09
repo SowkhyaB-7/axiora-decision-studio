@@ -356,13 +356,53 @@ function BoardOverview() {
             </div>
 
             <div className="flex flex-col items-end gap-3">
-              <div className="flex gap-2">
-                <button className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-muted">
-                  <Share2 className="h-4 w-4" /> Share
+              <div className="flex flex-wrap justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={openEdit}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-muted"
+                >
+                  <Pencil className="h-4 w-4" /> Edit
                 </button>
-                <button className="grid h-9 w-9 place-items-center rounded-md border border-border bg-surface hover:bg-surface-muted">
-                  <MoreHorizontal className="h-4 w-4" />
+                <button
+                  type="button"
+                  onClick={handleArchive}
+                  disabled={archiving}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-muted disabled:opacity-60"
+                >
+                  {archiving ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Archive className="h-4 w-4" />
+                  )}
+                  {(board.status ?? "").toLowerCase() === "archived" ? "Restore" : "Archive"}
                 </button>
+                {(() => {
+                  const neverAnalyzed = !latestAnalysisQuery.data;
+                  const notRecorded =
+                    (board.status ?? "").toLowerCase() !== "decision recorded";
+                  const canDelete = neverAnalyzed && notRecorded;
+                  const reason = !neverAnalyzed
+                    ? "Cannot delete: this board has been analyzed"
+                    : !notRecorded
+                      ? "Cannot delete: decision already recorded"
+                      : "";
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!canDelete) {
+                          toast.error(reason);
+                          return;
+                        }
+                        setConfirmDelete(true);
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" /> Delete
+                    </button>
+                  );
+                })()}
                 <button
                   type="button"
                   onClick={handleAnalyze}
