@@ -19,7 +19,7 @@ import {
   X,
 } from "lucide-react";
 
-export const Route = createFileRoute("/boards/$id/customer-validation")({
+export const Route = createFileRoute("/_authenticated/boards/$id/customer-validation")({
   head: () => ({
     meta: [{ title: "Customer Validation — Axiora" }],
   }),
