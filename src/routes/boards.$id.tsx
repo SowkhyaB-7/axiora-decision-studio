@@ -305,6 +305,11 @@ function BoardOverview() {
                   <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Decide by</div>
                   <div className="text-sm font-medium">{formatDate(board.target_date)}</div>
                 </div>
+                <div className="h-10 w-px bg-border" />
+                <div>
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Created</div>
+                  <div className="text-sm font-medium">{formatDate(board.created_at)}</div>
+                </div>
               </div>
             </div>
           </div>
