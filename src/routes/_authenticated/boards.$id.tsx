@@ -45,6 +45,96 @@ function BoardOverview() {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [analyzing, setAnalyzing] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [archiving, setArchiving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editDecisionType, setEditDecisionType] = useState("Launch");
+  const [editTargetDate, setEditTargetDate] = useState("");
+  const [editStatus, setEditStatus] = useState("Draft");
+
+  const openEdit = () => {
+    if (!board) return;
+    setEditTitle(board.title ?? "");
+    setEditDescription(board.description ?? "");
+    setEditDecisionType(
+      (board as { decision_type?: string | null }).decision_type ?? "Launch",
+    );
+    setEditTargetDate(board.target_date ?? "");
+    setEditStatus(board.status ?? "Draft");
+    setEditOpen(true);
+  };
+
+  const invalidateBoards = async () => {
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ["board", id] }),
+      qc.invalidateQueries({ queryKey: ["boards", "mine"] }),
+    ]);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editTitle.trim()) {
+      toast.error("Title is required");
+      return;
+    }
+    setEditSaving(true);
+    try {
+      const { error } = await supabase
+        .from("decision_boards")
+        .update({
+          title: editTitle.trim(),
+          description: editDescription.trim() || null,
+          decision_type: editDecisionType,
+          target_date: editTargetDate || null,
+          status: editStatus,
+        })
+        .eq("id", id);
+      if (error) throw error;
+      toast.success("Board updated");
+      setEditOpen(false);
+      await invalidateBoards();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to update board");
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  const handleArchive = async () => {
+    if (!board) return;
+    const isArchived = (board.status ?? "").toLowerCase() === "archived";
+    setArchiving(true);
+    try {
+      const { error } = await supabase
+        .from("decision_boards")
+        .update({ status: isArchived ? "Draft" : "Archived" })
+        .eq("id", id);
+      if (error) throw error;
+      toast.success(isArchived ? "Board restored" : "Board archived");
+      await invalidateBoards();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to archive");
+    } finally {
+      setArchiving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      const { error } = await supabase.from("decision_boards").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("Board deleted");
+      await invalidateBoards();
+      navigate({ to: "/" });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to delete");
+      setDeleting(false);
+    }
+  };
 
   const boardQuery = useQuery({
     queryKey: ["board", id],
