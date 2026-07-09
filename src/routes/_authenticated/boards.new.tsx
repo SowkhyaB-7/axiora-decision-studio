@@ -14,7 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-export const Route = createFileRoute("/boards/new")({
+export const Route = createFileRoute("/_authenticated/boards/new")({
   head: () => ({
     meta: [{ title: "New Decision Board — Axiora" }],
   }),

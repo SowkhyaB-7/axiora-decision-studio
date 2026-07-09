@@ -14,7 +14,7 @@ import {
   Users,
 } from "lucide-react";
 
-export const Route = createFileRoute("/boards/$id")({
+export const Route = createFileRoute("/_authenticated/boards/$id")({
   head: () => ({
     meta: [{ title: "Decision Board — Axiora" }],
   }),
