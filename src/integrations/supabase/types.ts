@@ -137,39 +137,48 @@ export type Database = {
       }
       evidence: {
         Row: {
+          attachment_path: string | null
           created_at: string
           description: string | null
           dimension_id: string
+          evidence_date: string | null
           evidence_strength: string | null
           evidence_type: string | null
           file_url: string | null
           id: string
           notes: string | null
           recency: string | null
+          source_url: string | null
           title: string
         }
         Insert: {
+          attachment_path?: string | null
           created_at?: string
           description?: string | null
           dimension_id: string
+          evidence_date?: string | null
           evidence_strength?: string | null
           evidence_type?: string | null
           file_url?: string | null
           id?: string
           notes?: string | null
           recency?: string | null
+          source_url?: string | null
           title: string
         }
         Update: {
+          attachment_path?: string | null
           created_at?: string
           description?: string | null
           dimension_id?: string
+          evidence_date?: string | null
           evidence_strength?: string | null
           evidence_type?: string | null
           file_url?: string | null
           id?: string
           notes?: string | null
           recency?: string | null
+          source_url?: string | null
           title?: string
         }
         Relationships: [
