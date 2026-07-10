@@ -14,8 +14,8 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedBoardsNewRouteImport } from './routes/_authenticated/boards.new'
 import { Route as AuthenticatedBoardsIdRouteImport } from './routes/_authenticated/boards.$id'
-import { Route as AuthenticatedBoardsIdCustomerValidationRouteImport } from './routes/_authenticated/boards.$id.customer-validation'
-import { Route as AuthenticatedBoardsIdAnalysisRouteImport } from './routes/_authenticated/boards.$id.analysis'
+import { Route as AuthenticatedBoardsIdCustomerValidationRouteImport } from './routes/_authenticated/boards.$id_.customer-validation'
+import { Route as AuthenticatedBoardsIdAnalysisRouteImport } from './routes/_authenticated/boards.$id_.analysis'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -43,21 +43,21 @@ const AuthenticatedBoardsIdRoute = AuthenticatedBoardsIdRouteImport.update({
 } as any)
 const AuthenticatedBoardsIdCustomerValidationRoute =
   AuthenticatedBoardsIdCustomerValidationRouteImport.update({
-    id: '/customer-validation',
-    path: '/customer-validation',
-    getParentRoute: () => AuthenticatedBoardsIdRoute,
+    id: '/boards/$id_/customer-validation',
+    path: '/boards/$id/customer-validation',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedBoardsIdAnalysisRoute =
   AuthenticatedBoardsIdAnalysisRouteImport.update({
-    id: '/analysis',
-    path: '/analysis',
-    getParentRoute: () => AuthenticatedBoardsIdRoute,
+    id: '/boards/$id_/analysis',
+    path: '/boards/$id/analysis',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
-  '/boards/$id': typeof AuthenticatedBoardsIdRouteWithChildren
+  '/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/boards/new': typeof AuthenticatedBoardsNewRoute
   '/boards/$id/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
   '/boards/$id/customer-validation': typeof AuthenticatedBoardsIdCustomerValidationRoute
@@ -65,7 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/': typeof AuthenticatedIndexRoute
-  '/boards/$id': typeof AuthenticatedBoardsIdRouteWithChildren
+  '/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/boards/new': typeof AuthenticatedBoardsNewRoute
   '/boards/$id/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
   '/boards/$id/customer-validation': typeof AuthenticatedBoardsIdCustomerValidationRoute
@@ -75,10 +75,10 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/boards/$id': typeof AuthenticatedBoardsIdRouteWithChildren
+  '/_authenticated/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/_authenticated/boards/new': typeof AuthenticatedBoardsNewRoute
-  '/_authenticated/boards/$id/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
-  '/_authenticated/boards/$id/customer-validation': typeof AuthenticatedBoardsIdCustomerValidationRoute
+  '/_authenticated/boards/$id_/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
+  '/_authenticated/boards/$id_/customer-validation': typeof AuthenticatedBoardsIdCustomerValidationRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -104,8 +104,8 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/boards/$id'
     | '/_authenticated/boards/new'
-    | '/_authenticated/boards/$id/analysis'
-    | '/_authenticated/boards/$id/customer-validation'
+    | '/_authenticated/boards/$id_/analysis'
+    | '/_authenticated/boards/$id_/customer-validation'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -150,49 +150,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBoardsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/boards/$id/customer-validation': {
-      id: '/_authenticated/boards/$id/customer-validation'
-      path: '/customer-validation'
+    '/_authenticated/boards/$id_/customer-validation': {
+      id: '/_authenticated/boards/$id_/customer-validation'
+      path: '/boards/$id/customer-validation'
       fullPath: '/boards/$id/customer-validation'
       preLoaderRoute: typeof AuthenticatedBoardsIdCustomerValidationRouteImport
-      parentRoute: typeof AuthenticatedBoardsIdRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/boards/$id/analysis': {
-      id: '/_authenticated/boards/$id/analysis'
-      path: '/analysis'
+    '/_authenticated/boards/$id_/analysis': {
+      id: '/_authenticated/boards/$id_/analysis'
+      path: '/boards/$id/analysis'
       fullPath: '/boards/$id/analysis'
       preLoaderRoute: typeof AuthenticatedBoardsIdAnalysisRouteImport
-      parentRoute: typeof AuthenticatedBoardsIdRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
-interface AuthenticatedBoardsIdRouteChildren {
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedBoardsIdRoute: typeof AuthenticatedBoardsIdRoute
+  AuthenticatedBoardsNewRoute: typeof AuthenticatedBoardsNewRoute
   AuthenticatedBoardsIdAnalysisRoute: typeof AuthenticatedBoardsIdAnalysisRoute
   AuthenticatedBoardsIdCustomerValidationRoute: typeof AuthenticatedBoardsIdCustomerValidationRoute
 }
 
-const AuthenticatedBoardsIdRouteChildren: AuthenticatedBoardsIdRouteChildren = {
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedBoardsIdRoute: AuthenticatedBoardsIdRoute,
+  AuthenticatedBoardsNewRoute: AuthenticatedBoardsNewRoute,
   AuthenticatedBoardsIdAnalysisRoute: AuthenticatedBoardsIdAnalysisRoute,
   AuthenticatedBoardsIdCustomerValidationRoute:
     AuthenticatedBoardsIdCustomerValidationRoute,
-}
-
-const AuthenticatedBoardsIdRouteWithChildren =
-  AuthenticatedBoardsIdRoute._addFileChildren(
-    AuthenticatedBoardsIdRouteChildren,
-  )
-
-interface AuthenticatedRouteRouteChildren {
-  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
-  AuthenticatedBoardsIdRoute: typeof AuthenticatedBoardsIdRouteWithChildren
-  AuthenticatedBoardsNewRoute: typeof AuthenticatedBoardsNewRoute
-}
-
-const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
-  AuthenticatedBoardsIdRoute: AuthenticatedBoardsIdRouteWithChildren,
-  AuthenticatedBoardsNewRoute: AuthenticatedBoardsNewRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -205,13 +194,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

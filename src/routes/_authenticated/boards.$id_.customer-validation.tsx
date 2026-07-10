@@ -4,7 +4,7 @@ import { EvidenceSection } from "@/components/evidence-section";
 import { ArrowLeft, Users } from "lucide-react";
 
 export const Route = createFileRoute(
-  "/_authenticated/boards/$id/customer-validation",
+  "/_authenticated/boards/$id_/customer-validation",
 )({
   head: () => ({
     meta: [{ title: "Customer Validation — Axiora" }],
