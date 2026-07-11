@@ -5,17 +5,21 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { supabase } from "@/integrations/supabase/client";
 import { DIMENSIONS, type DimensionKey } from "@/lib/dimensions";
-import { analyzeCustomerValidation, recommendationFor } from "@/lib/analysis";
+import {
+  analyzeDimension,
+  recommendationFor,
+  type DimensionAnalysisResult,
+} from "@/lib/analysis";
 import {
   ArrowUpRight,
   Sparkles,
   Loader2,
-  Users,
   Pencil,
   Archive,
   Trash2,
   X,
 } from "lucide-react";
+
 
 export const Route = createFileRoute("/_authenticated/boards/$id")({
   head: () => ({
@@ -23,6 +27,16 @@ export const Route = createFileRoute("/_authenticated/boards/$id")({
   }),
   component: BoardOverview,
 });
+
+/** Route path per dimension key — enables driving the cards from config. */
+const DIMENSION_ROUTE = {
+  customer_validation: "/boards/$id/customer-validation",
+  product_technical: "/boards/$id/product-technical",
+  business: "/boards/$id/business",
+  operational: "/boards/$id/operational",
+  stakeholder_alignment: "/boards/$id/stakeholder-alignment",
+} as const satisfies Record<DimensionKey, string>;
+
 
 function formatDate(d: string | null | undefined) {
   if (!d) return "—";
@@ -206,44 +220,56 @@ function BoardOverview() {
     if (!board) return;
     setAnalyzing(true);
     try {
-      const cv = dimByKey.get("customer_validation");
-      let evidenceRows: {
-        title: string;
-        evidence_type: string | null;
-        evidence_strength: string | null;
-        evidence_date: string | null;
-      }[] = [];
-      if (cv) {
-        const { data: evRows } = await supabase
-          .from("evidence")
-          .select("title, evidence_type, evidence_strength, evidence_date")
-          .eq("dimension_id", cv.id);
-        evidenceRows = evRows ?? [];
+      const dimension_results: Record<string, DimensionAnalysisResult> = {};
+      const scores: number[] = [];
+      let totalEvidence = 0;
+
+      for (const d of DIMENSIONS) {
+        const row = dimByKey.get(d.key);
+        let evidenceRows: {
+          title: string;
+          evidence_type: string | null;
+          evidence_strength: string | null;
+          evidence_date: string | null;
+        }[] = [];
+        if (row) {
+          const { data: evRows } = await supabase
+            .from("evidence")
+            .select("title, evidence_type, evidence_strength, evidence_date")
+            .eq("dimension_id", row.id);
+          evidenceRows = evRows ?? [];
+        }
+        totalEvidence += evidenceRows.length;
+        const result = analyzeDimension(d.key, evidenceRows);
+        dimension_results[d.key] = result;
+        scores.push(result.readiness_score);
+
+        if (row) {
+          await supabase
+            .from("assessment_dimensions")
+            .update({
+              readiness_level: result.readiness,
+              readiness_score: result.readiness_score,
+              status: "analyzed",
+            })
+            .eq("id", row.id);
+        }
       }
 
-      const cvResult = analyzeCustomerValidation(evidenceRows);
-      const score = cvResult.readiness_score;
-      const readiness = cvResult.readiness;
-
-      const brief = `Board "${board.title}" analyzed from ${evidenceRows.length} evidence item${evidenceRows.length === 1 ? "" : "s"}. Customer Validation readiness: ${readiness} (${score}).`;
+      const overall = Math.round(
+        scores.reduce((a, b) => a + b, 0) / (scores.length || 1),
+      );
+      const brief = `Board "${board.title}" analyzed across ${DIMENSIONS.length} dimensions from ${totalEvidence} evidence item${totalEvidence === 1 ? "" : "s"}. Overall readiness: ${overall}.`;
 
       const { error: insErr } = await supabase.from("ai_analyses").insert({
         board_id: id,
-        overall_readiness: score,
-        recommendation: recommendationFor(score),
+        overall_readiness: overall,
+        recommendation: recommendationFor(overall),
         decision_brief: brief,
-        dimension_results: { customer_validation: cvResult },
+        dimension_results,
         analysis_version: ((latestAnalysisQuery.data?.analysis_version ?? 0) + 1) as number,
       });
       if (insErr) throw insErr;
-
-      // Update the dimension row with readiness
-      if (cv) {
-        await supabase
-          .from("assessment_dimensions")
-          .update({ readiness_level: readiness, readiness_score: score, status: "analyzed" })
-          .eq("id", cv.id);
-      }
 
       toast.success("Analysis complete");
       await Promise.all([
@@ -257,6 +283,7 @@ function BoardOverview() {
       setAnalyzing(false);
     }
   };
+
 
   if (boardQuery.isLoading) {
     return (
@@ -310,15 +337,8 @@ function BoardOverview() {
                 </p>
               )}
 
-              <div className="mt-6 flex flex-wrap gap-2">
-                <Link
-                  to="/boards/$id/customer-validation"
-                  params={{ id }}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-muted"
-                >
-                  <Users className="h-4 w-4" /> Customer Validation
-                </Link>
-                {latestAnalysisQuery.data && (
+              {latestAnalysisQuery.data && (
+                <div className="mt-6 flex flex-wrap gap-2">
                   <Link
                     to="/boards/$id/analysis"
                     params={{ id }}
@@ -326,8 +346,9 @@ function BoardOverview() {
                   >
                     <Sparkles className="h-4 w-4" /> View analysis
                   </Link>
-                )}
-              </div>
+                </div>
+              )}
+
             </div>
 
             <div className="flex flex-col items-end gap-3">
@@ -436,9 +457,14 @@ function BoardOverview() {
               const evidenceCount = row ? counts[row.id] ?? 0 : 0;
               const analyzed = !!row?.readiness_level;
               const status = row?.status ?? "not_started";
-              const isCV = d.key === "customer_validation";
-              const inner = (
-                <>
+              const to = DIMENSION_ROUTE[d.key];
+              return (
+                <Link
+                  key={d.key}
+                  to={to}
+                  params={{ id }}
+                  className="group flex flex-col rounded-xl border border-border bg-surface p-5 transition-colors hover:border-foreground/20"
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-surface-muted">
@@ -471,33 +497,13 @@ function BoardOverview() {
                     </div>
                   </dl>
 
-                  {isCV ? (
-                    <div className="mt-5 inline-flex items-center gap-1 self-start text-xs font-medium text-accent">
-                      Open dimension <ArrowUpRight className="h-3.5 w-3.5" />
-                    </div>
-                  ) : (
-                    <div className="mt-5 self-start text-xs font-medium text-muted-foreground">Coming soon</div>
-                  )}
-                </>
-              );
-              return isCV ? (
-                <Link
-                  key={d.key}
-                  to="/boards/$id/customer-validation"
-                  params={{ id }}
-                  className="group flex flex-col rounded-xl border border-border bg-surface p-5 transition-colors hover:border-foreground/20"
-                >
-                  {inner}
+                  <div className="mt-5 inline-flex items-center gap-1 self-start text-xs font-medium text-accent">
+                    Open dimension <ArrowUpRight className="h-3.5 w-3.5" />
+                  </div>
                 </Link>
-              ) : (
-                <article
-                  key={d.key}
-                  className="group flex flex-col rounded-xl border border-border bg-surface p-5 opacity-80"
-                >
-                  {inner}
-                </article>
               );
             })}
+
           </div>
         </section>
       </div>

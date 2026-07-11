@@ -2,15 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { DimensionPage } from "@/components/dimension-page";
 
 export const Route = createFileRoute(
-  "/_authenticated/boards/$id_/customer-validation",
+  "/_authenticated/boards/$id_/stakeholder-alignment",
 )({
   head: () => ({
-    meta: [{ title: "Customer Validation — Axiora" }],
+    meta: [{ title: "Stakeholder Alignment — Axiora" }],
   }),
   component: Page,
 });
 
 function Page() {
   const { id } = Route.useParams();
-  return <DimensionPage boardId={id} dimensionKey="customer_validation" />;
+  return <DimensionPage boardId={id} dimensionKey="stakeholder_alignment" />;
 }

@@ -1,4 +1,5 @@
 import { EVIDENCE_TYPES } from "@/lib/evidence";
+import { DIMENSIONS_BY_KEY, type DimensionKey } from "@/lib/dimensions";
 
 export type AnalysisEvidence = {
   title: string;
@@ -7,8 +8,8 @@ export type AnalysisEvidence = {
   evidence_date: string | null;
 };
 
-export type CVAnalysisResult = {
-  dimension: "customer_validation";
+export type DimensionAnalysisResult = {
+  dimension: DimensionKey;
   readiness: "High" | "Medium" | "Low";
   readiness_score: number;
   supporting_evidence: string[];
@@ -17,14 +18,8 @@ export type CVAnalysisResult = {
   overall_status: string;
 };
 
-/** Types considered central to Customer Validation readiness. */
-export const KEY_CV_TYPES: readonly string[] = [
-  "Customer Interview",
-  "Customer Feedback",
-  "Usage Analytics",
-  "Survey",
-  "Prototype Test",
-];
+// Backwards-compat alias — Customer Validation was the first dimension.
+export type CVAnalysisResult = DimensionAnalysisResult;
 
 const STRENGTH_WEIGHT: Record<string, number> = {
   weak: 0.3,
@@ -43,12 +38,19 @@ function isRecent(dateStr: string | null, days = 180): boolean {
   return Date.now() - t <= days * 24 * 60 * 60 * 1000;
 }
 
-export function analyzeCustomerValidation(
+/**
+ * Deterministic, rule-based readiness scoring for a single dimension.
+ * Same algorithm powers every dimension; only the "key evidence types"
+ * differ per dimension (see DIMENSIONS config).
+ */
+export function analyzeDimension(
+  dimensionKey: DimensionKey,
   evidence: AnalysisEvidence[],
-): CVAnalysisResult {
+): DimensionAnalysisResult {
+  const cfg = DIMENSIONS_BY_KEY[dimensionKey];
+  const keyTypes = cfg.keyEvidenceTypes;
   const count = evidence.length;
 
-  // Group by type
   const byType = new Map<string, AnalysisEvidence[]>();
   for (const e of evidence) {
     const t = (e.evidence_type ?? "Other").trim() || "Other";
@@ -57,12 +59,11 @@ export function analyzeCustomerValidation(
     byType.set(t, arr);
   }
 
-  const presentKeyTypes = KEY_CV_TYPES.filter((t) => byType.has(t));
-  const missingKeyTypes = KEY_CV_TYPES.filter((t) => !byType.has(t));
+  const presentKeyTypes = keyTypes.filter((t) => byType.has(t));
+  const missingKeyTypes = keyTypes.filter((t) => !byType.has(t));
 
-  // Component scores (0..1)
   const typeCoverage =
-    KEY_CV_TYPES.length === 0 ? 0 : presentKeyTypes.length / KEY_CV_TYPES.length;
+    keyTypes.length === 0 ? 0 : presentKeyTypes.length / keyTypes.length;
 
   const strengthAvg =
     count === 0
@@ -91,7 +92,6 @@ export function analyzeCustomerValidation(
   const readiness: "High" | "Medium" | "Low" =
     score >= 75 ? "High" : score >= 50 ? "Medium" : "Low";
 
-  // Supporting evidence: grouped counts of present types (never listed under missing)
   const supporting_evidence =
     count === 0
       ? []
@@ -105,10 +105,8 @@ export function analyzeCustomerValidation(
             return strong > 0 ? `${base} (${strong} strong)` : base;
           });
 
-  // Missing: only key types genuinely absent
   const missing_evidence = missingKeyTypes.map((t) => `No ${t.toLowerCase()}s yet`);
 
-  // Key risk = weakest signal
   const components: { key: string; value: number; risk: string }[] = [
     {
       key: "coverage",
@@ -136,20 +134,20 @@ export function analyzeCustomerValidation(
   ];
   const key_risk =
     count === 0
-      ? "No customer evidence has been collected yet"
+      ? `No ${cfg.name.toLowerCase()} evidence has been collected yet`
       : components.sort((a, b) => a.value - b.value)[0].risk;
 
   const overall_status =
     count === 0
       ? "No evidence collected."
       : readiness === "High"
-        ? "Customer Validation is well supported."
+        ? `${cfg.name} is well supported.`
         : readiness === "Medium"
-          ? "Customer Validation is partially supported."
-          : "Customer Validation lacks sufficient evidence.";
+          ? `${cfg.name} is partially supported.`
+          : `${cfg.name} lacks sufficient evidence.`;
 
   return {
-    dimension: "customer_validation",
+    dimension: dimensionKey,
     readiness,
     readiness_score: score,
     supporting_evidence,
@@ -159,6 +157,13 @@ export function analyzeCustomerValidation(
   };
 }
 
+/** Backwards-compat wrapper. */
+export function analyzeCustomerValidation(
+  evidence: AnalysisEvidence[],
+): DimensionAnalysisResult {
+  return analyzeDimension("customer_validation", evidence);
+}
+
 export function recommendationFor(score: number): string {
   if (score >= 75) return "Proceed — evidence supports moving forward.";
   if (score >= 50)
@@ -166,5 +171,4 @@ export function recommendationFor(score: number): string {
   return "Hold — gather more evidence before deciding.";
 }
 
-// Keep imports referenced so tree-shaking-based type-only removal doesn't break.
 void EVIDENCE_TYPES;
