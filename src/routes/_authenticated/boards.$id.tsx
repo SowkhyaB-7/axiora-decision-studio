@@ -210,44 +210,56 @@ function BoardOverview() {
     if (!board) return;
     setAnalyzing(true);
     try {
-      const cv = dimByKey.get("customer_validation");
-      let evidenceRows: {
-        title: string;
-        evidence_type: string | null;
-        evidence_strength: string | null;
-        evidence_date: string | null;
-      }[] = [];
-      if (cv) {
-        const { data: evRows } = await supabase
-          .from("evidence")
-          .select("title, evidence_type, evidence_strength, evidence_date")
-          .eq("dimension_id", cv.id);
-        evidenceRows = evRows ?? [];
+      const dimension_results: Record<string, DimensionAnalysisResult> = {};
+      const scores: number[] = [];
+      let totalEvidence = 0;
+
+      for (const d of DIMENSIONS) {
+        const row = dimByKey.get(d.key);
+        let evidenceRows: {
+          title: string;
+          evidence_type: string | null;
+          evidence_strength: string | null;
+          evidence_date: string | null;
+        }[] = [];
+        if (row) {
+          const { data: evRows } = await supabase
+            .from("evidence")
+            .select("title, evidence_type, evidence_strength, evidence_date")
+            .eq("dimension_id", row.id);
+          evidenceRows = evRows ?? [];
+        }
+        totalEvidence += evidenceRows.length;
+        const result = analyzeDimension(d.key, evidenceRows);
+        dimension_results[d.key] = result;
+        scores.push(result.readiness_score);
+
+        if (row) {
+          await supabase
+            .from("assessment_dimensions")
+            .update({
+              readiness_level: result.readiness,
+              readiness_score: result.readiness_score,
+              status: "analyzed",
+            })
+            .eq("id", row.id);
+        }
       }
 
-      const cvResult = analyzeCustomerValidation(evidenceRows);
-      const score = cvResult.readiness_score;
-      const readiness = cvResult.readiness;
-
-      const brief = `Board "${board.title}" analyzed from ${evidenceRows.length} evidence item${evidenceRows.length === 1 ? "" : "s"}. Customer Validation readiness: ${readiness} (${score}).`;
+      const overall = Math.round(
+        scores.reduce((a, b) => a + b, 0) / (scores.length || 1),
+      );
+      const brief = `Board "${board.title}" analyzed across ${DIMENSIONS.length} dimensions from ${totalEvidence} evidence item${totalEvidence === 1 ? "" : "s"}. Overall readiness: ${overall}.`;
 
       const { error: insErr } = await supabase.from("ai_analyses").insert({
         board_id: id,
-        overall_readiness: score,
-        recommendation: recommendationFor(score),
+        overall_readiness: overall,
+        recommendation: recommendationFor(overall),
         decision_brief: brief,
-        dimension_results: { customer_validation: cvResult },
+        dimension_results,
         analysis_version: ((latestAnalysisQuery.data?.analysis_version ?? 0) + 1) as number,
       });
       if (insErr) throw insErr;
-
-      // Update the dimension row with readiness
-      if (cv) {
-        await supabase
-          .from("assessment_dimensions")
-          .update({ readiness_level: readiness, readiness_score: score, status: "analyzed" })
-          .eq("id", cv.id);
-      }
 
       toast.success("Analysis complete");
       await Promise.all([
@@ -261,6 +273,7 @@ function BoardOverview() {
       setAnalyzing(false);
     }
   };
+
 
   if (boardQuery.isLoading) {
     return (
