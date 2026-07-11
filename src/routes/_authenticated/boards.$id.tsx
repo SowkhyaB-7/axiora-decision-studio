@@ -327,15 +327,8 @@ function BoardOverview() {
                 </p>
               )}
 
-              <div className="mt-6 flex flex-wrap gap-2">
-                <Link
-                  to="/boards/$id/customer-validation"
-                  params={{ id }}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-muted"
-                >
-                  <Users className="h-4 w-4" /> Customer Validation
-                </Link>
-                {latestAnalysisQuery.data && (
+              {latestAnalysisQuery.data && (
+                <div className="mt-6 flex flex-wrap gap-2">
                   <Link
                     to="/boards/$id/analysis"
                     params={{ id }}
@@ -343,8 +336,9 @@ function BoardOverview() {
                   >
                     <Sparkles className="h-4 w-4" /> View analysis
                   </Link>
-                )}
-              </div>
+                </div>
+              )}
+
             </div>
 
             <div className="flex flex-col items-end gap-3">
