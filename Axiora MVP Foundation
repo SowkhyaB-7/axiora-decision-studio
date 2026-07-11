@@ -1,0 +1,24 @@
+## Axiora v0.4.0 – MVP Foundation
+
+### New Features
+- User authentication
+- Decision Board management
+- Five readiness dimensions
+- Evidence management (CRUD)
+- File attachments
+- Rule-based readiness analysis
+- Dynamic recommendations
+- Dynamic supporting and missing evidence
+
+### Improvements
+- Generic reusable Evidence Engine
+- Dynamic scoring
+- Improved analysis quality
+- Navigation across all dimensions
+- Supabase persistence
+
+### Known Limitations
+- Analysis is deterministic (rule-based), not AI-powered
+- Multiple file upload not yet supported
+- Analysis status does not yet update after analysis
+- Import/Export functionality deferred
