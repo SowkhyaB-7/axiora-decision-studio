@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedBoardsNewRouteImport } from './routes/_authenticated/boards.new'
 import { Route as AuthenticatedBoardsIdRouteImport } from './routes/_authenticated/boards.$id'
+import { Route as AuthenticatedBoardsIdStakeholderAlignmentRouteImport } from './routes/_authenticated/boards.$id_.stakeholder-alignment'
 import { Route as AuthenticatedBoardsIdProductTechnicalRouteImport } from './routes/_authenticated/boards.$id_.product-technical'
 import { Route as AuthenticatedBoardsIdOperationalRouteImport } from './routes/_authenticated/boards.$id_.operational'
 import { Route as AuthenticatedBoardsIdCustomerValidationRouteImport } from './routes/_authenticated/boards.$id_.customer-validation'
@@ -44,6 +45,12 @@ const AuthenticatedBoardsIdRoute = AuthenticatedBoardsIdRouteImport.update({
   path: '/boards/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBoardsIdStakeholderAlignmentRoute =
+  AuthenticatedBoardsIdStakeholderAlignmentRouteImport.update({
+    id: '/boards/$id_/stakeholder-alignment',
+    path: '/boards/$id/stakeholder-alignment',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedBoardsIdProductTechnicalRoute =
   AuthenticatedBoardsIdProductTechnicalRouteImport.update({
     id: '/boards/$id_/product-technical',
@@ -85,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/boards/$id/customer-validation': typeof AuthenticatedBoardsIdCustomerValidationRoute
   '/boards/$id/operational': typeof AuthenticatedBoardsIdOperationalRoute
   '/boards/$id/product-technical': typeof AuthenticatedBoardsIdProductTechnicalRoute
+  '/boards/$id/stakeholder-alignment': typeof AuthenticatedBoardsIdStakeholderAlignmentRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -96,6 +104,7 @@ export interface FileRoutesByTo {
   '/boards/$id/customer-validation': typeof AuthenticatedBoardsIdCustomerValidationRoute
   '/boards/$id/operational': typeof AuthenticatedBoardsIdOperationalRoute
   '/boards/$id/product-technical': typeof AuthenticatedBoardsIdProductTechnicalRoute
+  '/boards/$id/stakeholder-alignment': typeof AuthenticatedBoardsIdStakeholderAlignmentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -109,6 +118,7 @@ export interface FileRoutesById {
   '/_authenticated/boards/$id_/customer-validation': typeof AuthenticatedBoardsIdCustomerValidationRoute
   '/_authenticated/boards/$id_/operational': typeof AuthenticatedBoardsIdOperationalRoute
   '/_authenticated/boards/$id_/product-technical': typeof AuthenticatedBoardsIdProductTechnicalRoute
+  '/_authenticated/boards/$id_/stakeholder-alignment': typeof AuthenticatedBoardsIdStakeholderAlignmentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/boards/$id/customer-validation'
     | '/boards/$id/operational'
     | '/boards/$id/product-technical'
+    | '/boards/$id/stakeholder-alignment'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '/boards/$id/customer-validation'
     | '/boards/$id/operational'
     | '/boards/$id/product-technical'
+    | '/boards/$id/stakeholder-alignment'
   id:
     | '__root__'
     | '/_authenticated'
@@ -145,6 +157,7 @@ export interface FileRouteTypes {
     | '/_authenticated/boards/$id_/customer-validation'
     | '/_authenticated/boards/$id_/operational'
     | '/_authenticated/boards/$id_/product-technical'
+    | '/_authenticated/boards/$id_/stakeholder-alignment'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -187,6 +200,13 @@ declare module '@tanstack/react-router' {
       path: '/boards/$id'
       fullPath: '/boards/$id'
       preLoaderRoute: typeof AuthenticatedBoardsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/boards/$id_/stakeholder-alignment': {
+      id: '/_authenticated/boards/$id_/stakeholder-alignment'
+      path: '/boards/$id/stakeholder-alignment'
+      fullPath: '/boards/$id/stakeholder-alignment'
+      preLoaderRoute: typeof AuthenticatedBoardsIdStakeholderAlignmentRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/boards/$id_/product-technical': {
@@ -236,6 +256,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBoardsIdCustomerValidationRoute: typeof AuthenticatedBoardsIdCustomerValidationRoute
   AuthenticatedBoardsIdOperationalRoute: typeof AuthenticatedBoardsIdOperationalRoute
   AuthenticatedBoardsIdProductTechnicalRoute: typeof AuthenticatedBoardsIdProductTechnicalRoute
+  AuthenticatedBoardsIdStakeholderAlignmentRoute: typeof AuthenticatedBoardsIdStakeholderAlignmentRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -249,6 +270,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBoardsIdOperationalRoute: AuthenticatedBoardsIdOperationalRoute,
   AuthenticatedBoardsIdProductTechnicalRoute:
     AuthenticatedBoardsIdProductTechnicalRoute,
+  AuthenticatedBoardsIdStakeholderAlignmentRoute:
+    AuthenticatedBoardsIdStakeholderAlignmentRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
