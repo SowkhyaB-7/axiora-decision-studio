@@ -16,6 +16,7 @@ import { Route as AuthenticatedBoardsNewRouteImport } from './routes/_authentica
 import { Route as AuthenticatedBoardsIdRouteImport } from './routes/_authenticated/boards.$id'
 import { Route as AuthenticatedBoardsIdProductTechnicalRouteImport } from './routes/_authenticated/boards.$id_.product-technical'
 import { Route as AuthenticatedBoardsIdCustomerValidationRouteImport } from './routes/_authenticated/boards.$id_.customer-validation'
+import { Route as AuthenticatedBoardsIdBusinessRouteImport } from './routes/_authenticated/boards.$id_.business'
 import { Route as AuthenticatedBoardsIdAnalysisRouteImport } from './routes/_authenticated/boards.$id_.analysis'
 
 const AuthRoute = AuthRouteImport.update({
@@ -54,6 +55,12 @@ const AuthenticatedBoardsIdCustomerValidationRoute =
     path: '/boards/$id/customer-validation',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedBoardsIdBusinessRoute =
+  AuthenticatedBoardsIdBusinessRouteImport.update({
+    id: '/boards/$id_/business',
+    path: '/boards/$id/business',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedBoardsIdAnalysisRoute =
   AuthenticatedBoardsIdAnalysisRouteImport.update({
     id: '/boards/$id_/analysis',
@@ -67,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/boards/new': typeof AuthenticatedBoardsNewRoute
   '/boards/$id/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
+  '/boards/$id/business': typeof AuthenticatedBoardsIdBusinessRoute
   '/boards/$id/customer-validation': typeof AuthenticatedBoardsIdCustomerValidationRoute
   '/boards/$id/product-technical': typeof AuthenticatedBoardsIdProductTechnicalRoute
 }
@@ -76,6 +84,7 @@ export interface FileRoutesByTo {
   '/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/boards/new': typeof AuthenticatedBoardsNewRoute
   '/boards/$id/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
+  '/boards/$id/business': typeof AuthenticatedBoardsIdBusinessRoute
   '/boards/$id/customer-validation': typeof AuthenticatedBoardsIdCustomerValidationRoute
   '/boards/$id/product-technical': typeof AuthenticatedBoardsIdProductTechnicalRoute
 }
@@ -87,6 +96,7 @@ export interface FileRoutesById {
   '/_authenticated/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/_authenticated/boards/new': typeof AuthenticatedBoardsNewRoute
   '/_authenticated/boards/$id_/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
+  '/_authenticated/boards/$id_/business': typeof AuthenticatedBoardsIdBusinessRoute
   '/_authenticated/boards/$id_/customer-validation': typeof AuthenticatedBoardsIdCustomerValidationRoute
   '/_authenticated/boards/$id_/product-technical': typeof AuthenticatedBoardsIdProductTechnicalRoute
 }
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/boards/$id'
     | '/boards/new'
     | '/boards/$id/analysis'
+    | '/boards/$id/business'
     | '/boards/$id/customer-validation'
     | '/boards/$id/product-technical'
   fileRoutesByTo: FileRoutesByTo
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/boards/$id'
     | '/boards/new'
     | '/boards/$id/analysis'
+    | '/boards/$id/business'
     | '/boards/$id/customer-validation'
     | '/boards/$id/product-technical'
   id:
@@ -117,6 +129,7 @@ export interface FileRouteTypes {
     | '/_authenticated/boards/$id'
     | '/_authenticated/boards/new'
     | '/_authenticated/boards/$id_/analysis'
+    | '/_authenticated/boards/$id_/business'
     | '/_authenticated/boards/$id_/customer-validation'
     | '/_authenticated/boards/$id_/product-technical'
   fileRoutesById: FileRoutesById
@@ -177,6 +190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBoardsIdCustomerValidationRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/boards/$id_/business': {
+      id: '/_authenticated/boards/$id_/business'
+      path: '/boards/$id/business'
+      fullPath: '/boards/$id/business'
+      preLoaderRoute: typeof AuthenticatedBoardsIdBusinessRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/boards/$id_/analysis': {
       id: '/_authenticated/boards/$id_/analysis'
       path: '/boards/$id/analysis'
@@ -192,6 +212,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBoardsIdRoute: typeof AuthenticatedBoardsIdRoute
   AuthenticatedBoardsNewRoute: typeof AuthenticatedBoardsNewRoute
   AuthenticatedBoardsIdAnalysisRoute: typeof AuthenticatedBoardsIdAnalysisRoute
+  AuthenticatedBoardsIdBusinessRoute: typeof AuthenticatedBoardsIdBusinessRoute
   AuthenticatedBoardsIdCustomerValidationRoute: typeof AuthenticatedBoardsIdCustomerValidationRoute
   AuthenticatedBoardsIdProductTechnicalRoute: typeof AuthenticatedBoardsIdProductTechnicalRoute
 }
@@ -201,6 +222,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBoardsIdRoute: AuthenticatedBoardsIdRoute,
   AuthenticatedBoardsNewRoute: AuthenticatedBoardsNewRoute,
   AuthenticatedBoardsIdAnalysisRoute: AuthenticatedBoardsIdAnalysisRoute,
+  AuthenticatedBoardsIdBusinessRoute: AuthenticatedBoardsIdBusinessRoute,
   AuthenticatedBoardsIdCustomerValidationRoute:
     AuthenticatedBoardsIdCustomerValidationRoute,
   AuthenticatedBoardsIdProductTechnicalRoute:
