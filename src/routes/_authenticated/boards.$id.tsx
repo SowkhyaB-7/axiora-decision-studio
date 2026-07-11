@@ -28,6 +28,16 @@ export const Route = createFileRoute("/_authenticated/boards/$id")({
   component: BoardOverview,
 });
 
+/** Route path per dimension key — enables driving the cards from config. */
+const DIMENSION_ROUTE: Record<DimensionKey, string> = {
+  customer_validation: "/boards/$id/customer-validation",
+  product_technical: "/boards/$id/product-technical",
+  business: "/boards/$id/business",
+  operational: "/boards/$id/operational",
+  stakeholder_alignment: "/boards/$id/stakeholder-alignment",
+};
+
+
 function formatDate(d: string | null | undefined) {
   if (!d) return "—";
   try {
