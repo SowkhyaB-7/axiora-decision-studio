@@ -447,9 +447,14 @@ function BoardOverview() {
               const evidenceCount = row ? counts[row.id] ?? 0 : 0;
               const analyzed = !!row?.readiness_level;
               const status = row?.status ?? "not_started";
-              const isCV = d.key === "customer_validation";
-              const inner = (
-                <>
+              const to = DIMENSION_ROUTE[d.key];
+              return (
+                <Link
+                  key={d.key}
+                  to={to}
+                  params={{ id }}
+                  className="group flex flex-col rounded-xl border border-border bg-surface p-5 transition-colors hover:border-foreground/20"
+                >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-surface-muted">
@@ -482,33 +487,13 @@ function BoardOverview() {
                     </div>
                   </dl>
 
-                  {isCV ? (
-                    <div className="mt-5 inline-flex items-center gap-1 self-start text-xs font-medium text-accent">
-                      Open dimension <ArrowUpRight className="h-3.5 w-3.5" />
-                    </div>
-                  ) : (
-                    <div className="mt-5 self-start text-xs font-medium text-muted-foreground">Coming soon</div>
-                  )}
-                </>
-              );
-              return isCV ? (
-                <Link
-                  key={d.key}
-                  to="/boards/$id/customer-validation"
-                  params={{ id }}
-                  className="group flex flex-col rounded-xl border border-border bg-surface p-5 transition-colors hover:border-foreground/20"
-                >
-                  {inner}
+                  <div className="mt-5 inline-flex items-center gap-1 self-start text-xs font-medium text-accent">
+                    Open dimension <ArrowUpRight className="h-3.5 w-3.5" />
+                  </div>
                 </Link>
-              ) : (
-                <article
-                  key={d.key}
-                  className="group flex flex-col rounded-xl border border-border bg-surface p-5 opacity-80"
-                >
-                  {inner}
-                </article>
               );
             })}
+
           </div>
         </section>
       </div>
