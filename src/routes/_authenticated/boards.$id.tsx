@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { supabase } from "@/integrations/supabase/client";
 import { DIMENSIONS, type DimensionKey } from "@/lib/dimensions";
+import { analyzeCustomerValidation, recommendationFor } from "@/lib/analysis";
 import {
   ArrowUpRight,
   Sparkles,
@@ -206,56 +207,30 @@ function BoardOverview() {
     setAnalyzing(true);
     try {
       const cv = dimByKey.get("customer_validation");
-      let evidenceRows: { title: string; evidence_strength: string | null }[] = [];
+      let evidenceRows: {
+        title: string;
+        evidence_type: string | null;
+        evidence_strength: string | null;
+        evidence_date: string | null;
+      }[] = [];
       if (cv) {
         const { data: evRows } = await supabase
           .from("evidence")
-          .select("title, evidence_strength")
+          .select("title, evidence_type, evidence_strength, evidence_date")
           .eq("dimension_id", cv.id);
         evidenceRows = evRows ?? [];
       }
 
-      const evidenceCount = evidenceRows.length;
-      const strongCount = evidenceRows.filter((e) => (e.evidence_strength ?? "").toLowerCase() === "strong").length;
-      let readiness: "High" | "Medium" | "Low" = "Low";
-      let score = 30;
-      if (evidenceCount >= 5 || strongCount >= 3) {
-        readiness = "High";
-        score = 85;
-      } else if (evidenceCount >= 2) {
-        readiness = "Medium";
-        score = 60;
-      }
+      const cvResult = analyzeCustomerValidation(evidenceRows);
+      const score = cvResult.readiness_score;
+      const readiness = cvResult.readiness;
 
-      const supporting = evidenceRows.slice(0, 5).map((e) => e.title);
-      if (supporting.length === 0) {
-        supporting.push("14 interviews", "2 usability studies", "Strong demand from SMB customers");
-      }
-
-      const cvResult = {
-        dimension: "customer_validation",
-        readiness,
-        readiness_score: score,
-        supporting_evidence:
-          supporting.length > 0
-            ? supporting
-            : ["14 interviews", "2 usability studies", "Strong demand from SMB customers"],
-        missing_evidence: ["Enterprise interviews", "Longitudinal retention study"],
-        key_risk: "Limited validation for enterprise customers",
-        overall_status: "Customer Validation appears strong.",
-      };
-
-      const brief = `Board "${board.title}" analyzed. Customer Validation readiness: ${readiness}.`;
+      const brief = `Board "${board.title}" analyzed from ${evidenceRows.length} evidence item${evidenceRows.length === 1 ? "" : "s"}. Customer Validation readiness: ${readiness} (${score}).`;
 
       const { error: insErr } = await supabase.from("ai_analyses").insert({
         board_id: id,
         overall_readiness: score,
-        recommendation:
-          readiness === "High"
-            ? "Proceed — Customer Validation is strong."
-            : readiness === "Medium"
-              ? "Proceed with caution — gather more evidence."
-              : "Hold — insufficient customer validation.",
+        recommendation: recommendationFor(score),
         decision_brief: brief,
         dimension_results: { customer_validation: cvResult },
         analysis_version: ((latestAnalysisQuery.data?.analysis_version ?? 0) + 1) as number,
