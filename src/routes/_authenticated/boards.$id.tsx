@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { supabase } from "@/integrations/supabase/client";
 import { DIMENSIONS, type DimensionKey } from "@/lib/dimensions";
+import { analyzeCustomerValidation, recommendationFor } from "@/lib/analysis";
 import {
   ArrowUpRight,
   Sparkles,
