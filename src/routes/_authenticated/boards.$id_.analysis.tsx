@@ -2,12 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { supabase } from "@/integrations/supabase/client";
+import { DIMENSIONS, type DimensionKey } from "@/lib/dimensions";
 import {
   ArrowLeft,
   Sparkles,
   CheckCircle2,
   AlertTriangle,
-  Users,
   Loader2,
 } from "lucide-react";
 
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/boards/$id_/analysis")({
   component: Analysis,
 });
 
-type CVResult = {
+type DimResult = {
   readiness?: string;
   readiness_score?: number;
   supporting_evidence?: string[];
@@ -53,8 +53,10 @@ function Analysis() {
   });
 
   const analysis = analysisQuery.data;
-  const dimResults = (analysis?.dimension_results ?? {}) as Record<string, CVResult>;
-  const cv: CVResult = dimResults.customer_validation ?? {};
+  const dimResults = (analysis?.dimension_results ?? {}) as Record<
+    DimensionKey,
+    DimResult | undefined
+  >;
 
   return (
     <AppShell title="Analysis Results" subtitle="Mocked analysis · MVP placeholder for AI output">
@@ -105,65 +107,73 @@ function Analysis() {
               </div>
             </section>
 
-            <section className="rounded-xl border border-border bg-surface p-6">
-              <div className="flex items-center gap-3">
-                <div className="grid h-10 w-10 place-items-center rounded-lg bg-surface-muted">
-                  <Users className="h-5 w-5 text-accent" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h2 className="text-sm font-semibold">Customer Validation</h2>
-                  <p className="text-xs text-muted-foreground">
-                    {cv.overall_status ?? "—"}
-                  </p>
-                </div>
-                <div className={`font-display text-2xl ${scoreColor(cv.readiness_score)}`}>
-                  {cv.readiness ?? "—"}
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-6 lg:grid-cols-2">
-                <div>
-                  <h3 className="flex items-center gap-2 text-sm font-semibold">
-                    <CheckCircle2 className="h-4 w-4 text-success" /> Supporting evidence
-                  </h3>
-                  <ul className="mt-3 space-y-2 text-sm">
-                    {(cv.supporting_evidence ?? []).map((e, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" /> {e}
-                      </li>
-                    ))}
-                    {(cv.supporting_evidence?.length ?? 0) === 0 && (
-                      <li className="text-muted-foreground">None</li>
-                    )}
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="flex items-center gap-2 text-sm font-semibold">
-                    <AlertTriangle className="h-4 w-4 text-warning" /> Missing evidence
-                  </h3>
-                  <ul className="mt-3 space-y-2 text-sm">
-                    {(cv.missing_evidence ?? []).map((e, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" /> {e}
-                      </li>
-                    ))}
-                    {(cv.missing_evidence?.length ?? 0) === 0 && (
-                      <li className="text-muted-foreground">None</li>
-                    )}
-                  </ul>
-                </div>
-              </div>
-
-              {cv.key_risk && (
-                <div className="mt-6 rounded-lg border border-warning/30 bg-warning/5 p-4 text-sm">
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-warning">
-                    <AlertTriangle className="h-3.5 w-3.5" /> Key risk
+            {DIMENSIONS.map((d) => {
+              const r: DimResult = dimResults[d.key] ?? {};
+              return (
+                <section
+                  key={d.key}
+                  className="rounded-xl border border-border bg-surface p-6"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-10 w-10 place-items-center rounded-lg bg-surface-muted">
+                      <d.icon className="h-5 w-5 text-accent" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-sm font-semibold">{d.name}</h2>
+                      <p className="text-xs text-muted-foreground">
+                        {r.overall_status ?? "—"}
+                      </p>
+                    </div>
+                    <div className={`font-display text-2xl ${scoreColor(r.readiness_score)}`}>
+                      {r.readiness ?? "—"}
+                    </div>
                   </div>
-                  <p className="mt-1">{cv.key_risk}</p>
-                </div>
-              )}
-            </section>
+
+                  <div className="mt-6 grid gap-6 lg:grid-cols-2">
+                    <div>
+                      <h3 className="flex items-center gap-2 text-sm font-semibold">
+                        <CheckCircle2 className="h-4 w-4 text-success" /> Supporting evidence
+                      </h3>
+                      <ul className="mt-3 space-y-2 text-sm">
+                        {(r.supporting_evidence ?? []).map((e, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" /> {e}
+                          </li>
+                        ))}
+                        {(r.supporting_evidence?.length ?? 0) === 0 && (
+                          <li className="text-muted-foreground">None</li>
+                        )}
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h3 className="flex items-center gap-2 text-sm font-semibold">
+                        <AlertTriangle className="h-4 w-4 text-warning" /> Missing evidence
+                      </h3>
+                      <ul className="mt-3 space-y-2 text-sm">
+                        {(r.missing_evidence ?? []).map((e, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" /> {e}
+                          </li>
+                        ))}
+                        {(r.missing_evidence?.length ?? 0) === 0 && (
+                          <li className="text-muted-foreground">None</li>
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+
+                  {r.key_risk && (
+                    <div className="mt-6 rounded-lg border border-warning/30 bg-warning/5 p-4 text-sm">
+                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-warning">
+                        <AlertTriangle className="h-3.5 w-3.5" /> Key risk
+                      </div>
+                      <p className="mt-1">{r.key_risk}</p>
+                    </div>
+                  )}
+                </section>
+              );
+            })}
           </>
         )}
       </div>
