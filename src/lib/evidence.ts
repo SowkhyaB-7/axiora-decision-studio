@@ -68,6 +68,11 @@ export type EvidenceRow = {
   created_at: string;
 };
 
-// Only Customer Validation is enabled in this sprint; the engine itself is
-// generic and driven by DimensionKey.
-export const ENABLED_EVIDENCE_DIMENSIONS: DimensionKey[] = ["customer_validation"];
+// All five dimensions use the same reusable Evidence Engine.
+export const ENABLED_EVIDENCE_DIMENSIONS: DimensionKey[] = [
+  "customer_validation",
+  "product_technical",
+  "business",
+  "operational",
+  "stakeholder_alignment",
+];
