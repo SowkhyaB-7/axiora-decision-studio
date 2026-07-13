@@ -140,6 +140,7 @@ export function useEvidenceMutations(
         notes: input.notes,
       } as never);
       if (error) throw error;
+      await markAnalysisOutdated();
     },
     onSuccess: invalidate,
   });
