@@ -330,6 +330,18 @@ function BoardOverview() {
                 <span className="rounded-full border border-accent/30 bg-accent/10 px-2 py-0.5 font-medium text-accent">
                   {board.status}
                 </span>
+                {(board as { analysis_status?: string | null }).analysis_status && (
+                  <span
+                    className={`rounded-full border px-2 py-0.5 font-medium ${
+                      (board as { analysis_status?: string | null }).analysis_status ===
+                      "Analysis Complete"
+                        ? "border-success/30 bg-success/10 text-success"
+                        : "border-border bg-surface-muted text-muted-foreground"
+                    }`}
+                  >
+                    {(board as { analysis_status?: string | null }).analysis_status}
+                  </span>
+                )}
                 {(board as { decision_type?: string | null }).decision_type && (
                   <span className="rounded-full border border-border bg-surface-muted px-2 py-0.5 font-medium text-muted-foreground">
                     {(board as { decision_type?: string | null }).decision_type}
