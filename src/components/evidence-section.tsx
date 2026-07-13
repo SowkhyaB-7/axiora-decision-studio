@@ -331,6 +331,11 @@ export function EvidenceSection({
                       </span>
                     )}
                     {r.evidence_date && <span>{fmtDate(r.evidence_date)}</span>}
+                    {r.updated_at && (
+                      <span className="text-[11px]">
+                        · Updated {fmtDate(r.updated_at)}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
