@@ -306,7 +306,7 @@ export function EvidenceSection({
             {rows.map((r) => (
               <li key={r.id} className="flex items-start gap-4 px-6 py-4">
                 <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-surface-muted">
-                  {r.attachment_path ? (
+                  {r.attachment_path || (r.attachment_paths?.length ?? 0) > 0 ? (
                     <Paperclip className="h-4 w-4 text-accent" />
                   ) : r.source_url ? (
                     <LinkIcon className="h-4 w-4 text-accent" />
