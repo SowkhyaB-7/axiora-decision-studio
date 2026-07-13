@@ -263,18 +263,21 @@ function BoardOverview() {
       );
       const brief = `Board "${board.title}" analyzed across ${DIMENSIONS.length} dimensions from ${totalEvidence} evidence item${totalEvidence === 1 ? "" : "s"}. Overall readiness: ${overall}.`;
 
+      const confidence = overallConfidence(Object.values(dimension_results));
+
       const { error: insErr } = await supabase.from("ai_analyses").insert({
         board_id: id,
         overall_readiness: overall,
         recommendation: recommendationFor(overall),
         decision_brief: brief,
         dimension_results,
+        confidence_score: confidence.score,
         analysis_version: ((latestAnalysisQuery.data?.analysis_version ?? 0) + 1) as number,
-      });
+      } as never);
       if (insErr) throw insErr;
 
       // Persist analysis status on the board so it survives refresh and
-      // shows consistently on dashboard + board list.
+      // clears any prior "Outdated" flag now that a fresh analysis exists.
       await supabase
         .from("decision_boards")
         .update({ analysis_status: "Analysis Complete" } as never)
@@ -283,8 +286,10 @@ function BoardOverview() {
       toast.success("Analysis complete");
       await Promise.all([
         qc.invalidateQueries({ queryKey: ["latest-analysis", id] }),
+        qc.invalidateQueries({ queryKey: ["analysis-history", id] }),
         qc.invalidateQueries({ queryKey: ["dimensions", id] }),
         qc.invalidateQueries({ queryKey: ["board", id] }),
+        qc.invalidateQueries({ queryKey: ["board-analysis-status", id] }),
         qc.invalidateQueries({ queryKey: ["boards", "mine"] }),
       ]);
       navigate({ to: "/boards/$id/analysis", params: { id } });
