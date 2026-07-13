@@ -290,9 +290,10 @@ export function EvidenceSection({
           </div>
         ) : rows.length === 0 ? (
           <div className="px-6 py-12 text-center">
-            <p className="text-sm font-medium">No evidence yet.</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Start by adding your first piece of evidence.
+            <p className="text-sm font-medium">No evidence has been added yet.</p>
+            <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+              Start by adding customer interviews, analytics, documents, or
+              stakeholder feedback that informs this dimension.
             </p>
             <button
               type="button"
