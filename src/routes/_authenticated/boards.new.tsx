@@ -228,17 +228,18 @@ function NewBoard() {
             </div>
 
             <div>
-              <div className="flex items-baseline justify-between">
+              <div>
                 <h2 className="text-sm font-semibold">Assessment dimensions</h2>
-                <span className="text-xs text-muted-foreground">All 5 enabled by default</span>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Launch Readiness always evaluates all five dimensions.
+                </p>
               </div>
               <div className="mt-3 grid gap-2 md:grid-cols-2">
                 {DIMENSIONS.map((d) => (
-                  <label
+                  <div
                     key={d.key}
-                    className="flex items-start gap-3 rounded-lg border border-border bg-surface p-3 hover:bg-surface-muted"
+                    className="flex items-start gap-3 rounded-lg border border-border bg-surface p-3"
                   >
-                    <input type="checkbox" defaultChecked disabled className="mt-1 h-4 w-4 accent-[color:var(--accent)]" />
                     <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-surface-muted">
                       <d.icon className="h-4 w-4 text-accent" />
                     </div>
@@ -246,7 +247,7 @@ function NewBoard() {
                       <div className="text-sm font-medium">{d.name}</div>
                       <div className="text-xs text-muted-foreground">{d.desc}</div>
                     </div>
-                  </label>
+                  </div>
                 ))}
               </div>
             </div>
