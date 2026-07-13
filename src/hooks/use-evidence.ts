@@ -105,10 +105,22 @@ export function useEvidenceMutations(
 ) {
   const qc = useQueryClient();
 
+  const markAnalysisOutdated = useCallback(async () => {
+    // Only mark Outdated when a prior analysis existed. Never overwrite
+    // states like "Never Analyzed" or "Outdated" itself.
+    await supabase
+      .from("decision_boards")
+      .update({ analysis_status: "Outdated" } as never)
+      .eq("id", boardId)
+      .eq("analysis_status", "Analysis Complete");
+  }, [boardId]);
+
   const invalidate = useCallback(async () => {
     await Promise.all([
       qc.invalidateQueries({ queryKey: evidenceKeys.list(dimensionId) }),
       qc.invalidateQueries({ queryKey: evidenceKeys.counts(boardId) }),
+      qc.invalidateQueries({ queryKey: ["board", boardId] }),
+      qc.invalidateQueries({ queryKey: ["boards", "mine"] }),
     ]);
   }, [qc, boardId, dimensionId]);
 
