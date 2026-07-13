@@ -63,10 +63,26 @@ export type EvidenceRow = {
   recency: string | null;
   source_url: string | null;
   attachment_path: string | null;
+  attachment_paths: string[] | null;
   file_url: string | null;
   notes: string | null;
   created_at: string;
 };
+
+/** yyyy-mm-dd for today in local time — for date-input max attribute. */
+export function todayISO(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/** Returns true if the given yyyy-mm-dd string is strictly after today. */
+export function isFutureDate(iso: string): boolean {
+  if (!iso) return false;
+  return iso > todayISO();
+}
 
 // All five dimensions use the same reusable Evidence Engine.
 export const ENABLED_EVIDENCE_DIMENSIONS: DimensionKey[] = [

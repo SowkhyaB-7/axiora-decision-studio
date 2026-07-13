@@ -18,6 +18,8 @@ import {
   EVIDENCE_TYPES,
   EVIDENCE_STRENGTHS,
   ALLOWED_ATTACHMENT_ACCEPT,
+  todayISO,
+  isFutureDate,
   type EvidenceRow,
 } from "@/lib/evidence";
 import {
@@ -38,6 +40,8 @@ type Props = {
   icon: ReactNode;
 };
 
+type Attachment = { path: string; name: string };
+
 type FormState = {
   id?: string;
   title: string;
@@ -47,8 +51,7 @@ type FormState = {
   evidence_strength: string;
   source_url: string;
   notes: string;
-  attachment_path: string | null;
-  attachment_name: string | null;
+  attachments: Attachment[];
 };
 
 const emptyForm: FormState = {
@@ -59,9 +62,14 @@ const emptyForm: FormState = {
   evidence_strength: "",
   source_url: "",
   notes: "",
-  attachment_path: null,
-  attachment_name: null,
+  attachments: [],
 };
+
+function nameFromPath(p: string): string {
+  const base = p.split("/").pop() ?? p;
+  // Strip the crypto.randomUUID() prefix we add on upload ("<uuid>-<name>")
+  return base.replace(/^[0-9a-f-]{36}-/i, "");
+}
 
 function fmtDate(d: string | null) {
   if (!d) return "—";
@@ -102,6 +110,12 @@ export function EvidenceSection({
   };
 
   const openEdit = (r: EvidenceRow) => {
+    const paths = [
+      ...(r.attachment_paths ?? []),
+      ...(r.attachment_path && !(r.attachment_paths ?? []).includes(r.attachment_path)
+        ? [r.attachment_path]
+        : []),
+    ];
     setForm({
       id: r.id,
       title: r.title,
@@ -111,37 +125,47 @@ export function EvidenceSection({
       evidence_strength: r.evidence_strength ?? "",
       source_url: r.source_url ?? "",
       notes: r.notes ?? "",
-      attachment_path: r.attachment_path,
-      attachment_name: r.attachment_path
-        ? r.attachment_path.split("/").pop() ?? null
-        : null,
+      attachments: paths.map((p) => ({ path: p, name: nameFromPath(p) })),
     });
     setFormOpen(true);
   };
 
-  const handleFile = async (file: File | undefined) => {
-    if (!file || !dimensionId) return;
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0 || !dimensionId) return;
     setUploading(true);
+    const uploaded: Attachment[] = [];
     try {
-      // Replace prior attachment if any (edit flow)
-      if (form.attachment_path) {
-        await removeAttachment(form.attachment_path).catch(() => {});
+      for (const file of Array.from(files)) {
+        try {
+          const path = await uploadAttachment(file, dimensionId);
+          uploaded.push({ path, name: file.name });
+        } catch (e) {
+          toast.error(
+            `${file.name}: ${e instanceof Error ? e.message : "Upload failed"}`,
+          );
+        }
       }
-      const path = await uploadAttachment(file, dimensionId);
-      setForm((f) => ({ ...f, attachment_path: path, attachment_name: file.name }));
-      toast.success("File uploaded");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upload failed");
+      if (uploaded.length > 0) {
+        setForm((f) => ({ ...f, attachments: [...f.attachments, ...uploaded] }));
+        toast.success(
+          uploaded.length === 1
+            ? "File uploaded"
+            : `${uploaded.length} files uploaded`,
+        );
+      }
     } finally {
       setUploading(false);
     }
   };
 
-  const clearAttachment = async () => {
-    if (form.attachment_path) {
-      await removeAttachment(form.attachment_path).catch(() => {});
-    }
-    setForm((f) => ({ ...f, attachment_path: null, attachment_name: null }));
+  const removeAttachmentAt = async (index: number) => {
+    const target = form.attachments[index];
+    if (!target) return;
+    await removeAttachment(target.path).catch(() => {});
+    setForm((f) => ({
+      ...f,
+      attachments: f.attachments.filter((_, i) => i !== index),
+    }));
   };
 
   const handleSubmit = async () => {
@@ -149,7 +173,10 @@ export function EvidenceSection({
     if (!form.description.trim()) return toast.error("Description is required");
     if (!form.evidence_type) return toast.error("Evidence type is required");
     if (!form.evidence_date) return toast.error("Evidence date is required");
+    if (isFutureDate(form.evidence_date))
+      return toast.error("Evidence date cannot be in the future.");
 
+    const paths = form.attachments.map((a) => a.path);
     const payload: EvidenceInput = {
       title: form.title.trim(),
       description: form.description.trim(),
@@ -158,7 +185,8 @@ export function EvidenceSection({
       evidence_strength: form.evidence_strength || null,
       source_url: form.source_url.trim() || null,
       notes: form.notes.trim() || null,
-      attachment_path: form.attachment_path,
+      attachment_path: paths[0] ?? null,
+      attachment_paths: paths,
     };
 
     try {
@@ -175,6 +203,7 @@ export function EvidenceSection({
       toast.error(e instanceof Error ? e.message : "Failed to save");
     }
   };
+
 
   const handleConfirmDelete = async () => {
     if (!pendingDelete) return;
@@ -277,7 +306,7 @@ export function EvidenceSection({
             {rows.map((r) => (
               <li key={r.id} className="flex items-start gap-4 px-6 py-4">
                 <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-surface-muted">
-                  {r.attachment_path ? (
+                  {r.attachment_path || (r.attachment_paths?.length ?? 0) > 0 ? (
                     <Paperclip className="h-4 w-4 text-accent" />
                   ) : r.source_url ? (
                     <LinkIcon className="h-4 w-4 text-accent" />
@@ -374,12 +403,19 @@ export function EvidenceSection({
                 <input
                   type="date"
                   value={form.evidence_date}
+                  max={todayISO()}
                   onChange={(e) =>
                     setForm({ ...form, evidence_date: e.target.value })
                   }
                   className={inputCls}
                 />
+                {form.evidence_date && isFutureDate(form.evidence_date) && (
+                  <p className="mt-1 text-[11px] text-destructive">
+                    Evidence date cannot be in the future.
+                  </p>
+                )}
               </Field>
+
             </div>
 
             <Field label="Evidence strength">
@@ -409,50 +445,59 @@ export function EvidenceSection({
               />
             </Field>
 
-            <Field label="Attachment">
-              {form.attachment_path ? (
-                <div className="flex items-center justify-between rounded-md border border-border bg-surface-muted px-3 py-2 text-xs">
-                  <span className="flex min-w-0 items-center gap-1.5 truncate">
-                    <Paperclip className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">
-                      {form.attachment_name ?? "Attached file"}
-                    </span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={clearAttachment}
-                    className="rounded-md p-1 hover:bg-surface"
-                    title="Remove"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              ) : (
-                <label className="flex cursor-pointer items-center justify-center gap-1.5 rounded-md border border-dashed border-border bg-background px-3 py-4 text-xs text-muted-foreground hover:bg-surface-muted">
-                  {uploading ? (
-                    <>
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" /> Uploading…
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-3.5 w-3.5" /> Choose file (max 20 MB)
-                    </>
-                  )}
-                  <input
-                    type="file"
-                    accept={ALLOWED_ATTACHMENT_ACCEPT}
-                    className="hidden"
-                    onChange={(e) => {
-                      void handleFile(e.target.files?.[0]);
-                      e.target.value = "";
-                    }}
-                  />
-                </label>
+            <Field label="Attachments">
+              {form.attachments.length > 0 && (
+                <ul className="mb-2 space-y-1.5">
+                  {form.attachments.map((a, i) => (
+                    <li
+                      key={`${a.path}-${i}`}
+                      className="flex items-center justify-between rounded-md border border-border bg-surface-muted px-3 py-2 text-xs"
+                    >
+                      <span className="flex min-w-0 items-center gap-1.5 truncate">
+                        <Paperclip className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">{a.name}</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => void removeAttachmentAt(i)}
+                        className="rounded-md p-1 hover:bg-surface"
+                        title="Remove"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
+              <label className="flex cursor-pointer items-center justify-center gap-1.5 rounded-md border border-dashed border-border bg-background px-3 py-4 text-xs text-muted-foreground hover:bg-surface-muted">
+                {uploading ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" /> Uploading…
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-3.5 w-3.5" />
+                    {form.attachments.length > 0
+                      ? "Add more files"
+                      : "Choose files (max 20 MB each)"}
+                  </>
+                )}
+                <input
+                  type="file"
+                  multiple
+                  accept={ALLOWED_ATTACHMENT_ACCEPT}
+                  className="hidden"
+                  onChange={(e) => {
+                    void handleFiles(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
               <p className="mt-1 text-[11px] text-muted-foreground">
                 PDF, DOCX, XLSX, PPTX, PNG, JPG, JPEG, CSV, TXT
               </p>
             </Field>
+
 
             <Field label="Notes">
               <textarea
@@ -521,18 +566,38 @@ export function EvidenceSection({
                 {viewing.source_url}
               </a>
             )}
-            {viewing.attachment_path && (
-              <div>
-                <button
-                  type="button"
-                  onClick={() => openSignedUrl(viewing.attachment_path!)}
-                  className="inline-flex items-center gap-1 text-accent hover:underline"
-                >
-                  <Paperclip className="h-3.5 w-3.5" />
-                  Open attachment
-                </button>
-              </div>
-            )}
+            {(() => {
+              const paths = [
+                ...(viewing.attachment_paths ?? []),
+                ...(viewing.attachment_path &&
+                !(viewing.attachment_paths ?? []).includes(viewing.attachment_path)
+                  ? [viewing.attachment_path]
+                  : []),
+              ];
+              if (paths.length === 0) return null;
+              return (
+                <div>
+                  <div className="text-xs font-medium">
+                    Attachments ({paths.length})
+                  </div>
+                  <ul className="mt-1 space-y-1">
+                    {paths.map((p, i) => (
+                      <li key={`${p}-${i}`}>
+                        <button
+                          type="button"
+                          onClick={() => openSignedUrl(p)}
+                          className="inline-flex items-center gap-1 text-accent hover:underline"
+                        >
+                          <Paperclip className="h-3.5 w-3.5" />
+                          {nameFromPath(p)}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
+
             {viewing.notes && (
               <div>
                 <div className="text-xs font-medium">Notes</div>

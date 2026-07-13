@@ -22,6 +22,7 @@ type BoardRow = {
   title: string;
   description: string | null;
   status: string;
+  analysis_status: string | null;
   decision_type: string | null;
   target_date: string | null;
   created_at: string;
@@ -60,7 +61,7 @@ function Home() {
       if (!uid) return [] as BoardRow[];
       const { data, error } = await supabase
         .from("decision_boards")
-        .select("id, title, description, status, decision_type, target_date, created_at, updated_at")
+        .select("id, title, description, status, analysis_status, decision_type, target_date, created_at, updated_at")
         .eq("owner_id", uid)
         .order("updated_at", { ascending: false });
       if (error) throw error;
@@ -180,6 +181,17 @@ function Home() {
                         {b.decision_type && (
                           <span className="shrink-0 rounded-full border border-border bg-surface-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                             {b.decision_type}
+                          </span>
+                        )}
+                        {b.analysis_status && (
+                          <span
+                            className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+                              b.analysis_status === "Analysis Complete"
+                                ? "border-success/20 bg-success/10 text-success"
+                                : "border-border bg-surface-muted text-muted-foreground"
+                            }`}
+                          >
+                            {b.analysis_status}
                           </span>
                         )}
                       </div>

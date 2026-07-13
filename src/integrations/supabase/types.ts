@@ -98,6 +98,7 @@ export type Database = {
       }
       decision_boards: {
         Row: {
+          analysis_status: string
           created_at: string
           decision_type: string | null
           description: string | null
@@ -110,6 +111,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          analysis_status?: string
           created_at?: string
           decision_type?: string | null
           description?: string | null
@@ -122,6 +124,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          analysis_status?: string
           created_at?: string
           decision_type?: string | null
           description?: string | null
@@ -138,6 +141,7 @@ export type Database = {
       evidence: {
         Row: {
           attachment_path: string | null
+          attachment_paths: string[]
           created_at: string
           description: string | null
           dimension_id: string
@@ -153,6 +157,7 @@ export type Database = {
         }
         Insert: {
           attachment_path?: string | null
+          attachment_paths?: string[]
           created_at?: string
           description?: string | null
           dimension_id: string
@@ -168,6 +173,7 @@ export type Database = {
         }
         Update: {
           attachment_path?: string | null
+          attachment_paths?: string[]
           created_at?: string
           description?: string | null
           dimension_id?: string
