@@ -343,7 +343,10 @@ function BoardOverview() {
                       (board as { analysis_status?: string | null }).analysis_status ===
                       "Analysis Complete"
                         ? "border-success/30 bg-success/10 text-success"
-                        : "border-border bg-surface-muted text-muted-foreground"
+                        : (board as { analysis_status?: string | null }).analysis_status ===
+                            "Outdated"
+                          ? "border-warning/30 bg-warning/10 text-warning"
+                          : "border-border bg-surface-muted text-muted-foreground"
                     }`}
                   >
                     {(board as { analysis_status?: string | null }).analysis_status}
