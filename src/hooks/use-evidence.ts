@@ -57,6 +57,7 @@ export type EvidenceInput = {
   source_url: string | null;
   notes: string | null;
   attachment_path: string | null;
+  attachment_paths: string[];
 };
 
 async function currentUserId(): Promise<string> {
