@@ -180,6 +180,7 @@ export function useEvidenceMutations(
       }
       const { error } = await supabase.from("evidence").delete().eq("id", row.id);
       if (error) throw error;
+      await markAnalysisOutdated();
     },
     onSuccess: invalidate,
   });
