@@ -61,7 +61,7 @@ function Home() {
       if (!uid) return [] as BoardRow[];
       const { data, error } = await supabase
         .from("decision_boards")
-        .select("id, title, description, status, decision_type, target_date, created_at, updated_at")
+        .select("id, title, description, status, analysis_status, decision_type, target_date, created_at, updated_at")
         .eq("owner_id", uid)
         .order("updated_at", { ascending: false });
       if (error) throw error;
