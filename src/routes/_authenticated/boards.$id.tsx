@@ -69,7 +69,7 @@ function BoardOverview() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
-  const [editDecisionType, setEditDecisionType] = useState("Launch");
+  const [editDecisionType, setEditDecisionType] = useState("Launch Readiness");
   const [editTargetDate, setEditTargetDate] = useState("");
   const [editStatus, setEditStatus] = useState("Draft");
 
