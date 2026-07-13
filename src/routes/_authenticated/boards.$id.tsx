@@ -583,7 +583,12 @@ function BoardOverview() {
                     onChange={(e) => setEditDecisionType(e.target.value)}
                     className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                   >
-                    <option value="Launch">Launch</option>
+                    <option value="Launch Readiness">Launch Readiness</option>
+                    <option value="Feature Prioritization" disabled>Feature Prioritization (Coming Soon)</option>
+                    <option value="Pricing Decision" disabled>Pricing Decision (Coming Soon)</option>
+                    <option value="Product Sunset" disabled>Product Sunset (Coming Soon)</option>
+                    <option value="Build vs Buy" disabled>Build vs Buy (Coming Soon)</option>
+                    <option value="Market Expansion" disabled>Market Expansion (Coming Soon)</option>
                   </select>
                 </div>
                 <div>
