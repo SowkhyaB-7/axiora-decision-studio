@@ -438,50 +438,59 @@ export function EvidenceSection({
               />
             </Field>
 
-            <Field label="Attachment">
-              {form.attachment_path ? (
-                <div className="flex items-center justify-between rounded-md border border-border bg-surface-muted px-3 py-2 text-xs">
-                  <span className="flex min-w-0 items-center gap-1.5 truncate">
-                    <Paperclip className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">
-                      {form.attachment_name ?? "Attached file"}
-                    </span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={clearAttachment}
-                    className="rounded-md p-1 hover:bg-surface"
-                    title="Remove"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              ) : (
-                <label className="flex cursor-pointer items-center justify-center gap-1.5 rounded-md border border-dashed border-border bg-background px-3 py-4 text-xs text-muted-foreground hover:bg-surface-muted">
-                  {uploading ? (
-                    <>
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" /> Uploading…
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-3.5 w-3.5" /> Choose file (max 20 MB)
-                    </>
-                  )}
-                  <input
-                    type="file"
-                    accept={ALLOWED_ATTACHMENT_ACCEPT}
-                    className="hidden"
-                    onChange={(e) => {
-                      void handleFile(e.target.files?.[0]);
-                      e.target.value = "";
-                    }}
-                  />
-                </label>
+            <Field label="Attachments">
+              {form.attachments.length > 0 && (
+                <ul className="mb-2 space-y-1.5">
+                  {form.attachments.map((a, i) => (
+                    <li
+                      key={`${a.path}-${i}`}
+                      className="flex items-center justify-between rounded-md border border-border bg-surface-muted px-3 py-2 text-xs"
+                    >
+                      <span className="flex min-w-0 items-center gap-1.5 truncate">
+                        <Paperclip className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">{a.name}</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => void removeAttachmentAt(i)}
+                        className="rounded-md p-1 hover:bg-surface"
+                        title="Remove"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
+              <label className="flex cursor-pointer items-center justify-center gap-1.5 rounded-md border border-dashed border-border bg-background px-3 py-4 text-xs text-muted-foreground hover:bg-surface-muted">
+                {uploading ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" /> Uploading…
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-3.5 w-3.5" />
+                    {form.attachments.length > 0
+                      ? "Add more files"
+                      : "Choose files (max 20 MB each)"}
+                  </>
+                )}
+                <input
+                  type="file"
+                  multiple
+                  accept={ALLOWED_ATTACHMENT_ACCEPT}
+                  className="hidden"
+                  onChange={(e) => {
+                    void handleFiles(e.target.files);
+                    e.target.value = "";
+                  }}
+                />
+              </label>
               <p className="mt-1 text-[11px] text-muted-foreground">
                 PDF, DOCX, XLSX, PPTX, PNG, JPG, JPEG, CSV, TXT
               </p>
             </Field>
+
 
             <Field label="Notes">
               <textarea
