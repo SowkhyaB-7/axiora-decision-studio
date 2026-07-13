@@ -120,6 +120,7 @@ export function useEvidenceMutations(
       qc.invalidateQueries({ queryKey: evidenceKeys.list(dimensionId) }),
       qc.invalidateQueries({ queryKey: evidenceKeys.counts(boardId) }),
       qc.invalidateQueries({ queryKey: ["board", boardId] }),
+      qc.invalidateQueries({ queryKey: ["board-analysis-status", boardId] }),
       qc.invalidateQueries({ queryKey: ["boards", "mine"] }),
     ]);
   }, [qc, boardId, dimensionId]);
