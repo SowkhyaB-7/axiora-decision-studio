@@ -110,6 +110,12 @@ export function EvidenceSection({
   };
 
   const openEdit = (r: EvidenceRow) => {
+    const paths = [
+      ...(r.attachment_paths ?? []),
+      ...(r.attachment_path && !(r.attachment_paths ?? []).includes(r.attachment_path)
+        ? [r.attachment_path]
+        : []),
+    ];
     setForm({
       id: r.id,
       title: r.title,
@@ -119,37 +125,47 @@ export function EvidenceSection({
       evidence_strength: r.evidence_strength ?? "",
       source_url: r.source_url ?? "",
       notes: r.notes ?? "",
-      attachment_path: r.attachment_path,
-      attachment_name: r.attachment_path
-        ? r.attachment_path.split("/").pop() ?? null
-        : null,
+      attachments: paths.map((p) => ({ path: p, name: nameFromPath(p) })),
     });
     setFormOpen(true);
   };
 
-  const handleFile = async (file: File | undefined) => {
-    if (!file || !dimensionId) return;
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0 || !dimensionId) return;
     setUploading(true);
+    const uploaded: Attachment[] = [];
     try {
-      // Replace prior attachment if any (edit flow)
-      if (form.attachment_path) {
-        await removeAttachment(form.attachment_path).catch(() => {});
+      for (const file of Array.from(files)) {
+        try {
+          const path = await uploadAttachment(file, dimensionId);
+          uploaded.push({ path, name: file.name });
+        } catch (e) {
+          toast.error(
+            `${file.name}: ${e instanceof Error ? e.message : "Upload failed"}`,
+          );
+        }
       }
-      const path = await uploadAttachment(file, dimensionId);
-      setForm((f) => ({ ...f, attachment_path: path, attachment_name: file.name }));
-      toast.success("File uploaded");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upload failed");
+      if (uploaded.length > 0) {
+        setForm((f) => ({ ...f, attachments: [...f.attachments, ...uploaded] }));
+        toast.success(
+          uploaded.length === 1
+            ? "File uploaded"
+            : `${uploaded.length} files uploaded`,
+        );
+      }
     } finally {
       setUploading(false);
     }
   };
 
-  const clearAttachment = async () => {
-    if (form.attachment_path) {
-      await removeAttachment(form.attachment_path).catch(() => {});
-    }
-    setForm((f) => ({ ...f, attachment_path: null, attachment_name: null }));
+  const removeAttachmentAt = async (index: number) => {
+    const target = form.attachments[index];
+    if (!target) return;
+    await removeAttachment(target.path).catch(() => {});
+    setForm((f) => ({
+      ...f,
+      attachments: f.attachments.filter((_, i) => i !== index),
+    }));
   };
 
   const handleSubmit = async () => {
@@ -157,7 +173,10 @@ export function EvidenceSection({
     if (!form.description.trim()) return toast.error("Description is required");
     if (!form.evidence_type) return toast.error("Evidence type is required");
     if (!form.evidence_date) return toast.error("Evidence date is required");
+    if (isFutureDate(form.evidence_date))
+      return toast.error("Evidence date cannot be in the future.");
 
+    const paths = form.attachments.map((a) => a.path);
     const payload: EvidenceInput = {
       title: form.title.trim(),
       description: form.description.trim(),
@@ -166,7 +185,8 @@ export function EvidenceSection({
       evidence_strength: form.evidence_strength || null,
       source_url: form.source_url.trim() || null,
       notes: form.notes.trim() || null,
-      attachment_path: form.attachment_path,
+      attachment_path: paths[0] ?? null,
+      attachment_paths: paths,
     };
 
     try {
@@ -183,6 +203,7 @@ export function EvidenceSection({
       toast.error(e instanceof Error ? e.message : "Failed to save");
     }
   };
+
 
   const handleConfirmDelete = async () => {
     if (!pendingDelete) return;
