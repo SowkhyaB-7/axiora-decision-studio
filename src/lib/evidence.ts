@@ -67,6 +67,7 @@ export type EvidenceRow = {
   file_url: string | null;
   notes: string | null;
   created_at: string;
+  updated_at: string | null;
 };
 
 /** yyyy-mm-dd for today in local time — for date-input max attribute. */
