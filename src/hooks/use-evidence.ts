@@ -124,6 +124,7 @@ export function useEvidenceMutations(
         evidence_strength: input.evidence_strength,
         source_url: input.source_url,
         attachment_path: input.attachment_path,
+        attachment_paths: input.attachment_paths,
         notes: input.notes,
       } as never);
       if (error) throw error;
@@ -143,6 +144,7 @@ export function useEvidenceMutations(
           evidence_strength: args.input.evidence_strength,
           source_url: args.input.source_url,
           attachment_path: args.input.attachment_path,
+          attachment_paths: args.input.attachment_paths,
           notes: args.input.notes,
         } as never)
         .eq("id", args.id);
@@ -153,8 +155,14 @@ export function useEvidenceMutations(
 
   const remove = useMutation({
     mutationFn: async (row: EvidenceRow) => {
-      if (row.attachment_path) {
-        await removeAttachment(row.attachment_path).catch(() => {});
+      const paths = [
+        ...(row.attachment_paths ?? []),
+        ...(row.attachment_path && !(row.attachment_paths ?? []).includes(row.attachment_path)
+          ? [row.attachment_path]
+          : []),
+      ];
+      for (const p of paths) {
+        await removeAttachment(p).catch(() => {});
       }
       const { error } = await supabase.from("evidence").delete().eq("id", row.id);
       if (error) throw error;
