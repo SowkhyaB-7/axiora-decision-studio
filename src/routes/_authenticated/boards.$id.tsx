@@ -474,6 +474,10 @@ function BoardOverview() {
           </div>
         </section>
 
+        <OutdatedAnalysisBanner boardId={id} />
+
+
+
         <section>
           <div className="mb-4 flex items-baseline justify-between">
             <div>
