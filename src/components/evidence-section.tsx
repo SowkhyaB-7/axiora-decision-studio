@@ -403,12 +403,19 @@ export function EvidenceSection({
                 <input
                   type="date"
                   value={form.evidence_date}
+                  max={todayISO()}
                   onChange={(e) =>
                     setForm({ ...form, evidence_date: e.target.value })
                   }
                   className={inputCls}
                 />
+                {form.evidence_date && isFutureDate(form.evidence_date) && (
+                  <p className="mt-1 text-[11px] text-destructive">
+                    Evidence date cannot be in the future.
+                  </p>
+                )}
               </Field>
+
             </div>
 
             <Field label="Evidence strength">
