@@ -566,18 +566,38 @@ export function EvidenceSection({
                 {viewing.source_url}
               </a>
             )}
-            {viewing.attachment_path && (
-              <div>
-                <button
-                  type="button"
-                  onClick={() => openSignedUrl(viewing.attachment_path!)}
-                  className="inline-flex items-center gap-1 text-accent hover:underline"
-                >
-                  <Paperclip className="h-3.5 w-3.5" />
-                  Open attachment
-                </button>
-              </div>
-            )}
+            {(() => {
+              const paths = [
+                ...(viewing.attachment_paths ?? []),
+                ...(viewing.attachment_path &&
+                !(viewing.attachment_paths ?? []).includes(viewing.attachment_path)
+                  ? [viewing.attachment_path]
+                  : []),
+              ];
+              if (paths.length === 0) return null;
+              return (
+                <div>
+                  <div className="text-xs font-medium">
+                    Attachments ({paths.length})
+                  </div>
+                  <ul className="mt-1 space-y-1">
+                    {paths.map((p, i) => (
+                      <li key={`${p}-${i}`}>
+                        <button
+                          type="button"
+                          onClick={() => openSignedUrl(p)}
+                          className="inline-flex items-center gap-1 text-accent hover:underline"
+                        >
+                          <Paperclip className="h-3.5 w-3.5" />
+                          {nameFromPath(p)}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
+
             {viewing.notes && (
               <div>
                 <div className="text-xs font-medium">Notes</div>
