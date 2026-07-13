@@ -271,10 +271,19 @@ function BoardOverview() {
       });
       if (insErr) throw insErr;
 
+      // Persist analysis status on the board so it survives refresh and
+      // shows consistently on dashboard + board list.
+      await supabase
+        .from("decision_boards")
+        .update({ analysis_status: "Analysis Complete" } as never)
+        .eq("id", id);
+
       toast.success("Analysis complete");
       await Promise.all([
         qc.invalidateQueries({ queryKey: ["latest-analysis", id] }),
         qc.invalidateQueries({ queryKey: ["dimensions", id] }),
+        qc.invalidateQueries({ queryKey: ["board", id] }),
+        qc.invalidateQueries({ queryKey: ["boards", "mine"] }),
       ]);
       navigate({ to: "/boards/$id/analysis", params: { id } });
     } catch (e) {
