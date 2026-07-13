@@ -78,7 +78,7 @@ function BoardOverview() {
     setEditTitle(board.title ?? "");
     setEditDescription(board.description ?? "");
     setEditDecisionType(
-      (board as { decision_type?: string | null }).decision_type ?? "Launch",
+      (board as { decision_type?: string | null }).decision_type ?? "Launch Readiness",
     );
     setEditTargetDate(board.target_date ?? "");
     setEditStatus(board.status ?? "Draft");
