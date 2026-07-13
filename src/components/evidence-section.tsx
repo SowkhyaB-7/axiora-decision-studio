@@ -40,6 +40,8 @@ type Props = {
   icon: ReactNode;
 };
 
+type Attachment = { path: string; name: string };
+
 type FormState = {
   id?: string;
   title: string;
@@ -49,8 +51,7 @@ type FormState = {
   evidence_strength: string;
   source_url: string;
   notes: string;
-  attachment_path: string | null;
-  attachment_name: string | null;
+  attachments: Attachment[];
 };
 
 const emptyForm: FormState = {
@@ -61,9 +62,14 @@ const emptyForm: FormState = {
   evidence_strength: "",
   source_url: "",
   notes: "",
-  attachment_path: null,
-  attachment_name: null,
+  attachments: [],
 };
+
+function nameFromPath(p: string): string {
+  const base = p.split("/").pop() ?? p;
+  // Strip the crypto.randomUUID() prefix we add on upload ("<uuid>-<name>")
+  return base.replace(/^[0-9a-f-]{36}-/i, "");
+}
 
 function fmtDate(d: string | null) {
   if (!d) return "—";
