@@ -22,6 +22,7 @@ type BoardRow = {
   title: string;
   description: string | null;
   status: string;
+  analysis_status: string | null;
   decision_type: string | null;
   target_date: string | null;
   created_at: string;
