@@ -28,11 +28,20 @@ const templates = [
   { key: "deprecation", name: "Deprecation", meta: "Lifecycle · 4 sections", featured: false },
 ];
 
+const DECISION_TYPES: { value: string; label: string; available: boolean }[] = [
+  { value: "Launch Readiness", label: "Launch Readiness", available: true },
+  { value: "Feature Prioritization", label: "Feature Prioritization", available: false },
+  { value: "Pricing Decision", label: "Pricing Decision", available: false },
+  { value: "Product Sunset", label: "Product Sunset", available: false },
+  { value: "Build vs Buy", label: "Build vs Buy", available: false },
+  { value: "Market Expansion", label: "Market Expansion", available: false },
+];
+
 function NewBoard() {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [decisionType, setDecisionType] = useState<string>("Launch");
+  const [decisionType, setDecisionType] = useState<string>("Launch Readiness");
   const [targetDate, setTargetDate] = useState("");
   const [template, setTemplate] = useState<string>("feature_launch");
   const [submitting, setSubmitting] = useState(false);
