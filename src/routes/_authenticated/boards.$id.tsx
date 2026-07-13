@@ -7,9 +7,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { DIMENSIONS, type DimensionKey } from "@/lib/dimensions";
 import {
   analyzeDimension,
+  overallConfidence,
   recommendationFor,
   type DimensionAnalysisResult,
 } from "@/lib/analysis";
+import { OutdatedAnalysisBanner } from "@/components/outdated-analysis-banner";
 import {
   ArrowUpRight,
   Sparkles,
