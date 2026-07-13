@@ -162,6 +162,7 @@ export function useEvidenceMutations(
         } as never)
         .eq("id", args.id);
       if (error) throw error;
+      await markAnalysisOutdated();
     },
     onSuccess: invalidate,
   });
