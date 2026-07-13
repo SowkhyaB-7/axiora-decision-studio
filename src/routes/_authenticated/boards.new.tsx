@@ -177,8 +177,21 @@ function NewBoard() {
                   onChange={(e) => setDecisionType(e.target.value)}
                   className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                 >
-                  <option value="Launch">Launch</option>
+                  {DECISION_TYPES.map((t) => (
+                    <option
+                      key={t.value}
+                      value={t.value}
+                      disabled={!t.available}
+                    >
+                      {t.label}
+                      {t.available ? " (Available)" : " (Coming Soon)"}
+                    </option>
+                  ))}
                 </select>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  More decision types are on the roadmap. Only Launch Readiness
+                  is available today.
+                </p>
               </div>
             </div>
 
