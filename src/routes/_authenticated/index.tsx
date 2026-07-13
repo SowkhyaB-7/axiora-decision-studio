@@ -183,6 +183,17 @@ function Home() {
                             {b.decision_type}
                           </span>
                         )}
+                        {b.analysis_status && (
+                          <span
+                            className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+                              b.analysis_status === "Analysis Complete"
+                                ? "border-success/20 bg-success/10 text-success"
+                                : "border-border bg-surface-muted text-muted-foreground"
+                            }`}
+                          >
+                            {b.analysis_status}
+                          </span>
+                        )}
                       </div>
                       {b.description && (
                         <div className="mt-1 line-clamp-1 text-xs text-muted-foreground">
