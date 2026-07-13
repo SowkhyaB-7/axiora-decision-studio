@@ -12,7 +12,7 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-type Mode = "login" | "signup";
+type Mode = "login" | "signup" | "forgot";
 
 function AuthPage() {
   const navigate = useNavigate();
@@ -31,6 +31,32 @@ function AuthPage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (mode === "forgot") {
+      if (!email) {
+        toast.error("Email is required");
+        return;
+      }
+      setLoading(true);
+      setNotice(null);
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        setNotice(
+          "If an account exists for that email, a password reset link is on its way.",
+        );
+        toast.success("Reset email sent");
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Could not send reset email";
+        toast.error(message);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     if (!email || !password) {
       toast.error("Email and password are required");
       return;
@@ -81,36 +107,47 @@ function AuthPage() {
         </div>
 
         <div className="rounded-2xl border border-border bg-surface p-6 md:p-8">
-          <div className="mb-6 grid grid-cols-2 gap-1 rounded-md bg-surface-muted p-1 text-sm">
-            <button
-              type="button"
-              onClick={() => {
-                setMode("login");
-                setNotice(null);
-              }}
-              className={`rounded-[6px] px-3 py-1.5 font-medium transition ${
-                mode === "login"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Sign in
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setMode("signup");
-                setNotice(null);
-              }}
-              className={`rounded-[6px] px-3 py-1.5 font-medium transition ${
-                mode === "signup"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Create account
-            </button>
-          </div>
+          {mode !== "forgot" && (
+            <div className="mb-6 grid grid-cols-2 gap-1 rounded-md bg-surface-muted p-1 text-sm">
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("login");
+                  setNotice(null);
+                }}
+                className={`rounded-[6px] px-3 py-1.5 font-medium transition ${
+                  mode === "login"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode("signup");
+                  setNotice(null);
+                }}
+                className={`rounded-[6px] px-3 py-1.5 font-medium transition ${
+                  mode === "signup"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Create account
+              </button>
+            </div>
+          )}
+
+          {mode === "forgot" && (
+            <div className="mb-6">
+              <h1 className="font-display text-2xl">Reset your password</h1>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Enter your account email and we'll send you a reset link.
+              </p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
@@ -142,21 +179,37 @@ function AuthPage() {
                 required
               />
             </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
-                placeholder="••••••••"
-                autoComplete={mode === "login" ? "current-password" : "new-password"}
-                minLength={6}
-                required
-              />
-            </div>
+            {mode !== "forgot" && (
+              <div>
+                <div className="mb-1.5 flex items-center justify-between">
+                  <label className="block text-xs font-medium text-muted-foreground">
+                    Password
+                  </label>
+                  {mode === "login" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode("forgot");
+                        setNotice(null);
+                      }}
+                      className="text-xs font-medium text-accent hover:underline"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
+                  placeholder="••••••••"
+                  autoComplete={mode === "login" ? "current-password" : "new-password"}
+                  minLength={6}
+                  required
+                />
+              </div>
+            )}
 
             {notice && (
               <div className="rounded-md border border-info/20 bg-info/10 px-3 py-2 text-xs text-info">
@@ -170,22 +223,44 @@ function AuthPage() {
               className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              {mode === "login" ? "Sign in" : "Create account"}
+              {mode === "login"
+                ? "Sign in"
+                : mode === "signup"
+                  ? "Create account"
+                  : "Send reset link"}
             </button>
           </form>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            {mode === "login" ? "New to Axiora?" : "Already have an account?"}{" "}
-            <button
-              type="button"
-              onClick={() => {
-                setMode(mode === "login" ? "signup" : "login");
-                setNotice(null);
-              }}
-              className="font-medium text-accent hover:underline"
-            >
-              {mode === "login" ? "Create an account" : "Sign in"}
-            </button>
+            {mode === "forgot" ? (
+              <>
+                Remembered your password?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("login");
+                    setNotice(null);
+                  }}
+                  className="font-medium text-accent hover:underline"
+                >
+                  Back to sign in
+                </button>
+              </>
+            ) : (
+              <>
+                {mode === "login" ? "New to Axiora?" : "Already have an account?"}{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode(mode === "login" ? "signup" : "login");
+                    setNotice(null);
+                  }}
+                  className="font-medium text-accent hover:underline"
+                >
+                  {mode === "login" ? "Create an account" : "Sign in"}
+                </button>
+              </>
+            )}
           </p>
         </div>
       </div>
