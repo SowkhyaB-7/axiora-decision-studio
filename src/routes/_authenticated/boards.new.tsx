@@ -28,11 +28,20 @@ const templates = [
   { key: "deprecation", name: "Deprecation", meta: "Lifecycle · 4 sections", featured: false },
 ];
 
+const DECISION_TYPES: { value: string; label: string; available: boolean }[] = [
+  { value: "Launch Readiness", label: "Launch Readiness", available: true },
+  { value: "Feature Prioritization", label: "Feature Prioritization", available: false },
+  { value: "Pricing Decision", label: "Pricing Decision", available: false },
+  { value: "Product Sunset", label: "Product Sunset", available: false },
+  { value: "Build vs Buy", label: "Build vs Buy", available: false },
+  { value: "Market Expansion", label: "Market Expansion", available: false },
+];
+
 function NewBoard() {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [decisionType, setDecisionType] = useState<string>("Launch");
+  const [decisionType, setDecisionType] = useState<string>("Launch Readiness");
   const [targetDate, setTargetDate] = useState("");
   const [template, setTemplate] = useState<string>("feature_launch");
   const [submitting, setSubmitting] = useState(false);
@@ -168,8 +177,21 @@ function NewBoard() {
                   onChange={(e) => setDecisionType(e.target.value)}
                   className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                 >
-                  <option value="Launch">Launch</option>
+                  {DECISION_TYPES.map((t) => (
+                    <option
+                      key={t.value}
+                      value={t.value}
+                      disabled={!t.available}
+                    >
+                      {t.label}
+                      {t.available ? " (Available)" : " (Coming Soon)"}
+                    </option>
+                  ))}
                 </select>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  More decision types are on the roadmap. Only Launch Readiness
+                  is available today.
+                </p>
               </div>
             </div>
 
@@ -206,17 +228,18 @@ function NewBoard() {
             </div>
 
             <div>
-              <div className="flex items-baseline justify-between">
+              <div>
                 <h2 className="text-sm font-semibold">Assessment dimensions</h2>
-                <span className="text-xs text-muted-foreground">All 5 enabled by default</span>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Launch Readiness always evaluates all five dimensions.
+                </p>
               </div>
               <div className="mt-3 grid gap-2 md:grid-cols-2">
                 {DIMENSIONS.map((d) => (
-                  <label
+                  <div
                     key={d.key}
-                    className="flex items-start gap-3 rounded-lg border border-border bg-surface p-3 hover:bg-surface-muted"
+                    className="flex items-start gap-3 rounded-lg border border-border bg-surface p-3"
                   >
-                    <input type="checkbox" defaultChecked disabled className="mt-1 h-4 w-4 accent-[color:var(--accent)]" />
                     <div className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-surface-muted">
                       <d.icon className="h-4 w-4 text-accent" />
                     </div>
@@ -224,7 +247,7 @@ function NewBoard() {
                       <div className="text-sm font-medium">{d.name}</div>
                       <div className="text-xs text-muted-foreground">{d.desc}</div>
                     </div>
-                  </label>
+                  </div>
                 ))}
               </div>
             </div>

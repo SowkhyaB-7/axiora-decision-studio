@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           analysis_version: number
           board_id: string
+          confidence_score: number | null
           created_at: string
           decision_brief: string | null
           dimension_results: Json | null
@@ -28,6 +29,7 @@ export type Database = {
         Insert: {
           analysis_version?: number
           board_id: string
+          confidence_score?: number | null
           created_at?: string
           decision_brief?: string | null
           dimension_results?: Json | null
@@ -38,6 +40,7 @@ export type Database = {
         Update: {
           analysis_version?: number
           board_id?: string
+          confidence_score?: number | null
           created_at?: string
           decision_brief?: string | null
           dimension_results?: Json | null
@@ -154,6 +157,7 @@ export type Database = {
           recency: string | null
           source_url: string | null
           title: string
+          updated_at: string
         }
         Insert: {
           attachment_path?: string | null
@@ -170,6 +174,7 @@ export type Database = {
           recency?: string | null
           source_url?: string | null
           title: string
+          updated_at?: string
         }
         Update: {
           attachment_path?: string | null
@@ -186,6 +191,7 @@ export type Database = {
           recency?: string | null
           source_url?: string | null
           title?: string
+          updated_at?: string
         }
         Relationships: [
           {

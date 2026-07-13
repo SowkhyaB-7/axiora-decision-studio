@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
 import { EvidenceSection } from "@/components/evidence-section";
+import { OutdatedAnalysisBanner } from "@/components/outdated-analysis-banner";
 import { DIMENSIONS_BY_KEY, type DimensionKey } from "@/lib/dimensions";
 
 type Props = {
@@ -10,11 +11,6 @@ type Props = {
   dimensionKey: DimensionKey;
 };
 
-/**
- * Configuration-driven page that powers every readiness dimension.
- * Reuses the shared EvidenceSection for CRUD, attachments, signed URLs,
- * and validation.
- */
 export function DimensionPage({ boardId, dimensionKey }: Props) {
   const cfg = DIMENSIONS_BY_KEY[dimensionKey];
   return (
@@ -30,6 +26,8 @@ export function DimensionPage({ boardId, dimensionKey }: Props) {
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Back to board
         </Link>
+
+        <OutdatedAnalysisBanner boardId={boardId} />
 
         <EvidenceSection
           boardId={boardId}

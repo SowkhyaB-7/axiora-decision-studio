@@ -7,9 +7,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { DIMENSIONS, type DimensionKey } from "@/lib/dimensions";
 import {
   analyzeDimension,
+  overallConfidence,
   recommendationFor,
   type DimensionAnalysisResult,
 } from "@/lib/analysis";
+import { OutdatedAnalysisBanner } from "@/components/outdated-analysis-banner";
 import {
   ArrowUpRight,
   Sparkles,
@@ -67,7 +69,7 @@ function BoardOverview() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
-  const [editDecisionType, setEditDecisionType] = useState("Launch");
+  const [editDecisionType, setEditDecisionType] = useState("Launch Readiness");
   const [editTargetDate, setEditTargetDate] = useState("");
   const [editStatus, setEditStatus] = useState("Draft");
 
@@ -76,7 +78,7 @@ function BoardOverview() {
     setEditTitle(board.title ?? "");
     setEditDescription(board.description ?? "");
     setEditDecisionType(
-      (board as { decision_type?: string | null }).decision_type ?? "Launch",
+      (board as { decision_type?: string | null }).decision_type ?? "Launch Readiness",
     );
     setEditTargetDate(board.target_date ?? "");
     setEditStatus(board.status ?? "Draft");
@@ -261,18 +263,21 @@ function BoardOverview() {
       );
       const brief = `Board "${board.title}" analyzed across ${DIMENSIONS.length} dimensions from ${totalEvidence} evidence item${totalEvidence === 1 ? "" : "s"}. Overall readiness: ${overall}.`;
 
+      const confidence = overallConfidence(Object.values(dimension_results));
+
       const { error: insErr } = await supabase.from("ai_analyses").insert({
         board_id: id,
         overall_readiness: overall,
         recommendation: recommendationFor(overall),
         decision_brief: brief,
         dimension_results,
+        confidence_score: confidence.score,
         analysis_version: ((latestAnalysisQuery.data?.analysis_version ?? 0) + 1) as number,
-      });
+      } as never);
       if (insErr) throw insErr;
 
       // Persist analysis status on the board so it survives refresh and
-      // shows consistently on dashboard + board list.
+      // clears any prior "Outdated" flag now that a fresh analysis exists.
       await supabase
         .from("decision_boards")
         .update({ analysis_status: "Analysis Complete" } as never)
@@ -281,8 +286,10 @@ function BoardOverview() {
       toast.success("Analysis complete");
       await Promise.all([
         qc.invalidateQueries({ queryKey: ["latest-analysis", id] }),
+        qc.invalidateQueries({ queryKey: ["analysis-history", id] }),
         qc.invalidateQueries({ queryKey: ["dimensions", id] }),
         qc.invalidateQueries({ queryKey: ["board", id] }),
+        qc.invalidateQueries({ queryKey: ["board-analysis-status", id] }),
         qc.invalidateQueries({ queryKey: ["boards", "mine"] }),
       ]);
       navigate({ to: "/boards/$id/analysis", params: { id } });
@@ -336,7 +343,10 @@ function BoardOverview() {
                       (board as { analysis_status?: string | null }).analysis_status ===
                       "Analysis Complete"
                         ? "border-success/30 bg-success/10 text-success"
-                        : "border-border bg-surface-muted text-muted-foreground"
+                        : (board as { analysis_status?: string | null }).analysis_status ===
+                            "Outdated"
+                          ? "border-warning/30 bg-warning/10 text-warning"
+                          : "border-border bg-surface-muted text-muted-foreground"
                     }`}
                   >
                     {(board as { analysis_status?: string | null }).analysis_status}
@@ -464,6 +474,10 @@ function BoardOverview() {
           </div>
         </section>
 
+        <OutdatedAnalysisBanner boardId={id} />
+
+
+
         <section>
           <div className="mb-4 flex items-baseline justify-between">
             <div>
@@ -569,7 +583,12 @@ function BoardOverview() {
                     onChange={(e) => setEditDecisionType(e.target.value)}
                     className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                   >
-                    <option value="Launch">Launch</option>
+                    <option value="Launch Readiness">Launch Readiness</option>
+                    <option value="Feature Prioritization" disabled>Feature Prioritization (Coming Soon)</option>
+                    <option value="Pricing Decision" disabled>Pricing Decision (Coming Soon)</option>
+                    <option value="Product Sunset" disabled>Product Sunset (Coming Soon)</option>
+                    <option value="Build vs Buy" disabled>Build vs Buy (Coming Soon)</option>
+                    <option value="Market Expansion" disabled>Market Expansion (Coming Soon)</option>
                   </select>
                 </div>
                 <div>
