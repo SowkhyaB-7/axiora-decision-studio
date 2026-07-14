@@ -251,12 +251,12 @@ export function analyzeDimension(
       value: typeCoverage,
       risk:
         missingKeyTypes.length > 0
-          ? `Narrow evidence base — no ${missingKeyTypes[0].toLowerCase()} yet`
-          : "Narrow evidence base",
+          ? `Additional ${missingKeyTypes[0].toLowerCase()} evidence is recommended`
+          : "Limited evidence coverage",
     },
-    { value: strengthAvg, risk: "Evidence quality is weak — few sources rated strong" },
+    { value: strengthAvg, risk: "Evidence quality is limited. Few sources are rated as strong" },
     { value: volumeScore, risk: "Too few data points to draw a confident conclusion" },
-    { value: recencyScore, risk: "Evidence is stale — most items are older than six months" },
+    { value: recencyScore, risk: "Most evidence is more than six months old" },
   ];
   const key_risk =
     count === 0
@@ -265,12 +265,12 @@ export function analyzeDimension(
 
   const overall_status =
     count === 0
-      ? "No evidence collected."
+      ? "No evidence collected yet."
       : readiness === "High"
-        ? `${cfg.name} is well supported.`
+        ? `${cfg.name} is well supported by evidence.`
         : readiness === "Medium"
-          ? `${cfg.name} is partially supported.`
-          : `${cfg.name} lacks sufficient evidence.`;
+          ? `${cfg.name} requires additional supporting evidence.`
+          : `${cfg.name} lacks sufficient supporting evidence.`;
 
   return {
     dimension: dimensionKey,
@@ -304,10 +304,10 @@ export function analyzeCustomerValidation(
 
 export function recommendationFor(score: number): string {
   if (score >= 75)
-    return "Proceed — the evidence supports moving forward with this decision.";
+    return "Proceed. The evidence supports moving forward with this decision.";
   if (score >= 50)
-    return "Proceed with caution — strengthen the weakest dimensions before committing.";
-  return "Hold — gather more evidence before making this decision.";
+    return "Proceed with caution. Strengthen the weakest dimensions before committing.";
+  return "Hold. Gather more evidence before making this decision.";
 }
 
 export function overallLabel(score: number): string {
