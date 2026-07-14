@@ -486,8 +486,8 @@ export function EvidenceSection({
                   <>
                     <Upload className="h-3.5 w-3.5" />
                     {form.attachments.length > 0
-                      ? "Add more files"
-                      : "Choose files (max 20 MB each)"}
+                      ? "Add More Files"
+                      : "Choose Files (max 20 MB each)"}
                   </>
                 )}
                 <input
