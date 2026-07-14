@@ -114,9 +114,9 @@ function NewBoard() {
         <div className="rounded-2xl border border-border bg-surface">
           <div className="border-b border-border px-6 py-5 md:px-8">
             <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-accent">
-              <Sparkles className="h-3.5 w-3.5" /> Step 1 of 3 · Board setup
+              <Sparkles className="h-3.5 w-3.5" /> Step 1 of 3 · Board Setup
             </div>
-            <h1 className="mt-2 font-display text-3xl md:text-4xl">Create decision board</h1>
+            <h1 className="mt-2 font-display text-3xl md:text-4xl">Create Decision Board</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               A board frames the decision. Axiora will help you gather evidence across five dimensions.
             </p>
