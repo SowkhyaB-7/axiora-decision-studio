@@ -197,7 +197,7 @@ function NewBoard() {
 
             <div>
               <div className="flex items-baseline justify-between">
-                <h2 className="text-sm font-semibold">Choose a template</h2>
+                <h2 className="text-sm font-semibold">Choose a Template</h2>
                 <span className="text-xs text-muted-foreground">Optional</span>
               </div>
               <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
