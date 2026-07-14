@@ -246,7 +246,7 @@ export function EvidenceSection({
                 Readiness
               </div>
               <div className="font-display text-lg">
-                {dimensionQuery.data?.readiness_level ?? "Not analyzed"}
+                {dimensionQuery.data?.readiness_level ?? "Not Analyzed"}
               </div>
             </div>
             <div>
@@ -273,7 +273,7 @@ export function EvidenceSection({
             disabled={!dimensionId}
             className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
           >
-            <Plus className="h-3.5 w-3.5" /> Add evidence
+            <Plus className="h-3.5 w-3.5" /> Add Evidence
           </button>
         </div>
 
@@ -290,7 +290,7 @@ export function EvidenceSection({
           </div>
         ) : rows.length === 0 ? (
           <div className="px-6 py-12 text-center">
-            <p className="text-sm font-medium">No evidence has been added yet.</p>
+            <p className="text-sm font-medium">No Evidence Added Yet</p>
             <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
               Start by adding customer interviews, analytics, documents, or
               stakeholder feedback that informs this dimension.
@@ -301,7 +301,7 @@ export function EvidenceSection({
               disabled={!dimensionId}
               className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
             >
-              <Plus className="h-3.5 w-3.5" /> Add evidence
+              <Plus className="h-3.5 w-3.5" /> Add Evidence
             </button>
           </div>
         ) : (
@@ -370,7 +370,7 @@ export function EvidenceSection({
       {formOpen && (
         <Modal
           onClose={() => setFormOpen(false)}
-          title={form.id ? "Edit evidence" : "Add evidence"}
+          title={form.id ? "Edit Evidence" : "Add Evidence"}
         >
           <div className="space-y-4">
             <Field label="Title" required>
@@ -393,7 +393,7 @@ export function EvidenceSection({
             </Field>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Evidence type" required>
+              <Field label="Evidence Type" required>
                 <select
                   value={form.evidence_type}
                   onChange={(e) =>
@@ -407,7 +407,7 @@ export function EvidenceSection({
                   ))}
                 </select>
               </Field>
-              <Field label="Evidence date" required>
+              <Field label="Evidence Date" required>
                 <input
                   type="date"
                   value={form.evidence_date}
@@ -426,7 +426,7 @@ export function EvidenceSection({
 
             </div>
 
-            <Field label="Evidence strength">
+            <Field label="Evidence Strength">
               <select
                 value={form.evidence_strength}
                 onChange={(e) =>
@@ -486,8 +486,8 @@ export function EvidenceSection({
                   <>
                     <Upload className="h-3.5 w-3.5" />
                     {form.attachments.length > 0
-                      ? "Add more files"
-                      : "Choose files (max 20 MB each)"}
+                      ? "Add More Files"
+                      : "Choose Files (max 20 MB each)"}
                   </>
                 )}
                 <input
@@ -531,7 +531,7 @@ export function EvidenceSection({
                 className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
               >
                 {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                {form.id ? "Save" : "Add evidence"}
+                {form.id ? "Save Changes" : "Add Evidence"}
               </button>
             </div>
           </div>
@@ -619,11 +619,11 @@ export function EvidenceSection({
       )}
 
       {pendingDelete && (
-        <Modal onClose={() => setPendingDelete(null)} title="Delete evidence?">
+        <Modal onClose={() => setPendingDelete(null)} title="Delete This Evidence?">
           <div className="space-y-4 text-sm">
             <p className="text-muted-foreground">
               This will permanently delete "{pendingDelete.title}" and its
-              attachment. This action cannot be undone.
+              attachments. This action cannot be undone.
             </p>
             <div className="flex justify-end gap-2">
               <button

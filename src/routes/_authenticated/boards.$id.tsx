@@ -261,7 +261,7 @@ function BoardOverview() {
       const overall = Math.round(
         scores.reduce((a, b) => a + b, 0) / (scores.length || 1),
       );
-      const brief = `Board "${board.title}" analyzed across ${DIMENSIONS.length} dimensions from ${totalEvidence} evidence item${totalEvidence === 1 ? "" : "s"}. Overall readiness: ${overall}.`;
+      const brief = `Analyzed "${board.title}" across ${DIMENSIONS.length} readiness dimensions using ${totalEvidence} evidence item${totalEvidence === 1 ? "" : "s"}. Overall readiness score: ${overall}/100.`;
 
       const confidence = overallConfidence(Object.values(dimension_results));
 
@@ -357,9 +357,14 @@ function BoardOverview() {
                     {(board as { decision_type?: string | null }).decision_type}
                   </span>
                 )}
-                {(board as { template?: string | null }).template && (
-                  <span className="text-muted-foreground">Template · {(board as { template?: string | null }).template}</span>
-                )}
+                {(board as { template?: string | null }).template && (() => {
+                  const t = (board as { template?: string | null }).template!;
+                  const label = t
+                    .split(/[_\s]+/)
+                    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                    .join(" ");
+                  return <span className="text-muted-foreground">Template · {label}</span>;
+                })()}
               </div>
               <h1 className="mt-3 font-display text-3xl md:text-4xl">{board.title}</h1>
               {board.description && (
@@ -375,7 +380,7 @@ function BoardOverview() {
                     params={{ id }}
                     className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-muted"
                   >
-                    <Sparkles className="h-4 w-4" /> View analysis
+                    <Sparkles className="h-4 w-4" /> View Analysis
                   </Link>
                 </div>
               )}
@@ -410,9 +415,9 @@ function BoardOverview() {
                     (board.status ?? "").toLowerCase() !== "decision recorded";
                   const canDelete = neverAnalyzed && notRecorded;
                   const reason = !neverAnalyzed
-                    ? "Cannot delete: this board has been analyzed"
+                    ? "This board cannot be deleted because it has been analyzed."
                     : !notRecorded
-                      ? "Cannot delete: decision already recorded"
+                      ? "This board cannot be deleted because a decision has already been recorded."
                       : "";
                   return (
                     <button
@@ -442,7 +447,7 @@ function BoardOverview() {
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-4 w-4" /> Analyze decision
+                      <Sparkles className="h-4 w-4" /> Analyze Decision
                     </>
                   )}
                 </button>
@@ -481,7 +486,7 @@ function BoardOverview() {
         <section>
           <div className="mb-4 flex items-baseline justify-between">
             <div>
-              <h2 className="font-display text-2xl">Assessment dimensions</h2>
+              <h2 className="font-display text-2xl">Assessment Dimensions</h2>
               <p className="text-sm text-muted-foreground">Evidence is organized across five readiness dimensions.</p>
             </div>
           </div>
@@ -491,7 +496,15 @@ function BoardOverview() {
               const row = dimByKey.get(d.key);
               const evidenceCount = row ? counts[row.id] ?? 0 : 0;
               const analyzed = !!row?.readiness_level;
-              const status = row?.status ?? "not_started";
+              const rawStatus = row?.status ?? "not_started";
+              const statusLabel = analyzed
+                ? "Analyzed"
+                : rawStatus === "not_started"
+                  ? "Not Started"
+                  : rawStatus
+                      .split(/[_\s]+/)
+                      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                      .join(" ");
               const to = DIMENSION_ROUTE[d.key];
               return (
                 <Link
@@ -508,7 +521,7 @@ function BoardOverview() {
                       <div className="min-w-0">
                         <h3 className="truncate text-sm font-semibold">{d.name}</h3>
                         <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-border bg-surface-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                          {status.replace("_", " ")}
+                          {statusLabel}
                         </span>
                       </div>
                     </div>
@@ -527,13 +540,13 @@ function BoardOverview() {
                     <div className="min-w-0">
                       <dt className="text-[10px] uppercase tracking-wider text-muted-foreground">Readiness</dt>
                       <dd className="mt-0.5 truncate text-sm font-medium">
-                        {analyzed ? row?.readiness_level : "Not analyzed"}
+                        {analyzed ? row?.readiness_level : "Not Analyzed"}
                       </dd>
                     </div>
                   </dl>
 
                   <div className="mt-5 inline-flex items-center gap-1 self-start text-xs font-medium text-accent">
-                    Open dimension <ArrowUpRight className="h-3.5 w-3.5" />
+                    Open Dimension <ArrowUpRight className="h-3.5 w-3.5" />
                   </div>
                 </Link>
               );
@@ -547,7 +560,7 @@ function BoardOverview() {
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
           <div className="w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-xl">
             <div className="flex items-center justify-between">
-              <h2 className="font-display text-2xl">Edit board</h2>
+              <h2 className="font-display text-2xl">Edit Board</h2>
               <button
                 type="button"
                 onClick={() => setEditOpen(false)}
@@ -577,7 +590,7 @@ function BoardOverview() {
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium">Decision type</label>
+                  <label className="text-sm font-medium">Decision Type</label>
                   <select
                     value={editDecisionType}
                     onChange={(e) => setEditDecisionType(e.target.value)}
@@ -606,7 +619,7 @@ function BoardOverview() {
                   </select>
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-sm font-medium">Target date</label>
+                  <label className="text-sm font-medium">Target Date</label>
                   <input
                     type="date"
                     value={editTargetDate}
@@ -631,7 +644,7 @@ function BoardOverview() {
                 className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
               >
                 {editSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-                Save changes
+                Save Changes
               </button>
             </div>
           </div>
@@ -641,7 +654,7 @@ function BoardOverview() {
       {confirmDelete && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
           <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
-            <h2 className="font-display text-2xl">Delete this board?</h2>
+            <h2 className="font-display text-2xl">Delete This Board?</h2>
             <p className="mt-2 text-sm text-muted-foreground">
               This will permanently delete the board and all its data. This action cannot be undone.
             </p>
@@ -660,7 +673,7 @@ function BoardOverview() {
                 className="inline-flex items-center gap-2 rounded-md bg-destructive px-3 py-2 text-sm font-medium text-destructive-foreground hover:opacity-90 disabled:opacity-60"
               >
                 {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
-                Delete board
+                Delete Board
               </button>
             </div>
           </div>

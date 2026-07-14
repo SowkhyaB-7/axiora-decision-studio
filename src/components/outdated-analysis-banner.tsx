@@ -30,7 +30,7 @@ export function OutdatedAnalysisBanner({ boardId }: Props) {
     <div className="flex items-start gap-3 rounded-xl border border-warning/30 bg-warning/5 px-4 py-3 text-sm">
       <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
       <div>
-        <div className="font-medium">Evidence has changed.</div>
+        <div className="font-medium">Evidence has been updated.</div>
         <div className="text-muted-foreground">
           Re-run analysis to refresh recommendations. Previous analyses remain
           available in Decision History.

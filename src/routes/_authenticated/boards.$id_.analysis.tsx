@@ -175,7 +175,7 @@ function Analysis() {
             params={{ id }}
             className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="h-3.5 w-3.5" /> Back to board
+            <ArrowLeft className="h-3.5 w-3.5" /> Back to Board
           </Link>
 
           <OutdatedAnalysisBanner boardId={id} />
@@ -204,10 +204,10 @@ function Analysis() {
               <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-surface-muted">
                 <Sparkles className="h-6 w-6 text-accent" />
               </div>
-              <h1 className="mt-4 font-display text-2xl">No analysis yet</h1>
+              <h1 className="mt-4 font-display text-2xl">No Analysis Yet</h1>
               <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
                 Add evidence across the five readiness dimensions, then run
-                "Analyze decision" on the board overview to generate your first
+                Analyze Decision on the board overview to generate your first
                 synthesis.
               </p>
               <Link
@@ -215,7 +215,7 @@ function Analysis() {
                 params={{ id }}
                 className="mt-5 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
               >
-                <ArrowLeft className="h-3.5 w-3.5" /> Back to board
+                <ArrowLeft className="h-3.5 w-3.5" /> Back to Board
               </Link>
             </section>
           ) : (
@@ -224,7 +224,7 @@ function Analysis() {
               {summary && (
                 <section className="rounded-2xl border border-border bg-primary p-6 text-primary-foreground md:p-8">
                   <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] opacity-75">
-                    <Sparkles className="h-3.5 w-3.5" /> Executive summary
+                    <Sparkles className="h-3.5 w-3.5" /> Executive Summary
                   </div>
                   <div className="mt-3 flex flex-wrap items-end justify-between gap-6">
                     <div>
@@ -237,7 +237,7 @@ function Analysis() {
                     </div>
                     <div className="text-right">
                       <div className="text-[11px] uppercase tracking-widest opacity-70">
-                        Overall score
+                        Overall Score
                       </div>
                       <div className="font-display text-5xl leading-none tabular-nums">
                         {summary.overallScore}
@@ -297,7 +297,7 @@ function Analysis() {
                     </div>
                     <div>
                       <div className="flex items-center gap-1 text-[10px] uppercase tracking-widest opacity-70">
-                        <ShieldAlert className="h-3 w-3" /> Primary risk
+                        <ShieldAlert className="h-3 w-3" /> Primary Risk
                       </div>
                       <div className="mt-1 text-sm leading-snug opacity-95">
                         {summary.primaryRisk ?? "None identified"}
@@ -387,8 +387,8 @@ function Analysis() {
                           {(r.strengths ?? r.supporting_evidence ?? []).length ===
                             0 && (
                             <li className="text-muted-foreground">
-                              No strengths surfaced yet. Add evidence to build
-                              a stronger case.
+                              No strengths surfaced yet. Add supporting evidence
+                              to build a stronger case.
                             </li>
                           )}
                         </ul>
@@ -417,7 +417,7 @@ function Analysis() {
                         {missing.length > 0 && (
                           <div>
                             <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                              Missing evidence
+                              Missing Evidence
                             </h3>
                             <ul className="mt-2 flex flex-wrap gap-1.5">
                               {missing.map((m, i) => (
@@ -437,7 +437,7 @@ function Analysis() {
                     {actions.length > 0 && (
                       <div className="mt-6 rounded-lg border border-border bg-surface-muted/40 p-4">
                         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                          <Target className="h-3.5 w-3.5" /> Next actions
+                          <Target className="h-3.5 w-3.5" /> Next Actions
                         </div>
                         <ul className="mt-3 space-y-2.5 text-sm">
                           {actions
@@ -495,7 +495,7 @@ function Analysis() {
         <aside className="lg:sticky lg:top-6 lg:self-start">
           <div className="rounded-xl border border-border bg-surface p-4">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              <History className="h-3.5 w-3.5" /> Decision history
+              <History className="h-3.5 w-3.5" /> Decision History
             </div>
             {analyses.length === 0 ? (
               <p className="mt-3 text-xs text-muted-foreground">

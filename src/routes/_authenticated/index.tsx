@@ -74,21 +74,21 @@ function Home() {
   const archivedCount = boards.length - active.length;
 
   return (
-    <AppShell title="Home" subtitle="Overview of decision preparation across your org">
+    <AppShell title="Home" subtitle="Overview of decision preparation across your organization">
       <div className="mx-auto max-w-7xl space-y-8">
         {/* Hero */}
         <section className="overflow-hidden rounded-2xl border border-border bg-surface p-8 md:p-10">
           <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
             <div className="min-w-0">
               <div className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                Decision intelligence
+                Decision Intelligence
               </div>
               <h1 className="mt-3 font-display text-4xl leading-tight md:text-5xl">
-                Your decision boards
+                Your Decision Boards
               </h1>
               <p className="mt-3 max-w-xl text-sm text-muted-foreground md:text-base">
                 Frame each decision, gather evidence across five dimensions, and let Axiora surface
-                where you're ready — and where you're not.
+                where you're ready and where you're not.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -96,7 +96,7 @@ function Home() {
                 to="/boards/new"
                 className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90"
               >
-                <Plus className="h-4 w-4" /> New decision board
+                <Plus className="h-4 w-4" /> New Decision Board
               </Link>
             </div>
           </div>
@@ -106,7 +106,7 @@ function Home() {
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-xl border border-border bg-surface p-5">
             <div className="flex items-center justify-between">
-              <div className="text-xs font-medium text-muted-foreground">Active boards</div>
+              <div className="text-xs font-medium text-muted-foreground">Active Boards</div>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="mt-3 font-display text-3xl">{active.length}</div>
@@ -120,7 +120,7 @@ function Home() {
           </div>
           <div className="rounded-xl border border-border bg-surface p-5">
             <div className="flex items-center justify-between">
-              <div className="text-xs font-medium text-muted-foreground">Total boards</div>
+              <div className="text-xs font-medium text-muted-foreground">Total Boards</div>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </div>
             <div className="mt-3 font-display text-3xl">{boards.length}</div>
@@ -131,9 +131,9 @@ function Home() {
         <section className="rounded-xl border border-border bg-surface">
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <div>
-              <h2 className="text-sm font-semibold">Your decision boards</h2>
+              <h2 className="text-sm font-semibold">Your Decision Boards</h2>
               <p className="text-xs text-muted-foreground">
-                Most recently updated first
+                Most recently updated first.
               </p>
             </div>
           </div>
@@ -148,7 +148,7 @@ function Home() {
                 <Sparkles className="h-6 w-6 text-accent" />
               </div>
               <div>
-                <h3 className="font-display text-2xl">No decision boards yet</h3>
+                <h3 className="font-display text-2xl">No Decision Boards Yet</h3>
                 <p className="mt-1 max-w-md text-sm text-muted-foreground">
                   Create your first board to start organizing evidence and preparing your next
                   product decision.
@@ -158,7 +158,7 @@ function Home() {
                 to="/boards/new"
                 className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90"
               >
-                <Plus className="h-4 w-4" /> Create your first board
+                <Plus className="h-4 w-4" /> Create Your First Board
               </Link>
             </div>
           ) : (

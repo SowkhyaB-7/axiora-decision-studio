@@ -22,9 +22,9 @@ export const Route = createFileRoute("/_authenticated/boards/new")({
 });
 
 const templates = [
-  { key: "blank", name: "Blank board", meta: "Start from scratch", featured: false },
-  { key: "feature_launch", name: "Feature launch", meta: "Product · 5 sections", featured: true },
-  { key: "pricing_change", name: "Pricing change", meta: "Revenue · 6 sections", featured: false },
+  { key: "blank", name: "Blank Board", meta: "Start from scratch", featured: false },
+  { key: "feature_launch", name: "Feature Launch", meta: "Product · 5 sections", featured: true },
+  { key: "pricing_change", name: "Pricing Change", meta: "Revenue · 6 sections", featured: false },
   { key: "deprecation", name: "Deprecation", meta: "Lifecycle · 4 sections", featured: false },
 ];
 
@@ -114,9 +114,9 @@ function NewBoard() {
         <div className="rounded-2xl border border-border bg-surface">
           <div className="border-b border-border px-6 py-5 md:px-8">
             <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-accent">
-              <Sparkles className="h-3.5 w-3.5" /> Step 1 of 3 · Board setup
+              <Sparkles className="h-3.5 w-3.5" /> Step 1 of 3 · Board Setup
             </div>
-            <h1 className="mt-2 font-display text-3xl md:text-4xl">Create decision board</h1>
+            <h1 className="mt-2 font-display text-3xl md:text-4xl">Create Decision Board</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               A board frames the decision. Axiora will help you gather evidence across five dimensions.
             </p>
@@ -125,7 +125,7 @@ function NewBoard() {
           <div className="space-y-8 p-6 md:p-8">
             <div className="grid gap-6 md:grid-cols-2">
               <div className="md:col-span-2">
-                <label className="text-sm font-medium">Decision title</label>
+                <label className="text-sm font-medium">Decision Title</label>
                 <input
                   type="text"
                   value={title}
@@ -150,16 +150,16 @@ function NewBoard() {
               </div>
 
               <div>
-                <label className="text-sm font-medium">Decision owner</label>
+                <label className="text-sm font-medium">Decision Owner</label>
                 <select
                   disabled
                   className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                 >
-                  <option>You (signed-in user)</option>
+                  <option>You (Signed-in User)</option>
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium">Target decision date</label>
+                <label className="text-sm font-medium">Target Decision Date</label>
                 <div className="relative mt-2">
                   <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <input
@@ -171,7 +171,7 @@ function NewBoard() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium">Decision type</label>
+                <label className="text-sm font-medium">Decision Type</label>
                 <select
                   value={decisionType}
                   onChange={(e) => setDecisionType(e.target.value)}
@@ -197,7 +197,7 @@ function NewBoard() {
 
             <div>
               <div className="flex items-baseline justify-between">
-                <h2 className="text-sm font-semibold">Choose a template</h2>
+                <h2 className="text-sm font-semibold">Choose a Template</h2>
                 <span className="text-xs text-muted-foreground">Optional</span>
               </div>
               <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -229,7 +229,7 @@ function NewBoard() {
 
             <div>
               <div>
-                <h2 className="text-sm font-semibold">Assessment dimensions</h2>
+                <h2 className="text-sm font-semibold">Assessment Dimensions</h2>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   Launch Readiness always evaluates all five dimensions.
                 </p>
@@ -294,7 +294,7 @@ function NewBoard() {
                   </>
                 ) : (
                   <>
-                    Create board <ArrowRight className="h-4 w-4" />
+                    Create Board <ArrowRight className="h-4 w-4" />
                   </>
                 )}
               </button>
