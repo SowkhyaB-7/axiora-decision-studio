@@ -585,7 +585,7 @@ function BoardOverview() {
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium">Decision type</label>
+                  <label className="text-sm font-medium">Decision Type</label>
                   <select
                     value={editDecisionType}
                     onChange={(e) => setEditDecisionType(e.target.value)}
