@@ -237,7 +237,7 @@ function Analysis() {
                     </div>
                     <div className="text-right">
                       <div className="text-[11px] uppercase tracking-widest opacity-70">
-                        Overall score
+                        Overall Score
                       </div>
                       <div className="font-display text-5xl leading-none tabular-nums">
                         {summary.overallScore}
