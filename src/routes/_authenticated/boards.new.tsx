@@ -229,7 +229,7 @@ function NewBoard() {
 
             <div>
               <div>
-                <h2 className="text-sm font-semibold">Assessment dimensions</h2>
+                <h2 className="text-sm font-semibold">Assessment Dimensions</h2>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   Launch Readiness always evaluates all five dimensions.
                 </p>
