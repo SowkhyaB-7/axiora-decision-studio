@@ -393,7 +393,7 @@ export function EvidenceSection({
             </Field>
 
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Evidence type" required>
+              <Field label="Evidence Type" required>
                 <select
                   value={form.evidence_type}
                   onChange={(e) =>
