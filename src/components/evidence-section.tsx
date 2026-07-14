@@ -426,7 +426,7 @@ export function EvidenceSection({
 
             </div>
 
-            <Field label="Evidence strength">
+            <Field label="Evidence Strength">
               <select
                 value={form.evidence_strength}
                 onChange={(e) =>
