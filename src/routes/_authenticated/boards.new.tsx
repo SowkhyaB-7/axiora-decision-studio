@@ -150,16 +150,16 @@ function NewBoard() {
               </div>
 
               <div>
-                <label className="text-sm font-medium">Decision owner</label>
+                <label className="text-sm font-medium">Decision Owner</label>
                 <select
                   disabled
                   className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
                 >
-                  <option>You (signed-in user)</option>
+                  <option>You (Signed-in User)</option>
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium">Target decision date</label>
+                <label className="text-sm font-medium">Target Decision Date</label>
                 <div className="relative mt-2">
                   <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <input
@@ -171,7 +171,7 @@ function NewBoard() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium">Decision type</label>
+                <label className="text-sm font-medium">Decision Type</label>
                 <select
                   value={decisionType}
                   onChange={(e) => setDecisionType(e.target.value)}
