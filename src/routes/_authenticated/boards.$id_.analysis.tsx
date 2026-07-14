@@ -175,7 +175,7 @@ function Analysis() {
             params={{ id }}
             className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="h-3.5 w-3.5" /> Back to board
+            <ArrowLeft className="h-3.5 w-3.5" /> Back to Board
           </Link>
 
           <OutdatedAnalysisBanner boardId={id} />
@@ -204,10 +204,10 @@ function Analysis() {
               <div className="mx-auto grid h-12 w-12 place-items-center rounded-xl bg-surface-muted">
                 <Sparkles className="h-6 w-6 text-accent" />
               </div>
-              <h1 className="mt-4 font-display text-2xl">No analysis yet</h1>
+              <h1 className="mt-4 font-display text-2xl">No Analysis Yet</h1>
               <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
                 Add evidence across the five readiness dimensions, then run
-                "Analyze decision" on the board overview to generate your first
+                Analyze Decision on the board overview to generate your first
                 synthesis.
               </p>
               <Link
@@ -215,7 +215,7 @@ function Analysis() {
                 params={{ id }}
                 className="mt-5 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
               >
-                <ArrowLeft className="h-3.5 w-3.5" /> Back to board
+                <ArrowLeft className="h-3.5 w-3.5" /> Back to Board
               </Link>
             </section>
           ) : (
