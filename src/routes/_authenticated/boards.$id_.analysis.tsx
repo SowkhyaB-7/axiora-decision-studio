@@ -387,8 +387,8 @@ function Analysis() {
                           {(r.strengths ?? r.supporting_evidence ?? []).length ===
                             0 && (
                             <li className="text-muted-foreground">
-                              No strengths surfaced yet. Add evidence to build
-                              a stronger case.
+                              No strengths surfaced yet. Add supporting evidence
+                              to build a stronger case.
                             </li>
                           )}
                         </ul>
@@ -417,7 +417,7 @@ function Analysis() {
                         {missing.length > 0 && (
                           <div>
                             <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                              Missing evidence
+                              Missing Evidence
                             </h3>
                             <ul className="mt-2 flex flex-wrap gap-1.5">
                               {missing.map((m, i) => (
