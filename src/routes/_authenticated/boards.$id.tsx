@@ -614,7 +614,7 @@ function BoardOverview() {
                   </select>
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="text-sm font-medium">Target date</label>
+                  <label className="text-sm font-medium">Target Date</label>
                   <input
                     type="date"
                     value={editTargetDate}
