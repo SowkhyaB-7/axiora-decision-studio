@@ -437,7 +437,7 @@ function Analysis() {
                     {actions.length > 0 && (
                       <div className="mt-6 rounded-lg border border-border bg-surface-muted/40 p-4">
                         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                          <Target className="h-3.5 w-3.5" /> Next actions
+                          <Target className="h-3.5 w-3.5" /> Next Actions
                         </div>
                         <ul className="mt-3 space-y-2.5 text-sm">
                           {actions
