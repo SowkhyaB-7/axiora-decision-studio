@@ -531,7 +531,7 @@ export function EvidenceSection({
                 className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
               >
                 {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                {form.id ? "Save" : "Add evidence"}
+                {form.id ? "Save Changes" : "Add Evidence"}
               </button>
             </div>
           </div>
