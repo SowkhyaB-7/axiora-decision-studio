@@ -516,7 +516,7 @@ function BoardOverview() {
                       <div className="min-w-0">
                         <h3 className="truncate text-sm font-semibold">{d.name}</h3>
                         <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-border bg-surface-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                          {status.replace("_", " ")}
+                          {statusLabel}
                         </span>
                       </div>
                     </div>
