@@ -410,9 +410,9 @@ function BoardOverview() {
                     (board.status ?? "").toLowerCase() !== "decision recorded";
                   const canDelete = neverAnalyzed && notRecorded;
                   const reason = !neverAnalyzed
-                    ? "Cannot delete: this board has been analyzed"
+                    ? "This board cannot be deleted because it has been analyzed."
                     : !notRecorded
-                      ? "Cannot delete: decision already recorded"
+                      ? "This board cannot be deleted because a decision has already been recorded."
                       : "";
                   return (
                     <button
