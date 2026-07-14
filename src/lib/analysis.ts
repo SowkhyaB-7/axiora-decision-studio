@@ -181,23 +181,22 @@ export function analyzeDimension(
   const risks: string[] = [];
   if (count === 0) {
     risks.push(
-      `No ${dimNameLower} evidence has been collected yet — the decision currently has no grounding here.`,
+      `No ${dimNameLower} evidence has been collected yet. This dimension has no supporting data.`,
     );
   } else {
     if (missingKeyTypes.length > 0) {
-      const first = missingKeyTypes.slice(0, 2).map((t) => t.toLowerCase()).join(" and ");
       risks.push(
-        `The ${dimNameLower} assessment currently relies on a narrow evidence base — no ${first} available yet.`,
+        `Additional supporting evidence is recommended to strengthen ${dimNameLower}.`,
       );
     }
     if (strengthAvg < 0.5) {
       risks.push(
-        "Overall evidence quality is weak — few sources are rated as strong.",
+        "Overall evidence quality is limited. Few sources are rated as strong.",
       );
     }
     if (recencyScore < 0.4) {
       risks.push(
-        "Most evidence is more than six months old and may no longer reflect reality.",
+        "Most evidence is more than six months old and may no longer reflect current reality.",
       );
     }
     if (volumeScore < 0.4) {
@@ -218,7 +217,7 @@ export function analyzeDimension(
   }
   if (count > 0 && strengthAvg < 0.6) {
     prioritized_actions.push({
-      action: "Upgrade weak sources — capture stronger, primary evidence.",
+      action: "Strengthen weak sources with more authoritative or primary evidence.",
       priority: "Medium",
       impact: "Improves confidence in the current assessment.",
     });
@@ -232,14 +231,14 @@ export function analyzeDimension(
   }
   if (count > 0 && volumeScore < 0.6 && missingKeyTypes.length === 0) {
     prioritized_actions.push({
-      action: "Add more supporting evidence items across existing sources.",
+      action: "Add more supporting evidence across existing sources.",
       priority: "Low",
-      impact: "Strengthens signal without adding new source types.",
+      impact: "Strengthens the signal without adding new source types.",
     });
   }
   if (prioritized_actions.length === 0) {
     prioritized_actions.push({
-      action: "Maintain — re-validate this dimension before the final decision.",
+      action: "Revisit this dimension before finalizing the decision.",
       priority: "Low",
       impact: "Keeps the assessment trustworthy over time.",
     });
