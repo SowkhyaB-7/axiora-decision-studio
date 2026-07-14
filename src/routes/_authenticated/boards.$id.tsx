@@ -375,7 +375,7 @@ function BoardOverview() {
                     params={{ id }}
                     className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-2 text-sm hover:bg-surface-muted"
                   >
-                    <Sparkles className="h-4 w-4" /> View analysis
+                    <Sparkles className="h-4 w-4" /> View Analysis
                   </Link>
                 </div>
               )}
