@@ -495,7 +495,7 @@ function Analysis() {
         <aside className="lg:sticky lg:top-6 lg:self-start">
           <div className="rounded-xl border border-border bg-surface p-4">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              <History className="h-3.5 w-3.5" /> Decision history
+              <History className="h-3.5 w-3.5" /> Decision History
             </div>
             {analyses.length === 0 ? (
               <p className="mt-3 text-xs text-muted-foreground">
