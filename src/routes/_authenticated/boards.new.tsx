@@ -125,7 +125,7 @@ function NewBoard() {
           <div className="space-y-8 p-6 md:p-8">
             <div className="grid gap-6 md:grid-cols-2">
               <div className="md:col-span-2">
-                <label className="text-sm font-medium">Decision title</label>
+                <label className="text-sm font-medium">Decision Title</label>
                 <input
                   type="text"
                   value={title}
