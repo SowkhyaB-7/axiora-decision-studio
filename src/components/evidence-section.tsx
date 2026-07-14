@@ -619,11 +619,11 @@ export function EvidenceSection({
       )}
 
       {pendingDelete && (
-        <Modal onClose={() => setPendingDelete(null)} title="Delete evidence?">
+        <Modal onClose={() => setPendingDelete(null)} title="Delete This Evidence?">
           <div className="space-y-4 text-sm">
             <p className="text-muted-foreground">
               This will permanently delete "{pendingDelete.title}" and its
-              attachment. This action cannot be undone.
+              attachments. This action cannot be undone.
             </p>
             <div className="flex justify-end gap-2">
               <button
