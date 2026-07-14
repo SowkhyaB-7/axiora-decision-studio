@@ -481,7 +481,7 @@ function BoardOverview() {
         <section>
           <div className="mb-4 flex items-baseline justify-between">
             <div>
-              <h2 className="font-display text-2xl">Assessment dimensions</h2>
+              <h2 className="font-display text-2xl">Assessment Dimensions</h2>
               <p className="text-sm text-muted-foreground">Evidence is organized across five readiness dimensions.</p>
             </div>
           </div>
