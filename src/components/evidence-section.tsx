@@ -370,7 +370,7 @@ export function EvidenceSection({
       {formOpen && (
         <Modal
           onClose={() => setFormOpen(false)}
-          title={form.id ? "Edit evidence" : "Add evidence"}
+          title={form.id ? "Edit Evidence" : "Add Evidence"}
         >
           <div className="space-y-4">
             <Field label="Title" required>
