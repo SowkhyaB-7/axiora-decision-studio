@@ -261,7 +261,7 @@ function BoardOverview() {
       const overall = Math.round(
         scores.reduce((a, b) => a + b, 0) / (scores.length || 1),
       );
-      const brief = `Board "${board.title}" analyzed across ${DIMENSIONS.length} dimensions from ${totalEvidence} evidence item${totalEvidence === 1 ? "" : "s"}. Overall readiness: ${overall}.`;
+      const brief = `Analyzed "${board.title}" across ${DIMENSIONS.length} readiness dimensions using ${totalEvidence} evidence item${totalEvidence === 1 ? "" : "s"}. Overall readiness score: ${overall}/100.`;
 
       const confidence = overallConfidence(Object.values(dimension_results));
 
