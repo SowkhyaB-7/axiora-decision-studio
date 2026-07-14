@@ -649,7 +649,7 @@ function BoardOverview() {
       {confirmDelete && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
           <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
-            <h2 className="font-display text-2xl">Delete this board?</h2>
+            <h2 className="font-display text-2xl">Delete This Board?</h2>
             <p className="mt-2 text-sm text-muted-foreground">
               This will permanently delete the board and all its data. This action cannot be undone.
             </p>
@@ -668,7 +668,7 @@ function BoardOverview() {
                 className="inline-flex items-center gap-2 rounded-md bg-destructive px-3 py-2 text-sm font-medium text-destructive-foreground hover:opacity-90 disabled:opacity-60"
               >
                 {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
-                Delete board
+                Delete Board
               </button>
             </div>
           </div>
