@@ -290,7 +290,7 @@ export function EvidenceSection({
           </div>
         ) : rows.length === 0 ? (
           <div className="px-6 py-12 text-center">
-            <p className="text-sm font-medium">No evidence has been added yet.</p>
+            <p className="text-sm font-medium">No Evidence Added Yet</p>
             <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
               Start by adding customer interviews, analytics, documents, or
               stakeholder feedback that informs this dimension.
@@ -301,7 +301,7 @@ export function EvidenceSection({
               disabled={!dimensionId}
               className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
             >
-              <Plus className="h-3.5 w-3.5" /> Add evidence
+              <Plus className="h-3.5 w-3.5" /> Add Evidence
             </button>
           </div>
         ) : (
