@@ -246,7 +246,7 @@ export function EvidenceSection({
                 Readiness
               </div>
               <div className="font-display text-lg">
-                {dimensionQuery.data?.readiness_level ?? "Not analyzed"}
+                {dimensionQuery.data?.readiness_level ?? "Not Analyzed"}
               </div>
             </div>
             <div>
