@@ -407,7 +407,7 @@ export function EvidenceSection({
                   ))}
                 </select>
               </Field>
-              <Field label="Evidence date" required>
+              <Field label="Evidence Date" required>
                 <input
                   type="date"
                   value={form.evidence_date}
