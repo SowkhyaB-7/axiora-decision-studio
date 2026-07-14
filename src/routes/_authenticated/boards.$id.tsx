@@ -555,7 +555,7 @@ function BoardOverview() {
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
           <div className="w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-xl">
             <div className="flex items-center justify-between">
-              <h2 className="font-display text-2xl">Edit board</h2>
+              <h2 className="font-display text-2xl">Edit Board</h2>
               <button
                 type="button"
                 onClick={() => setEditOpen(false)}
