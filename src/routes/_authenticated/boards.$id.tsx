@@ -491,7 +491,15 @@ function BoardOverview() {
               const row = dimByKey.get(d.key);
               const evidenceCount = row ? counts[row.id] ?? 0 : 0;
               const analyzed = !!row?.readiness_level;
-              const status = row?.status ?? "not_started";
+              const rawStatus = row?.status ?? "not_started";
+              const statusLabel = analyzed
+                ? "Analyzed"
+                : rawStatus === "not_started"
+                  ? "Not Started"
+                  : rawStatus
+                      .split(/[_\s]+/)
+                      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                      .join(" ");
               const to = DIMENSION_ROUTE[d.key];
               return (
                 <Link
