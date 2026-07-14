@@ -294,7 +294,7 @@ function NewBoard() {
                   </>
                 ) : (
                   <>
-                    Create board <ArrowRight className="h-4 w-4" />
+                    Create Board <ArrowRight className="h-4 w-4" />
                   </>
                 )}
               </button>
