@@ -224,7 +224,7 @@ function Analysis() {
               {summary && (
                 <section className="rounded-2xl border border-border bg-primary p-6 text-primary-foreground md:p-8">
                   <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] opacity-75">
-                    <Sparkles className="h-3.5 w-3.5" /> Executive summary
+                    <Sparkles className="h-3.5 w-3.5" /> Executive Summary
                   </div>
                   <div className="mt-3 flex flex-wrap items-end justify-between gap-6">
                     <div>
