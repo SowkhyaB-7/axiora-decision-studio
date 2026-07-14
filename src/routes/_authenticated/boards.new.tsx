@@ -22,9 +22,9 @@ export const Route = createFileRoute("/_authenticated/boards/new")({
 });
 
 const templates = [
-  { key: "blank", name: "Blank board", meta: "Start from scratch", featured: false },
-  { key: "feature_launch", name: "Feature launch", meta: "Product · 5 sections", featured: true },
-  { key: "pricing_change", name: "Pricing change", meta: "Revenue · 6 sections", featured: false },
+  { key: "blank", name: "Blank Board", meta: "Start from scratch", featured: false },
+  { key: "feature_launch", name: "Feature Launch", meta: "Product · 5 sections", featured: true },
+  { key: "pricing_change", name: "Pricing Change", meta: "Revenue · 6 sections", featured: false },
   { key: "deprecation", name: "Deprecation", meta: "Lifecycle · 4 sections", featured: false },
 ];
 
