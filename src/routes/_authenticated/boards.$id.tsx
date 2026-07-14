@@ -357,9 +357,14 @@ function BoardOverview() {
                     {(board as { decision_type?: string | null }).decision_type}
                   </span>
                 )}
-                {(board as { template?: string | null }).template && (
-                  <span className="text-muted-foreground">Template · {(board as { template?: string | null }).template}</span>
-                )}
+                {(board as { template?: string | null }).template && (() => {
+                  const t = (board as { template?: string | null }).template!;
+                  const label = t
+                    .split(/[_\s]+/)
+                    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                    .join(" ");
+                  return <span className="text-muted-foreground">Template · {label}</span>;
+                })()}
               </div>
               <h1 className="mt-3 font-display text-3xl md:text-4xl">{board.title}</h1>
               {board.description && (
