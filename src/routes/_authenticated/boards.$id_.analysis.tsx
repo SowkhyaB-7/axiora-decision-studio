@@ -297,7 +297,7 @@ function Analysis() {
                     </div>
                     <div>
                       <div className="flex items-center gap-1 text-[10px] uppercase tracking-widest opacity-70">
-                        <ShieldAlert className="h-3 w-3" /> Primary risk
+                        <ShieldAlert className="h-3 w-3" /> Primary Risk
                       </div>
                       <div className="mt-1 text-sm leading-snug opacity-95">
                         {summary.primaryRisk ?? "None identified"}
