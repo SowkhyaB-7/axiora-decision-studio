@@ -535,13 +535,13 @@ function BoardOverview() {
                     <div className="min-w-0">
                       <dt className="text-[10px] uppercase tracking-wider text-muted-foreground">Readiness</dt>
                       <dd className="mt-0.5 truncate text-sm font-medium">
-                        {analyzed ? row?.readiness_level : "Not analyzed"}
+                        {analyzed ? row?.readiness_level : "Not Analyzed"}
                       </dd>
                     </div>
                   </dl>
 
                   <div className="mt-5 inline-flex items-center gap-1 self-start text-xs font-medium text-accent">
-                    Open dimension <ArrowUpRight className="h-3.5 w-3.5" />
+                    Open Dimension <ArrowUpRight className="h-3.5 w-3.5" />
                   </div>
                 </Link>
               );
