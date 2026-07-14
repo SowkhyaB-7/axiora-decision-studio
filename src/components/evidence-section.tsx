@@ -273,7 +273,7 @@ export function EvidenceSection({
             disabled={!dimensionId}
             className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
           >
-            <Plus className="h-3.5 w-3.5" /> Add evidence
+            <Plus className="h-3.5 w-3.5" /> Add Evidence
           </button>
         </div>
 
