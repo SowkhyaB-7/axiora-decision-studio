@@ -639,7 +639,7 @@ function BoardOverview() {
                 className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:opacity-60"
               >
                 {editSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-                Save changes
+                Save Changes
               </button>
             </div>
           </div>
