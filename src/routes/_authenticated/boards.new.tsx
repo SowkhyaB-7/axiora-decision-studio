@@ -107,7 +107,7 @@ function NewBoard() {
   return (
     <AppShell title="New Decision Board" subtitle="Set up the scope, dimensions, and collaborators">
       <div className="mx-auto max-w-5xl space-y-6">
-        <Link to="/" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
+        <Link to="/dashboard" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-3.5 w-3.5" /> Back to home
         </Link>
 
@@ -278,7 +278,7 @@ function NewBoard() {
           </div>
 
           <div className="flex flex-col-reverse gap-3 border-t border-border px-6 py-4 md:flex-row md:items-center md:justify-between md:px-8">
-            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">
+            <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
               Cancel
             </Link>
             <div className="flex gap-2">

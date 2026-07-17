@@ -5,7 +5,6 @@ import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
-  ssr: false,
   head: () => ({
     meta: [{ title: "Sign in — Axiora" }],
   }),
@@ -24,9 +23,15 @@ function AuthPage() {
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/" });
-    });
+    supabase.auth
+      .getUser()
+      .then(({ data }) => {
+        if (data.user) navigate({ to: "/dashboard" });
+      })
+      .catch(() => {
+        // Keep the sign-in page mounted if the hosted preview is still
+        // hydrating its backend configuration.
+      });
   }, [navigate]);
 
   async function handleSubmit(e: FormEvent) {
@@ -68,7 +73,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back");
-        navigate({ to: "/" });
+        navigate({ to: "/dashboard" });
       } else {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -81,7 +86,7 @@ function AuthPage() {
         if (error) throw error;
         if (data.session) {
           toast.success("Account created");
-          navigate({ to: "/" });
+          navigate({ to: "/dashboard" });
         } else {
           setNotice("Check your email to verify your account.");
         }

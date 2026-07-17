@@ -3,7 +3,7 @@ import { LayoutDashboard, PlusCircle, LifeBuoy, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const workspaceNav = [
-  { title: "Home", to: "/", icon: LayoutDashboard },
+  { title: "Home", to: "/dashboard", icon: LayoutDashboard },
   { title: "New Decision Board", to: "/boards/new", icon: PlusCircle },
 ];
 
