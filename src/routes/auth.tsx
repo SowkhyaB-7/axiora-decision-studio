@@ -24,9 +24,15 @@ function AuthPage() {
   const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/" });
-    });
+    supabase.auth
+      .getUser()
+      .then(({ data }) => {
+        if (data.user) navigate({ to: "/" });
+      })
+      .catch(() => {
+        // Keep the sign-in page mounted if the hosted preview is still
+        // hydrating its backend configuration.
+      });
   }, [navigate]);
 
   async function handleSubmit(e: FormEvent) {
