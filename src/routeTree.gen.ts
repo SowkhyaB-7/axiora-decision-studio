@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as HelpRouteRouteImport } from './routes/help/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as HelpIndexRouteImport } from './routes/help/index'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedBoardsNewRouteImport } from './routes/_authenticated/boards.new'
 import { Route as AuthenticatedBoardsIdRouteImport } from './routes/_authenticated/boards.$id'
@@ -32,9 +34,19 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HelpRouteRoute = HelpRouteRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
+} as any)
+const HelpIndexRoute = HelpIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => HelpRouteRoute,
 } as any)
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
@@ -90,8 +102,10 @@ const AuthenticatedBoardsIdAnalysisRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
+  '/help': typeof HelpRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/help/': typeof HelpIndexRoute
   '/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/boards/new': typeof AuthenticatedBoardsNewRoute
   '/boards/$id/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
@@ -105,6 +119,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/': typeof AuthenticatedIndexRoute
+  '/help': typeof HelpIndexRoute
   '/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/boards/new': typeof AuthenticatedBoardsNewRoute
   '/boards/$id/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
@@ -117,9 +132,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/help': typeof HelpRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/help/': typeof HelpIndexRoute
   '/_authenticated/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/_authenticated/boards/new': typeof AuthenticatedBoardsNewRoute
   '/_authenticated/boards/$id_/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
@@ -133,8 +150,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/help'
     | '/auth'
     | '/reset-password'
+    | '/help/'
     | '/boards/$id'
     | '/boards/new'
     | '/boards/$id/analysis'
@@ -148,6 +167,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/'
+    | '/help'
     | '/boards/$id'
     | '/boards/new'
     | '/boards/$id/analysis'
@@ -159,9 +179,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_authenticated'
+    | '/help'
     | '/auth'
     | '/reset-password'
     | '/_authenticated/'
+    | '/help/'
     | '/_authenticated/boards/$id'
     | '/_authenticated/boards/new'
     | '/_authenticated/boards/$id_/analysis'
@@ -174,6 +196,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  HelpRouteRoute: typeof HelpRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
 }
@@ -194,12 +217,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/help/': {
+      id: '/help/'
+      path: '/'
+      fullPath: '/help/'
+      preLoaderRoute: typeof HelpIndexRouteImport
+      parentRoute: typeof HelpRouteRoute
     }
     '/_authenticated/': {
       id: '/_authenticated/'
@@ -297,8 +334,21 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface HelpRouteRouteChildren {
+  HelpIndexRoute: typeof HelpIndexRoute
+}
+
+const HelpRouteRouteChildren: HelpRouteRouteChildren = {
+  HelpIndexRoute: HelpIndexRoute,
+}
+
+const HelpRouteRouteWithChildren = HelpRouteRoute._addFileChildren(
+  HelpRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  HelpRouteRoute: HelpRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
 }
