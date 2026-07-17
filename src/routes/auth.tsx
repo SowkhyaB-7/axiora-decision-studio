@@ -26,7 +26,7 @@ function AuthPage() {
     supabase.auth
       .getUser()
       .then(({ data }) => {
-        if (data.user) navigate({ to: "/" });
+        if (data.user) navigate({ to: "/dashboard" });
       })
       .catch(() => {
         // Keep the sign-in page mounted if the hosted preview is still
@@ -73,7 +73,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back");
-        navigate({ to: "/" });
+        navigate({ to: "/dashboard" });
       } else {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -86,7 +86,7 @@ function AuthPage() {
         if (error) throw error;
         if (data.session) {
           toast.success("Account created");
-          navigate({ to: "/" });
+          navigate({ to: "/dashboard" });
         } else {
           setNotice("Check your email to verify your account.");
         }

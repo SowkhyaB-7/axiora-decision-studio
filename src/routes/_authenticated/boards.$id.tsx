@@ -146,7 +146,7 @@ function BoardOverview() {
       if (error) throw error;
       toast.success("Board deleted");
       await invalidateBoards();
-      navigate({ to: "/" });
+      navigate({ to: "/dashboard" });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to delete");
       setDeleting(false);
@@ -319,7 +319,7 @@ function BoardOverview() {
           <p className="mt-2 text-sm text-muted-foreground">
             This board doesn't exist or you don't have access to it.
           </p>
-          <Link to="/" className="mt-4 inline-block text-sm text-accent hover:underline">
+          <Link to="/dashboard" className="mt-4 inline-block text-sm text-accent hover:underline">
             Back to home
           </Link>
         </div>
