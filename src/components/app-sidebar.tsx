@@ -1,24 +1,13 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  LayoutDashboard,
-  PlusCircle,
-  ClipboardList,
-  Settings,
-  LifeBuoy,
-  Sparkles,
-} from "lucide-react";
+import { LayoutDashboard, PlusCircle, LifeBuoy, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const nav = [
+const workspaceNav = [
   { title: "Home", to: "/", icon: LayoutDashboard },
   { title: "New Decision Board", to: "/boards/new", icon: PlusCircle },
-  { title: "Decision Overview", to: "/boards/demo", icon: ClipboardList },
 ];
 
-const secondary = [
-  { title: "Settings", to: "/", icon: Settings },
-  { title: "Help & Docs", to: "/", icon: LifeBuoy },
-];
+const secondaryNav = [{ title: "Help Center", to: "/help", icon: LifeBuoy }];
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
@@ -42,7 +31,7 @@ export function AppSidebar() {
           Workspace
         </div>
         <ul className="space-y-1">
-          {nav.map((item) => {
+          {workspaceNav.map((item) => {
             const active = pathname === item.to;
             return (
               <li key={item.title}>
@@ -62,54 +51,30 @@ export function AppSidebar() {
             );
           })}
         </ul>
-
-        <div className="mt-8 px-3 pb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-          Recent Boards
-        </div>
-        <ul className="space-y-0.5">
-          {[
-            "Pricing tier restructure",
-            "Mobile onboarding v3",
-            "AI copilot rollout",
-            "Enterprise SSO GA",
-          ].map((t, idx) => (
-            <li key={t}>
-              <Link
-                to="/boards/$id"
-                params={{ id: `board-${idx + 1}` }}
-                className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm text-muted-foreground hover:bg-surface-muted hover:text-foreground"
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-accent/70" />
-                <span className="truncate">{t}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
       </nav>
 
       <div className="border-t border-border px-3 py-3">
         <ul className="space-y-1">
-          {secondary.map((item) => (
-            <li key={item.title}>
-              <Link
-                to={item.to}
-                className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-foreground/70 hover:bg-surface-muted hover:text-foreground"
-              >
-                <item.icon className="h-4 w-4" />
-                {item.title}
-              </Link>
-            </li>
-          ))}
+          {secondaryNav.map((item) => {
+            const active = pathname.startsWith(item.to);
+            return (
+              <li key={item.title}>
+                <Link
+                  to={item.to}
+                  className={cn(
+                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                    active
+                      ? "bg-surface-muted text-foreground"
+                      : "text-foreground/70 hover:bg-surface-muted hover:text-foreground",
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.title}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
-        <div className="mt-3 rounded-lg border border-border bg-surface-muted p-3">
-          <div className="text-xs font-medium">Team Trial · 12 days left</div>
-          <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-border">
-            <div className="h-full w-2/3 rounded-full bg-accent" />
-          </div>
-          <button className="mt-3 w-full rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90">
-            Upgrade plan
-          </button>
-        </div>
       </div>
     </aside>
   );
