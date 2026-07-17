@@ -270,7 +270,6 @@ function AuthPage() {
             Visit the Help Center
           </Link>
         </p>
-        </div>
       </div>
     </div>
   );
