@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Bell, Search, ChevronDown, Command, LogOut } from "lucide-react";
+import { ChevronDown, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -54,17 +54,6 @@ export function TopBar({ title, subtitle }: { title: string; subtitle?: string }
         )}
       </div>
 
-      <div className="hidden lg:flex items-center gap-2 rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-muted-foreground w-80">
-        <Search className="h-4 w-4" />
-        <span className="flex-1 truncate">Search boards, evidence, people…</span>
-        <kbd className="inline-flex items-center gap-1 rounded border border-border bg-surface-muted px-1.5 py-0.5 text-[10px] font-medium">
-          <Command className="h-3 w-3" /> K
-        </kbd>
-      </div>
-
-      <button className="grid h-9 w-9 place-items-center rounded-md border border-border bg-surface text-muted-foreground hover:text-foreground">
-        <Bell className="h-4 w-4" />
-      </button>
 
       <div className="relative">
         <button

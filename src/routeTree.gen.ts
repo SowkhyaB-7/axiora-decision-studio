@@ -11,8 +11,22 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as HelpRouteRouteImport } from './routes/help/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as HelpIndexRouteImport } from './routes/help/index'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as HelpUserGuideRouteImport } from './routes/help/user-guide'
+import { Route as HelpReleaseNotesRouteImport } from './routes/help/release-notes'
+import { Route as HelpProductPrinciplesRouteImport } from './routes/help/product-principles'
+import { Route as HelpLimitationsRouteImport } from './routes/help/limitations'
+import { Route as HelpLegalRouteImport } from './routes/help/legal'
+import { Route as HelpGettingStartedRouteImport } from './routes/help/getting-started'
+import { Route as HelpFaqRouteImport } from './routes/help/faq'
+import { Route as HelpDecisionFrameworkRouteImport } from './routes/help/decision-framework'
+import { Route as HelpCoreConceptsRouteImport } from './routes/help/core-concepts'
+import { Route as HelpContactRouteImport } from './routes/help/contact'
+import { Route as HelpArchitectureRouteImport } from './routes/help/architecture'
+import { Route as HelpAboutRouteImport } from './routes/help/about'
 import { Route as AuthenticatedBoardsNewRouteImport } from './routes/_authenticated/boards.new'
 import { Route as AuthenticatedBoardsIdRouteImport } from './routes/_authenticated/boards.$id'
 import { Route as AuthenticatedBoardsIdStakeholderAlignmentRouteImport } from './routes/_authenticated/boards.$id_.stakeholder-alignment'
@@ -32,14 +46,84 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HelpRouteRoute = HelpRouteRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
+} as any)
+const HelpIndexRoute = HelpIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => HelpRouteRoute,
 } as any)
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const HelpUserGuideRoute = HelpUserGuideRouteImport.update({
+  id: '/user-guide',
+  path: '/user-guide',
+  getParentRoute: () => HelpRouteRoute,
+} as any)
+const HelpReleaseNotesRoute = HelpReleaseNotesRouteImport.update({
+  id: '/release-notes',
+  path: '/release-notes',
+  getParentRoute: () => HelpRouteRoute,
+} as any)
+const HelpProductPrinciplesRoute = HelpProductPrinciplesRouteImport.update({
+  id: '/product-principles',
+  path: '/product-principles',
+  getParentRoute: () => HelpRouteRoute,
+} as any)
+const HelpLimitationsRoute = HelpLimitationsRouteImport.update({
+  id: '/limitations',
+  path: '/limitations',
+  getParentRoute: () => HelpRouteRoute,
+} as any)
+const HelpLegalRoute = HelpLegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
+  getParentRoute: () => HelpRouteRoute,
+} as any)
+const HelpGettingStartedRoute = HelpGettingStartedRouteImport.update({
+  id: '/getting-started',
+  path: '/getting-started',
+  getParentRoute: () => HelpRouteRoute,
+} as any)
+const HelpFaqRoute = HelpFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => HelpRouteRoute,
+} as any)
+const HelpDecisionFrameworkRoute = HelpDecisionFrameworkRouteImport.update({
+  id: '/decision-framework',
+  path: '/decision-framework',
+  getParentRoute: () => HelpRouteRoute,
+} as any)
+const HelpCoreConceptsRoute = HelpCoreConceptsRouteImport.update({
+  id: '/core-concepts',
+  path: '/core-concepts',
+  getParentRoute: () => HelpRouteRoute,
+} as any)
+const HelpContactRoute = HelpContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => HelpRouteRoute,
+} as any)
+const HelpArchitectureRoute = HelpArchitectureRouteImport.update({
+  id: '/architecture',
+  path: '/architecture',
+  getParentRoute: () => HelpRouteRoute,
+} as any)
+const HelpAboutRoute = HelpAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => HelpRouteRoute,
 } as any)
 const AuthenticatedBoardsNewRoute = AuthenticatedBoardsNewRouteImport.update({
   id: '/boards/new',
@@ -90,8 +174,22 @@ const AuthenticatedBoardsIdAnalysisRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
+  '/help': typeof HelpRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/help/about': typeof HelpAboutRoute
+  '/help/architecture': typeof HelpArchitectureRoute
+  '/help/contact': typeof HelpContactRoute
+  '/help/core-concepts': typeof HelpCoreConceptsRoute
+  '/help/decision-framework': typeof HelpDecisionFrameworkRoute
+  '/help/faq': typeof HelpFaqRoute
+  '/help/getting-started': typeof HelpGettingStartedRoute
+  '/help/legal': typeof HelpLegalRoute
+  '/help/limitations': typeof HelpLimitationsRoute
+  '/help/product-principles': typeof HelpProductPrinciplesRoute
+  '/help/release-notes': typeof HelpReleaseNotesRoute
+  '/help/user-guide': typeof HelpUserGuideRoute
+  '/help/': typeof HelpIndexRoute
   '/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/boards/new': typeof AuthenticatedBoardsNewRoute
   '/boards/$id/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
@@ -104,7 +202,20 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/help/about': typeof HelpAboutRoute
+  '/help/architecture': typeof HelpArchitectureRoute
+  '/help/contact': typeof HelpContactRoute
+  '/help/core-concepts': typeof HelpCoreConceptsRoute
+  '/help/decision-framework': typeof HelpDecisionFrameworkRoute
+  '/help/faq': typeof HelpFaqRoute
+  '/help/getting-started': typeof HelpGettingStartedRoute
+  '/help/legal': typeof HelpLegalRoute
+  '/help/limitations': typeof HelpLimitationsRoute
+  '/help/product-principles': typeof HelpProductPrinciplesRoute
+  '/help/release-notes': typeof HelpReleaseNotesRoute
+  '/help/user-guide': typeof HelpUserGuideRoute
   '/': typeof AuthenticatedIndexRoute
+  '/help': typeof HelpIndexRoute
   '/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/boards/new': typeof AuthenticatedBoardsNewRoute
   '/boards/$id/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
@@ -117,9 +228,23 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/help': typeof HelpRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/help/about': typeof HelpAboutRoute
+  '/help/architecture': typeof HelpArchitectureRoute
+  '/help/contact': typeof HelpContactRoute
+  '/help/core-concepts': typeof HelpCoreConceptsRoute
+  '/help/decision-framework': typeof HelpDecisionFrameworkRoute
+  '/help/faq': typeof HelpFaqRoute
+  '/help/getting-started': typeof HelpGettingStartedRoute
+  '/help/legal': typeof HelpLegalRoute
+  '/help/limitations': typeof HelpLimitationsRoute
+  '/help/product-principles': typeof HelpProductPrinciplesRoute
+  '/help/release-notes': typeof HelpReleaseNotesRoute
+  '/help/user-guide': typeof HelpUserGuideRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/help/': typeof HelpIndexRoute
   '/_authenticated/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/_authenticated/boards/new': typeof AuthenticatedBoardsNewRoute
   '/_authenticated/boards/$id_/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
@@ -133,8 +258,22 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/help'
     | '/auth'
     | '/reset-password'
+    | '/help/about'
+    | '/help/architecture'
+    | '/help/contact'
+    | '/help/core-concepts'
+    | '/help/decision-framework'
+    | '/help/faq'
+    | '/help/getting-started'
+    | '/help/legal'
+    | '/help/limitations'
+    | '/help/product-principles'
+    | '/help/release-notes'
+    | '/help/user-guide'
+    | '/help/'
     | '/boards/$id'
     | '/boards/new'
     | '/boards/$id/analysis'
@@ -147,7 +286,20 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/reset-password'
+    | '/help/about'
+    | '/help/architecture'
+    | '/help/contact'
+    | '/help/core-concepts'
+    | '/help/decision-framework'
+    | '/help/faq'
+    | '/help/getting-started'
+    | '/help/legal'
+    | '/help/limitations'
+    | '/help/product-principles'
+    | '/help/release-notes'
+    | '/help/user-guide'
     | '/'
+    | '/help'
     | '/boards/$id'
     | '/boards/new'
     | '/boards/$id/analysis'
@@ -159,9 +311,23 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_authenticated'
+    | '/help'
     | '/auth'
     | '/reset-password'
+    | '/help/about'
+    | '/help/architecture'
+    | '/help/contact'
+    | '/help/core-concepts'
+    | '/help/decision-framework'
+    | '/help/faq'
+    | '/help/getting-started'
+    | '/help/legal'
+    | '/help/limitations'
+    | '/help/product-principles'
+    | '/help/release-notes'
+    | '/help/user-guide'
     | '/_authenticated/'
+    | '/help/'
     | '/_authenticated/boards/$id'
     | '/_authenticated/boards/new'
     | '/_authenticated/boards/$id_/analysis'
@@ -174,6 +340,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  HelpRouteRoute: typeof HelpRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
 }
@@ -194,6 +361,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
@@ -201,12 +375,103 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/help/': {
+      id: '/help/'
+      path: '/'
+      fullPath: '/help/'
+      preLoaderRoute: typeof HelpIndexRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
     '/_authenticated/': {
       id: '/_authenticated/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/help/user-guide': {
+      id: '/help/user-guide'
+      path: '/user-guide'
+      fullPath: '/help/user-guide'
+      preLoaderRoute: typeof HelpUserGuideRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
+    '/help/release-notes': {
+      id: '/help/release-notes'
+      path: '/release-notes'
+      fullPath: '/help/release-notes'
+      preLoaderRoute: typeof HelpReleaseNotesRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
+    '/help/product-principles': {
+      id: '/help/product-principles'
+      path: '/product-principles'
+      fullPath: '/help/product-principles'
+      preLoaderRoute: typeof HelpProductPrinciplesRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
+    '/help/limitations': {
+      id: '/help/limitations'
+      path: '/limitations'
+      fullPath: '/help/limitations'
+      preLoaderRoute: typeof HelpLimitationsRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
+    '/help/legal': {
+      id: '/help/legal'
+      path: '/legal'
+      fullPath: '/help/legal'
+      preLoaderRoute: typeof HelpLegalRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
+    '/help/getting-started': {
+      id: '/help/getting-started'
+      path: '/getting-started'
+      fullPath: '/help/getting-started'
+      preLoaderRoute: typeof HelpGettingStartedRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
+    '/help/faq': {
+      id: '/help/faq'
+      path: '/faq'
+      fullPath: '/help/faq'
+      preLoaderRoute: typeof HelpFaqRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
+    '/help/decision-framework': {
+      id: '/help/decision-framework'
+      path: '/decision-framework'
+      fullPath: '/help/decision-framework'
+      preLoaderRoute: typeof HelpDecisionFrameworkRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
+    '/help/core-concepts': {
+      id: '/help/core-concepts'
+      path: '/core-concepts'
+      fullPath: '/help/core-concepts'
+      preLoaderRoute: typeof HelpCoreConceptsRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
+    '/help/contact': {
+      id: '/help/contact'
+      path: '/contact'
+      fullPath: '/help/contact'
+      preLoaderRoute: typeof HelpContactRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
+    '/help/architecture': {
+      id: '/help/architecture'
+      path: '/architecture'
+      fullPath: '/help/architecture'
+      preLoaderRoute: typeof HelpArchitectureRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
+    '/help/about': {
+      id: '/help/about'
+      path: '/about'
+      fullPath: '/help/about'
+      preLoaderRoute: typeof HelpAboutRouteImport
+      parentRoute: typeof HelpRouteRoute
     }
     '/_authenticated/boards/new': {
       id: '/_authenticated/boards/new'
@@ -297,21 +562,48 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface HelpRouteRouteChildren {
+  HelpAboutRoute: typeof HelpAboutRoute
+  HelpArchitectureRoute: typeof HelpArchitectureRoute
+  HelpContactRoute: typeof HelpContactRoute
+  HelpCoreConceptsRoute: typeof HelpCoreConceptsRoute
+  HelpDecisionFrameworkRoute: typeof HelpDecisionFrameworkRoute
+  HelpFaqRoute: typeof HelpFaqRoute
+  HelpGettingStartedRoute: typeof HelpGettingStartedRoute
+  HelpLegalRoute: typeof HelpLegalRoute
+  HelpLimitationsRoute: typeof HelpLimitationsRoute
+  HelpProductPrinciplesRoute: typeof HelpProductPrinciplesRoute
+  HelpReleaseNotesRoute: typeof HelpReleaseNotesRoute
+  HelpUserGuideRoute: typeof HelpUserGuideRoute
+  HelpIndexRoute: typeof HelpIndexRoute
+}
+
+const HelpRouteRouteChildren: HelpRouteRouteChildren = {
+  HelpAboutRoute: HelpAboutRoute,
+  HelpArchitectureRoute: HelpArchitectureRoute,
+  HelpContactRoute: HelpContactRoute,
+  HelpCoreConceptsRoute: HelpCoreConceptsRoute,
+  HelpDecisionFrameworkRoute: HelpDecisionFrameworkRoute,
+  HelpFaqRoute: HelpFaqRoute,
+  HelpGettingStartedRoute: HelpGettingStartedRoute,
+  HelpLegalRoute: HelpLegalRoute,
+  HelpLimitationsRoute: HelpLimitationsRoute,
+  HelpProductPrinciplesRoute: HelpProductPrinciplesRoute,
+  HelpReleaseNotesRoute: HelpReleaseNotesRoute,
+  HelpUserGuideRoute: HelpUserGuideRoute,
+  HelpIndexRoute: HelpIndexRoute,
+}
+
+const HelpRouteRouteWithChildren = HelpRouteRoute._addFileChildren(
+  HelpRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  HelpRouteRoute: HelpRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

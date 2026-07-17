@@ -263,6 +263,13 @@ function AuthPage() {
             )}
           </p>
         </div>
+
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          Exploring Axiora?{" "}
+          <Link to="/help" className="font-medium text-accent hover:underline">
+            Visit the Help Center
+          </Link>
+        </p>
       </div>
     </div>
   );
