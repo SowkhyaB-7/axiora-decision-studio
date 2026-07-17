@@ -13,6 +13,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as HelpRouteRouteImport } from './routes/help/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as HelpIndexRouteImport } from './routes/help/index'
 import { Route as HelpUserGuideRouteImport } from './routes/help/user-guide'
 import { Route as HelpReleaseNotesRouteImport } from './routes/help/release-notes'
@@ -53,6 +54,11 @@ const HelpRouteRoute = HelpRouteRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HelpIndexRoute = HelpIndexRouteImport.update({
@@ -173,7 +179,7 @@ const AuthenticatedBoardsIdAnalysisRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AuthenticatedRouteRouteWithChildren
+  '/': typeof IndexRoute
   '/help': typeof HelpRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -201,7 +207,7 @@ export interface FileRoutesByFullPath {
   '/boards/$id/stakeholder-alignment': typeof AuthenticatedBoardsIdStakeholderAlignmentRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof AuthenticatedRouteRouteWithChildren
+  '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -229,6 +235,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/help': typeof HelpRouteRouteWithChildren
   '/auth': typeof AuthRoute
@@ -314,6 +321,7 @@ export interface FileRouteTypes {
     | '/boards/$id/stakeholder-alignment'
   id:
     | '__root__'
+    | '/'
     | '/_authenticated'
     | '/help'
     | '/auth'
@@ -343,6 +351,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   HelpRouteRoute: typeof HelpRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
@@ -377,6 +386,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/help/': {
@@ -603,6 +619,7 @@ const HelpRouteRouteWithChildren = HelpRouteRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   HelpRouteRoute: HelpRouteRouteWithChildren,
   AuthRoute: AuthRoute,
