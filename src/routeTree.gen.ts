@@ -14,7 +14,6 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as HelpRouteRouteImport } from './routes/help/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as HelpIndexRouteImport } from './routes/help/index'
-import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as HelpUserGuideRouteImport } from './routes/help/user-guide'
 import { Route as HelpReleaseNotesRouteImport } from './routes/help/release-notes'
 import { Route as HelpProductPrinciplesRouteImport } from './routes/help/product-principles'
@@ -27,6 +26,7 @@ import { Route as HelpCoreConceptsRouteImport } from './routes/help/core-concept
 import { Route as HelpContactRouteImport } from './routes/help/contact'
 import { Route as HelpArchitectureRouteImport } from './routes/help/architecture'
 import { Route as HelpAboutRouteImport } from './routes/help/about'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedBoardsNewRouteImport } from './routes/_authenticated/boards.new'
 import { Route as AuthenticatedBoardsIdRouteImport } from './routes/_authenticated/boards.$id'
 import { Route as AuthenticatedBoardsIdStakeholderAlignmentRouteImport } from './routes/_authenticated/boards.$id_.stakeholder-alignment'
@@ -59,11 +59,6 @@ const HelpIndexRoute = HelpIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => HelpRouteRoute,
-} as any)
-const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const HelpUserGuideRoute = HelpUserGuideRouteImport.update({
   id: '/user-guide',
@@ -125,6 +120,11 @@ const HelpAboutRoute = HelpAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => HelpRouteRoute,
 } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedBoardsNewRoute = AuthenticatedBoardsNewRouteImport.update({
   id: '/boards/new',
   path: '/boards/new',
@@ -173,10 +173,11 @@ const AuthenticatedBoardsIdAnalysisRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AuthenticatedIndexRoute
+  '/': typeof AuthenticatedRouteRouteWithChildren
   '/help': typeof HelpRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/help/about': typeof HelpAboutRoute
   '/help/architecture': typeof HelpArchitectureRoute
   '/help/contact': typeof HelpContactRoute
@@ -200,8 +201,10 @@ export interface FileRoutesByFullPath {
   '/boards/$id/stakeholder-alignment': typeof AuthenticatedBoardsIdStakeholderAlignmentRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/help/about': typeof HelpAboutRoute
   '/help/architecture': typeof HelpArchitectureRoute
   '/help/contact': typeof HelpContactRoute
@@ -214,7 +217,6 @@ export interface FileRoutesByTo {
   '/help/product-principles': typeof HelpProductPrinciplesRoute
   '/help/release-notes': typeof HelpReleaseNotesRoute
   '/help/user-guide': typeof HelpUserGuideRoute
-  '/': typeof AuthenticatedIndexRoute
   '/help': typeof HelpIndexRoute
   '/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/boards/new': typeof AuthenticatedBoardsNewRoute
@@ -231,6 +233,7 @@ export interface FileRoutesById {
   '/help': typeof HelpRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/help/about': typeof HelpAboutRoute
   '/help/architecture': typeof HelpArchitectureRoute
   '/help/contact': typeof HelpContactRoute
@@ -243,7 +246,6 @@ export interface FileRoutesById {
   '/help/product-principles': typeof HelpProductPrinciplesRoute
   '/help/release-notes': typeof HelpReleaseNotesRoute
   '/help/user-guide': typeof HelpUserGuideRoute
-  '/_authenticated/': typeof AuthenticatedIndexRoute
   '/help/': typeof HelpIndexRoute
   '/_authenticated/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/_authenticated/boards/new': typeof AuthenticatedBoardsNewRoute
@@ -261,6 +263,7 @@ export interface FileRouteTypes {
     | '/help'
     | '/auth'
     | '/reset-password'
+    | '/dashboard'
     | '/help/about'
     | '/help/architecture'
     | '/help/contact'
@@ -284,8 +287,10 @@ export interface FileRouteTypes {
     | '/boards/$id/stakeholder-alignment'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/auth'
     | '/reset-password'
+    | '/dashboard'
     | '/help/about'
     | '/help/architecture'
     | '/help/contact'
@@ -298,7 +303,6 @@ export interface FileRouteTypes {
     | '/help/product-principles'
     | '/help/release-notes'
     | '/help/user-guide'
-    | '/'
     | '/help'
     | '/boards/$id'
     | '/boards/new'
@@ -314,6 +318,7 @@ export interface FileRouteTypes {
     | '/help'
     | '/auth'
     | '/reset-password'
+    | '/_authenticated/dashboard'
     | '/help/about'
     | '/help/architecture'
     | '/help/contact'
@@ -326,7 +331,6 @@ export interface FileRouteTypes {
     | '/help/product-principles'
     | '/help/release-notes'
     | '/help/user-guide'
-    | '/_authenticated/'
     | '/help/'
     | '/_authenticated/boards/$id'
     | '/_authenticated/boards/new'
@@ -381,13 +385,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/help/'
       preLoaderRoute: typeof HelpIndexRouteImport
       parentRoute: typeof HelpRouteRoute
-    }
-    '/_authenticated/': {
-      id: '/_authenticated/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/help/user-guide': {
       id: '/help/user-guide'
@@ -473,6 +470,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpAboutRouteImport
       parentRoute: typeof HelpRouteRoute
     }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/boards/new': {
       id: '/_authenticated/boards/new'
       path: '/boards/new'
@@ -533,7 +537,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedBoardsIdRoute: typeof AuthenticatedBoardsIdRoute
   AuthenticatedBoardsNewRoute: typeof AuthenticatedBoardsNewRoute
   AuthenticatedBoardsIdAnalysisRoute: typeof AuthenticatedBoardsIdAnalysisRoute
@@ -545,7 +549,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedBoardsIdRoute: AuthenticatedBoardsIdRoute,
   AuthenticatedBoardsNewRoute: AuthenticatedBoardsNewRoute,
   AuthenticatedBoardsIdAnalysisRoute: AuthenticatedBoardsIdAnalysisRoute,
