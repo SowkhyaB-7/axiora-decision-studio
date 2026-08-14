@@ -161,20 +161,24 @@ export async function generateBriefingText(input: {
 
 Return JSON with exactly these keys:
 {
-  "why": 2-4 sentences explaining the current state strictly from the evidence listed,
+  "why": 2-4 sentences naming the actual tension in the evidence,
   "supports": [ { "claim": one short sentence, "evidence_refs": [evidence numbers] } ],
   "contradicts": [ { "claim": one short sentence, "evidence_refs": [evidence numbers] } ],
   "unresolved": one question capturing the open disagreement, or null if there is no disagreement,
-  "missing": array of 1-3 specific things that still need to be confirmed,
-  "next_action": one concrete next step for the PM
+  "missing": array of 1-3 specific pieces of evidence that could change or resolve THIS decision,
+  "next_action": one concrete step to obtain a specific missing or conflict-resolving piece of evidence
 }
 
 Rules:
 - Every claim must cite at least one real evidence number from the list. Never cite a number that is not listed.
 - "contradicts" must contain only evidence marked CONTRADICTS. Leave it empty if there is none.
+- "why" must describe the substance of the disagreement or gap. Never count or compare quantities of evidence ("two items support versus one against"), never mention strength ratings or the rules.
+- "missing" is not a generic research wishlist: each entry must be evidence that would plausibly move this decision out of its current state, phrased as the specific thing to find out.
+- "next_action" must be about obtaining or testing evidence (who to talk to, what to measure, what to prototype or verify), stated concretely. Never generic process language like "schedule a meeting", "align stakeholders" or "create a plan".
 - If the verdict is EVIDENCE_CONFLICT, do not blend the two sides into a moderate view; describe each side plainly and set "unresolved".
 - If the verdict is INSUFFICIENT_EVIDENCE, say explicitly that there is not enough evidence for a responsible recommendation.
 - Be brief and concrete. No essays, no motivational language, no scores.`;
+
 
   const evidenceBlock = input.evidence
     .map(

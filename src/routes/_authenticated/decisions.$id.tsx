@@ -89,6 +89,15 @@ function DecisionBriefing() {
   const navigate = useNavigate();
   const runBriefing = useServerFn(getBriefing);
   const [adding, setAdding] = useState(false);
+  const [highlight, setHighlight] = useState<number[]>([]);
+
+  /** Links a briefing claim back to the exact stored evidence behind it. */
+  const focusEvidence = (refs: number[]) => {
+    setHighlight(refs);
+    const first = document.getElementById(`evidence-${refs[0]}`);
+    first?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
 
   const decisionQuery = useQuery({
     queryKey: ["decision", id],
@@ -180,7 +189,7 @@ function DecisionBriefing() {
           <ArrowLeft className="h-4 w-4" /> Your Decisions
         </Link>
 
-        <header className="mt-4 border-b border-border pb-6">
+        <header className="mt-3 border-b border-border pb-4">
           <div className="flex flex-wrap items-center gap-2">
             <VerdictBadge verdict={assessment.verdict} />
             <ConfidenceChip confidence={assessment.confidence} />
@@ -190,52 +199,18 @@ function DecisionBriefing() {
               </span>
             )}
           </div>
-          <h1 className="mt-4 font-display text-3xl leading-tight">
+          <h1 className="mt-3 font-display text-3xl leading-tight">
             {decision.title}
           </h1>
           {decision.context && (
-            <p className="mt-3 text-[15px] leading-relaxed text-foreground/80">
+            <p className="mt-2 text-[15px] leading-relaxed text-foreground/80">
               {decision.context}
             </p>
           )}
-          <p className="mt-3 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground">
             {assessment.confidenceReason}
           </p>
         </header>
-
-        {/* Why Axiora says this */}
-        <Section title="Why Axiora Says This">
-          <ul className="space-y-1.5 text-[15px] leading-relaxed text-foreground/85">
-            {assessment.ruleTrace.map((line) => (
-              <li key={line} className="flex gap-2">
-                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
-                {line}
-              </li>
-            ))}
-          </ul>
-
-          {briefingQuery.isLoading && (
-            <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> Reading your evidence…
-            </p>
-          )}
-          {briefingQuery.error && (
-            <p className="mt-4 text-sm text-destructive">
-              The reasoning summary couldn't be generated. The verdict above is
-              still computed from your evidence.
-            </p>
-          )}
-          {briefing && (
-            <p className="mt-4 text-[15px] leading-relaxed text-foreground/85">
-              {briefing.why}
-            </p>
-          )}
-          {briefing && !briefing.ai_generated && (
-            <p className="mt-2 text-xs text-muted-foreground">
-              Written from your stored evidence records without AI assistance.
-            </p>
-          )}
-        </Section>
 
         {assessment.verdict === "INSUFFICIENT_EVIDENCE" && (
           <Callout
@@ -249,40 +224,68 @@ function DecisionBriefing() {
         )}
 
         {assessment.isConflict && (
-          <Callout
-            tone="destructive"
-            icon={Scale}
-            title="Evidence Conflict"
-          >
-            Your evidence disagrees with itself. Axiora will not average these
-            into a middle-ground answer — the disagreement has to be resolved.
+          <Callout tone="destructive" icon={Scale} title="Evidence Conflict">
+            {briefing?.unresolved ??
+              "Your evidence disagrees with itself. Axiora will not average these into a middle-ground answer — the disagreement has to be resolved."}
           </Callout>
         )}
 
+        {/* Why Axiora says this */}
+        <Section title="Why Axiora Says This">
+          <ul className="space-y-1.5 text-[15px] leading-relaxed text-foreground/85">
+            {assessment.ruleTrace.map((line) => (
+              <li key={line} className="flex gap-2">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
+                {line}
+              </li>
+            ))}
+          </ul>
+
+          {briefingQuery.isLoading && (
+            <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Reading your evidence…
+            </p>
+          )}
+          {briefingQuery.error && (
+            <p className="mt-3 text-sm text-destructive">
+              The reasoning summary couldn't be generated. The verdict above is
+              still computed from your evidence.
+            </p>
+          )}
+          {briefing && (
+            <p className="mt-3 text-[15px] leading-relaxed text-foreground/85">
+              {briefing.why}
+            </p>
+          )}
+          {briefing && !briefing.ai_generated && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Written from your stored evidence records without AI assistance.
+            </p>
+          )}
+        </Section>
+
         {briefing && (
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
             <ClaimList
-              title="Evidence For"
+              title="Argues For Going Ahead"
               claims={briefing.supports}
               emptyText="Nothing on record supports going ahead yet."
+              onSelect={focusEvidence}
+              activeRefs={highlight}
             />
             <ClaimList
-              title="Evidence Against"
+              title="Argues Against Going Ahead"
               claims={briefing.contradicts}
               emptyText="No evidence on record argues against going ahead."
+              onSelect={focusEvidence}
+              activeRefs={highlight}
             />
           </div>
         )}
 
-        {briefing?.unresolved && (
-          <Callout tone="destructive" icon={AlertTriangle} title="Unresolved">
-            {briefing.unresolved}
-          </Callout>
-        )}
-
         {briefing && briefing.missing.length > 0 && (
-          <Section title="What's Missing">
-            <ul className="space-y-2 text-[15px] leading-relaxed text-foreground/85">
+          <Section title="What Would Change This">
+            <ul className="space-y-1.5 text-[15px] leading-relaxed text-foreground/85">
               {briefing.missing.map((m) => (
                 <li key={m} className="flex gap-2">
                   <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent/70" />
@@ -300,6 +303,7 @@ function DecisionBriefing() {
             </p>
           </Section>
         )}
+
 
         {/* Evidence */}
         <Section
@@ -337,10 +341,12 @@ function DecisionBriefing() {
                 key={e.id}
                 item={e}
                 locked={decided}
+                highlighted={highlight.includes(e.ref)}
                 onDelete={() => removeEvidence.mutate(e.id)}
               />
             ))}
           </ul>
+
         </Section>
 
         {decisionQuery.data?.overrides.length ? (
@@ -351,20 +357,24 @@ function DecisionBriefing() {
                   key={o.id}
                   className="rounded-lg border border-border bg-surface-muted/60 p-4 text-sm"
                 >
-                  <div className="flex items-center gap-2 text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-muted-foreground">
                     <ShieldAlert className="h-4 w-4" />
                     Chose{" "}
                     <span className="font-medium text-foreground">
                       {CHOICES.find((c) => c.value === o.override_choice)?.label ??
                         o.override_choice}
                     </span>{" "}
-                    against a verdict of{" "}
+                    while Axiora's read was{" "}
                     <span className="font-medium text-foreground">
                       {VERDICT_LABEL[o.original_verdict as keyof typeof VERDICT_LABEL] ??
                         o.original_verdict}
                     </span>
+                    <span className="text-xs">
+                      · {new Date(o.created_at).toISOString().slice(0, 10)}
+                    </span>
                   </div>
                   <p className="mt-2 text-foreground/85">{o.reason}</p>
+
                 </li>
               ))}
             </ul>
@@ -398,7 +408,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="mt-8">
+    <section className="mt-6">
       <div className="mb-3 flex items-center justify-between gap-4">
         <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           {title}
@@ -450,10 +460,14 @@ function ClaimList({
   title,
   claims,
   emptyText,
+  onSelect,
+  activeRefs,
 }: {
   title: string;
   claims: BriefingClaim[];
   emptyText: string;
+  onSelect: (refs: number[]) => void;
+  activeRefs: number[];
 }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-5">
@@ -463,28 +477,44 @@ function ClaimList({
       {claims.length === 0 ? (
         <p className="mt-3 text-sm text-muted-foreground">{emptyText}</p>
       ) : (
-        <ul className="mt-3 space-y-3">
-          {claims.map((c) => (
-            <li key={c.claim} className="text-[15px] leading-relaxed">
-              {c.claim}
-              <span className="ml-1.5 inline-flex gap-1 align-middle">
-                {c.evidence_refs.map((ref) => (
-                  <a
-                    key={ref}
-                    href={`#evidence-${ref}`}
-                    className="rounded border border-border bg-surface-muted px-1.5 py-0.5 text-[11px] text-muted-foreground hover:text-foreground"
-                  >
-                    #{ref}
-                  </a>
-                ))}
-              </span>
-            </li>
-          ))}
+        <ul className="mt-3 space-y-2">
+          {claims.map((c) => {
+            const active =
+              c.evidence_refs.length > 0 &&
+              c.evidence_refs.every((r) => activeRefs.includes(r)) &&
+              activeRefs.length === c.evidence_refs.length;
+            return (
+              <li key={c.claim}>
+                <button
+                  type="button"
+                  onClick={() => onSelect(c.evidence_refs)}
+                  className={cn(
+                    "-mx-2 block w-full rounded-md px-2 py-1 text-left text-[15px] leading-relaxed transition-colors hover:bg-surface-muted",
+                    active && "bg-surface-muted",
+                  )}
+                  title="Show the evidence behind this"
+                >
+                  {c.claim}
+                  <span className="ml-1.5 inline-flex gap-1 align-middle">
+                    {c.evidence_refs.map((ref) => (
+                      <span
+                        key={ref}
+                        className="rounded border border-border bg-surface-muted px-1.5 py-0.5 text-[11px] text-muted-foreground"
+                      >
+                        #{ref}
+                      </span>
+                    ))}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
   );
 }
+
 
 const DIRECTION_TONE: Record<Direction, string> = {
   SUPPORTS: "bg-success/10 text-success border-success/20",
@@ -495,18 +525,26 @@ const DIRECTION_TONE: Record<Direction, string> = {
 function EvidenceCard({
   item,
   locked,
+  highlighted,
   onDelete,
 }: {
   item: EvidenceItem;
   locked: boolean;
+  highlighted?: boolean;
   onDelete: () => void;
 }) {
   const [open, setOpen] = useState(false);
   return (
     <li
       id={`evidence-${item.ref}`}
-      className="rounded-xl border border-border bg-surface p-5 scroll-mt-24"
+      className={cn(
+        "rounded-xl border bg-surface p-5 scroll-mt-24 transition-colors",
+        highlighted
+          ? "border-primary/50 ring-2 ring-primary/20"
+          : "border-border",
+      )}
     >
+
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <span className="rounded border border-border bg-surface-muted px-1.5 py-0.5 text-muted-foreground">
           #{item.ref}
@@ -580,10 +618,16 @@ function DecideBlock({
   const [choice, setChoice] = useState<string>("");
   const [reason, setReason] = useState("");
 
-  // Axiora only endorses "Go" when the evidence is ready; anything else is an
-  // override and must be logged with the PM's reasoning.
+  // When Axiora's read is unresolved (conflicting or insufficient evidence),
+  // ANY call the PM makes is theirs rather than the evidence's, so a reason is
+  // recorded. Outside those states, only a "Go" against the evidence is.
+  const unresolvedRead =
+    rawVerdict === "EVIDENCE_CONFLICT" || rawVerdict === "INSUFFICIENT_EVIDENCE";
   const needsOverride =
-    choice === "GO" && rawVerdict !== "READY" && rawVerdict !== "ALMOST_READY";
+    !!choice &&
+    (unresolvedRead ||
+      (choice === "GO" && rawVerdict !== "READY" && rawVerdict !== "ALMOST_READY"));
+
 
   const decide = useMutation({
     mutationFn: async () => {
@@ -644,7 +688,7 @@ function DecideBlock({
         <span className="font-medium text-foreground">
           {VERDICT_LABEL[verdict as keyof typeof VERDICT_LABEL] ?? verdict}
         </span>
-        . The call is still yours.
+        . The decision is still yours.
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2">
@@ -668,18 +712,20 @@ function DecideBlock({
       {needsOverride && (
         <div className="mt-4 rounded-lg border border-destructive/25 bg-destructive/5 p-4">
           <div className="flex items-center gap-2 text-sm font-medium text-destructive">
-            <ShieldAlert className="h-4 w-4" /> This overrides Axiora
+            <ShieldAlert className="h-4 w-4" /> Your call, not the evidence's
           </div>
           <p className="mt-1.5 text-sm text-foreground/80">
-            The evidence doesn't support going ahead. You can still choose Go,
-            but your reasoning will be recorded alongside the decision.
+            {unresolvedRead
+              ? "The evidence doesn't resolve this on its own. You can still decide, and your reasoning will be recorded alongside the decision."
+              : "The evidence doesn't support going ahead. You can still choose Go, but your reasoning will be recorded alongside the decision."}
           </p>
           <textarea
             rows={3}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="Why are you going ahead despite the evidence?"
+            placeholder="Why are you deciding this way, given the evidence?"
             className={cn(inputClass, "mt-3 resize-y")}
+
           />
         </div>
       )}
