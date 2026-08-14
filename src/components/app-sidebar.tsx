@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 const workspaceNav = [
   { title: "Home", to: "/dashboard", icon: LayoutDashboard },
-  { title: "New Decision Board", to: "/boards/new", icon: PlusCircle },
+  { title: "New Decision", to: "/decisions/new", icon: PlusCircle },
 ];
 
 const secondaryNav = [{ title: "Help Center", to: "/help", icon: LifeBuoy }];
