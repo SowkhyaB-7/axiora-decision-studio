@@ -408,7 +408,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="mt-8">
+    <section className="mt-6">
       <div className="mb-3 flex items-center justify-between gap-4">
         <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           {title}
@@ -688,7 +688,7 @@ function DecideBlock({
         <span className="font-medium text-foreground">
           {VERDICT_LABEL[verdict as keyof typeof VERDICT_LABEL] ?? verdict}
         </span>
-        . The call is still yours.
+        . The decision is still yours.
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2">
