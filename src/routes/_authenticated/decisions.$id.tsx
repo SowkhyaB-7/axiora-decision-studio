@@ -614,10 +614,16 @@ function DecideBlock({
   const [choice, setChoice] = useState<string>("");
   const [reason, setReason] = useState("");
 
-  // Axiora only endorses "Go" when the evidence is ready; anything else is an
-  // override and must be logged with the PM's reasoning.
+  // When Axiora's read is unresolved (conflicting or insufficient evidence),
+  // ANY call the PM makes is theirs rather than the evidence's, so a reason is
+  // recorded. Outside those states, only a "Go" against the evidence is.
+  const unresolvedRead =
+    rawVerdict === "EVIDENCE_CONFLICT" || rawVerdict === "INSUFFICIENT_EVIDENCE";
   const needsOverride =
-    choice === "GO" && rawVerdict !== "READY" && rawVerdict !== "ALMOST_READY";
+    !!choice &&
+    (unresolvedRead ||
+      (choice === "GO" && rawVerdict !== "READY" && rawVerdict !== "ALMOST_READY"));
+
 
   const decide = useMutation({
     mutationFn: async () => {
