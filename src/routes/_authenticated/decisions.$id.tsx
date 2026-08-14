@@ -456,10 +456,14 @@ function ClaimList({
   title,
   claims,
   emptyText,
+  onSelect,
+  activeRefs,
 }: {
   title: string;
   claims: BriefingClaim[];
   emptyText: string;
+  onSelect: (refs: number[]) => void;
+  activeRefs: number[];
 }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-5">
@@ -469,28 +473,44 @@ function ClaimList({
       {claims.length === 0 ? (
         <p className="mt-3 text-sm text-muted-foreground">{emptyText}</p>
       ) : (
-        <ul className="mt-3 space-y-3">
-          {claims.map((c) => (
-            <li key={c.claim} className="text-[15px] leading-relaxed">
-              {c.claim}
-              <span className="ml-1.5 inline-flex gap-1 align-middle">
-                {c.evidence_refs.map((ref) => (
-                  <a
-                    key={ref}
-                    href={`#evidence-${ref}`}
-                    className="rounded border border-border bg-surface-muted px-1.5 py-0.5 text-[11px] text-muted-foreground hover:text-foreground"
-                  >
-                    #{ref}
-                  </a>
-                ))}
-              </span>
-            </li>
-          ))}
+        <ul className="mt-3 space-y-2">
+          {claims.map((c) => {
+            const active =
+              c.evidence_refs.length > 0 &&
+              c.evidence_refs.every((r) => activeRefs.includes(r)) &&
+              activeRefs.length === c.evidence_refs.length;
+            return (
+              <li key={c.claim}>
+                <button
+                  type="button"
+                  onClick={() => onSelect(c.evidence_refs)}
+                  className={cn(
+                    "-mx-2 block w-full rounded-md px-2 py-1 text-left text-[15px] leading-relaxed transition-colors hover:bg-surface-muted",
+                    active && "bg-surface-muted",
+                  )}
+                  title="Show the evidence behind this"
+                >
+                  {c.claim}
+                  <span className="ml-1.5 inline-flex gap-1 align-middle">
+                    {c.evidence_refs.map((ref) => (
+                      <span
+                        key={ref}
+                        className="rounded border border-border bg-surface-muted px-1.5 py-0.5 text-[11px] text-muted-foreground"
+                      >
+                        #{ref}
+                      </span>
+                    ))}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
   );
 }
+
 
 const DIRECTION_TONE: Record<Direction, string> = {
   SUPPORTS: "bg-success/10 text-success border-success/20",
