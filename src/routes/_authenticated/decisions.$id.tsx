@@ -180,7 +180,7 @@ function DecisionBriefing() {
           <ArrowLeft className="h-4 w-4" /> Your Decisions
         </Link>
 
-        <header className="mt-4 border-b border-border pb-6">
+        <header className="mt-3 border-b border-border pb-4">
           <div className="flex flex-wrap items-center gap-2">
             <VerdictBadge verdict={assessment.verdict} />
             <ConfidenceChip confidence={assessment.confidence} />
@@ -190,52 +190,18 @@ function DecisionBriefing() {
               </span>
             )}
           </div>
-          <h1 className="mt-4 font-display text-3xl leading-tight">
+          <h1 className="mt-3 font-display text-3xl leading-tight">
             {decision.title}
           </h1>
           {decision.context && (
-            <p className="mt-3 text-[15px] leading-relaxed text-foreground/80">
+            <p className="mt-2 text-[15px] leading-relaxed text-foreground/80">
               {decision.context}
             </p>
           )}
-          <p className="mt-3 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground">
             {assessment.confidenceReason}
           </p>
         </header>
-
-        {/* Why Axiora says this */}
-        <Section title="Why Axiora Says This">
-          <ul className="space-y-1.5 text-[15px] leading-relaxed text-foreground/85">
-            {assessment.ruleTrace.map((line) => (
-              <li key={line} className="flex gap-2">
-                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
-                {line}
-              </li>
-            ))}
-          </ul>
-
-          {briefingQuery.isLoading && (
-            <p className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> Reading your evidence…
-            </p>
-          )}
-          {briefingQuery.error && (
-            <p className="mt-4 text-sm text-destructive">
-              The reasoning summary couldn't be generated. The verdict above is
-              still computed from your evidence.
-            </p>
-          )}
-          {briefing && (
-            <p className="mt-4 text-[15px] leading-relaxed text-foreground/85">
-              {briefing.why}
-            </p>
-          )}
-          {briefing && !briefing.ai_generated && (
-            <p className="mt-2 text-xs text-muted-foreground">
-              Written from your stored evidence records without AI assistance.
-            </p>
-          )}
-        </Section>
 
         {assessment.verdict === "INSUFFICIENT_EVIDENCE" && (
           <Callout
@@ -249,40 +215,68 @@ function DecisionBriefing() {
         )}
 
         {assessment.isConflict && (
-          <Callout
-            tone="destructive"
-            icon={Scale}
-            title="Evidence Conflict"
-          >
-            Your evidence disagrees with itself. Axiora will not average these
-            into a middle-ground answer — the disagreement has to be resolved.
+          <Callout tone="destructive" icon={Scale} title="Evidence Conflict">
+            {briefing?.unresolved ??
+              "Your evidence disagrees with itself. Axiora will not average these into a middle-ground answer — the disagreement has to be resolved."}
           </Callout>
         )}
 
+        {/* Why Axiora says this */}
+        <Section title="Why Axiora Says This">
+          <ul className="space-y-1.5 text-[15px] leading-relaxed text-foreground/85">
+            {assessment.ruleTrace.map((line) => (
+              <li key={line} className="flex gap-2">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
+                {line}
+              </li>
+            ))}
+          </ul>
+
+          {briefingQuery.isLoading && (
+            <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Reading your evidence…
+            </p>
+          )}
+          {briefingQuery.error && (
+            <p className="mt-3 text-sm text-destructive">
+              The reasoning summary couldn't be generated. The verdict above is
+              still computed from your evidence.
+            </p>
+          )}
+          {briefing && (
+            <p className="mt-3 text-[15px] leading-relaxed text-foreground/85">
+              {briefing.why}
+            </p>
+          )}
+          {briefing && !briefing.ai_generated && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Written from your stored evidence records without AI assistance.
+            </p>
+          )}
+        </Section>
+
         {briefing && (
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
             <ClaimList
-              title="Evidence For"
+              title="Argues For Going Ahead"
               claims={briefing.supports}
               emptyText="Nothing on record supports going ahead yet."
+              onSelect={focusEvidence}
+              activeRefs={highlight}
             />
             <ClaimList
-              title="Evidence Against"
+              title="Argues Against Going Ahead"
               claims={briefing.contradicts}
               emptyText="No evidence on record argues against going ahead."
+              onSelect={focusEvidence}
+              activeRefs={highlight}
             />
           </div>
         )}
 
-        {briefing?.unresolved && (
-          <Callout tone="destructive" icon={AlertTriangle} title="Unresolved">
-            {briefing.unresolved}
-          </Callout>
-        )}
-
         {briefing && briefing.missing.length > 0 && (
-          <Section title="What's Missing">
-            <ul className="space-y-2 text-[15px] leading-relaxed text-foreground/85">
+          <Section title="What Would Change This">
+            <ul className="space-y-1.5 text-[15px] leading-relaxed text-foreground/85">
               {briefing.missing.map((m) => (
                 <li key={m} className="flex gap-2">
                   <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent/70" />
@@ -300,6 +294,7 @@ function DecisionBriefing() {
             </p>
           </Section>
         )}
+
 
         {/* Evidence */}
         <Section
