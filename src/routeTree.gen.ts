@@ -32,6 +32,7 @@ import { Route as AuthenticatedDecisionsNewRouteImport } from './routes/_authent
 import { Route as AuthenticatedDecisionsIdRouteImport } from './routes/_authenticated/decisions.$id'
 import { Route as AuthenticatedBoardsNewRouteImport } from './routes/_authenticated/boards.new'
 import { Route as AuthenticatedBoardsIdRouteImport } from './routes/_authenticated/boards.$id'
+import { Route as AuthenticatedDecisionsIdOutcomeRouteImport } from './routes/_authenticated/decisions.$id_.outcome'
 import { Route as AuthenticatedBoardsIdStakeholderAlignmentRouteImport } from './routes/_authenticated/boards.$id_.stakeholder-alignment'
 import { Route as AuthenticatedBoardsIdProductTechnicalRouteImport } from './routes/_authenticated/boards.$id_.product-technical'
 import { Route as AuthenticatedBoardsIdOperationalRouteImport } from './routes/_authenticated/boards.$id_.operational'
@@ -155,6 +156,12 @@ const AuthenticatedBoardsIdRoute = AuthenticatedBoardsIdRouteImport.update({
   path: '/boards/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDecisionsIdOutcomeRoute =
+  AuthenticatedDecisionsIdOutcomeRouteImport.update({
+    id: '/decisions/$id_/outcome',
+    path: '/decisions/$id/outcome',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedBoardsIdStakeholderAlignmentRoute =
   AuthenticatedBoardsIdStakeholderAlignmentRouteImport.update({
     id: '/boards/$id_/stakeholder-alignment',
@@ -221,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/boards/$id/operational': typeof AuthenticatedBoardsIdOperationalRoute
   '/boards/$id/product-technical': typeof AuthenticatedBoardsIdProductTechnicalRoute
   '/boards/$id/stakeholder-alignment': typeof AuthenticatedBoardsIdStakeholderAlignmentRoute
+  '/decisions/$id/outcome': typeof AuthenticatedDecisionsIdOutcomeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -250,6 +258,7 @@ export interface FileRoutesByTo {
   '/boards/$id/operational': typeof AuthenticatedBoardsIdOperationalRoute
   '/boards/$id/product-technical': typeof AuthenticatedBoardsIdProductTechnicalRoute
   '/boards/$id/stakeholder-alignment': typeof AuthenticatedBoardsIdStakeholderAlignmentRoute
+  '/decisions/$id/outcome': typeof AuthenticatedDecisionsIdOutcomeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -282,6 +291,7 @@ export interface FileRoutesById {
   '/_authenticated/boards/$id_/operational': typeof AuthenticatedBoardsIdOperationalRoute
   '/_authenticated/boards/$id_/product-technical': typeof AuthenticatedBoardsIdProductTechnicalRoute
   '/_authenticated/boards/$id_/stakeholder-alignment': typeof AuthenticatedBoardsIdStakeholderAlignmentRoute
+  '/_authenticated/decisions/$id_/outcome': typeof AuthenticatedDecisionsIdOutcomeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -314,6 +324,7 @@ export interface FileRouteTypes {
     | '/boards/$id/operational'
     | '/boards/$id/product-technical'
     | '/boards/$id/stakeholder-alignment'
+    | '/decisions/$id/outcome'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -343,6 +354,7 @@ export interface FileRouteTypes {
     | '/boards/$id/operational'
     | '/boards/$id/product-technical'
     | '/boards/$id/stakeholder-alignment'
+    | '/decisions/$id/outcome'
   id:
     | '__root__'
     | '/'
@@ -374,6 +386,7 @@ export interface FileRouteTypes {
     | '/_authenticated/boards/$id_/operational'
     | '/_authenticated/boards/$id_/product-technical'
     | '/_authenticated/boards/$id_/stakeholder-alignment'
+    | '/_authenticated/decisions/$id_/outcome'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -547,6 +560,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBoardsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/decisions/$id_/outcome': {
+      id: '/_authenticated/decisions/$id_/outcome'
+      path: '/decisions/$id/outcome'
+      fullPath: '/decisions/$id/outcome'
+      preLoaderRoute: typeof AuthenticatedDecisionsIdOutcomeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/boards/$id_/stakeholder-alignment': {
       id: '/_authenticated/boards/$id_/stakeholder-alignment'
       path: '/boards/$id/stakeholder-alignment'
@@ -604,6 +624,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBoardsIdOperationalRoute: typeof AuthenticatedBoardsIdOperationalRoute
   AuthenticatedBoardsIdProductTechnicalRoute: typeof AuthenticatedBoardsIdProductTechnicalRoute
   AuthenticatedBoardsIdStakeholderAlignmentRoute: typeof AuthenticatedBoardsIdStakeholderAlignmentRoute
+  AuthenticatedDecisionsIdOutcomeRoute: typeof AuthenticatedDecisionsIdOutcomeRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -621,6 +642,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedBoardsIdProductTechnicalRoute,
   AuthenticatedBoardsIdStakeholderAlignmentRoute:
     AuthenticatedBoardsIdStakeholderAlignmentRoute,
+  AuthenticatedDecisionsIdOutcomeRoute: AuthenticatedDecisionsIdOutcomeRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
