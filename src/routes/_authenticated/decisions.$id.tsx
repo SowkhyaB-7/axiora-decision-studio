@@ -341,10 +341,12 @@ function DecisionBriefing() {
                 key={e.id}
                 item={e}
                 locked={decided}
+                highlighted={highlight.includes(e.ref)}
                 onDelete={() => removeEvidence.mutate(e.id)}
               />
             ))}
           </ul>
+
         </Section>
 
         {decisionQuery.data?.overrides.length ? (
