@@ -126,23 +126,26 @@ export function computeAssessment(
   if (items.length < RULES.MIN_EVIDENCE_ITEMS) {
     verdict = "INSUFFICIENT_EVIDENCE";
     trace.push(
-      `Only ${items.length} of the ${RULES.MIN_EVIDENCE_ITEMS} evidence items Axiora requires before it will make a recommendation.`,
+      items.length === 0
+        ? "Nothing has been recorded yet, so there is nothing for Axiora to reason about."
+        : "The evidence on record is too thin to stand behind a recommendation, and none of the three areas has been properly examined.",
     );
   } else if (substantive.length < RULES.MIN_SUBSTANTIVE_ITEMS) {
     verdict = "INSUFFICIENT_EVIDENCE";
     trace.push(
-      `${items.length} evidence items are recorded, but only ${substantive.length} are rated moderate or strong.`,
+      "Almost everything on record is a weak signal: hearsay, single anecdotes or unquantified opinion. That isn't enough to justify a call either way.",
     );
   } else if (isConflict) {
     verdict = "EVIDENCE_CONFLICT";
     trace.push(
-      `${substantiveSupport.length} substantive ${substantiveSupport.length === 1 ? "item points" : "items point"} toward going ahead and ${substantiveContra.length} ${substantiveContra.length === 1 ? "points" : "point"} against it. Axiora does not average these.`,
+      "Credible evidence pulls in opposite directions here: what argues for going ahead and what argues against it are both substantive, and neither has been answered by the other. Axiora will not blend them into a middle-ground answer.",
     );
   } else if (substantiveContra.length > 0 && substantiveSupport.length === 0) {
     verdict = "NOT_READY";
     trace.push(
       "The only substantive evidence on record argues against launching.",
     );
+
   } else if (uncoveredCategories.length >= 2) {
     verdict = "NOT_READY";
     trace.push(
