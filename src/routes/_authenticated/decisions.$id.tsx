@@ -521,18 +521,26 @@ const DIRECTION_TONE: Record<Direction, string> = {
 function EvidenceCard({
   item,
   locked,
+  highlighted,
   onDelete,
 }: {
   item: EvidenceItem;
   locked: boolean;
+  highlighted?: boolean;
   onDelete: () => void;
 }) {
   const [open, setOpen] = useState(false);
   return (
     <li
       id={`evidence-${item.ref}`}
-      className="rounded-xl border border-border bg-surface p-5 scroll-mt-24"
+      className={cn(
+        "rounded-xl border bg-surface p-5 scroll-mt-24 transition-colors",
+        highlighted
+          ? "border-primary/50 ring-2 ring-primary/20"
+          : "border-border",
+      )}
     >
+
       <div className="flex flex-wrap items-center gap-2 text-xs">
         <span className="rounded border border-border bg-surface-muted px-1.5 py-0.5 text-muted-foreground">
           #{item.ref}
