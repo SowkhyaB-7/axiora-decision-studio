@@ -30,15 +30,7 @@ import { Route as HelpAboutRouteImport } from './routes/help/about'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDecisionsNewRouteImport } from './routes/_authenticated/decisions.new'
 import { Route as AuthenticatedDecisionsIdRouteImport } from './routes/_authenticated/decisions.$id'
-import { Route as AuthenticatedBoardsNewRouteImport } from './routes/_authenticated/boards.new'
-import { Route as AuthenticatedBoardsIdRouteImport } from './routes/_authenticated/boards.$id'
 import { Route as AuthenticatedDecisionsIdOutcomeRouteImport } from './routes/_authenticated/decisions.$id_.outcome'
-import { Route as AuthenticatedBoardsIdStakeholderAlignmentRouteImport } from './routes/_authenticated/boards.$id_.stakeholder-alignment'
-import { Route as AuthenticatedBoardsIdProductTechnicalRouteImport } from './routes/_authenticated/boards.$id_.product-technical'
-import { Route as AuthenticatedBoardsIdOperationalRouteImport } from './routes/_authenticated/boards.$id_.operational'
-import { Route as AuthenticatedBoardsIdCustomerValidationRouteImport } from './routes/_authenticated/boards.$id_.customer-validation'
-import { Route as AuthenticatedBoardsIdBusinessRouteImport } from './routes/_authenticated/boards.$id_.business'
-import { Route as AuthenticatedBoardsIdAnalysisRouteImport } from './routes/_authenticated/boards.$id_.analysis'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -146,56 +138,10 @@ const AuthenticatedDecisionsIdRoute =
     path: '/decisions/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedBoardsNewRoute = AuthenticatedBoardsNewRouteImport.update({
-  id: '/boards/new',
-  path: '/boards/new',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedBoardsIdRoute = AuthenticatedBoardsIdRouteImport.update({
-  id: '/boards/$id',
-  path: '/boards/$id',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedDecisionsIdOutcomeRoute =
   AuthenticatedDecisionsIdOutcomeRouteImport.update({
     id: '/decisions/$id_/outcome',
     path: '/decisions/$id/outcome',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedBoardsIdStakeholderAlignmentRoute =
-  AuthenticatedBoardsIdStakeholderAlignmentRouteImport.update({
-    id: '/boards/$id_/stakeholder-alignment',
-    path: '/boards/$id/stakeholder-alignment',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedBoardsIdProductTechnicalRoute =
-  AuthenticatedBoardsIdProductTechnicalRouteImport.update({
-    id: '/boards/$id_/product-technical',
-    path: '/boards/$id/product-technical',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedBoardsIdOperationalRoute =
-  AuthenticatedBoardsIdOperationalRouteImport.update({
-    id: '/boards/$id_/operational',
-    path: '/boards/$id/operational',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedBoardsIdCustomerValidationRoute =
-  AuthenticatedBoardsIdCustomerValidationRouteImport.update({
-    id: '/boards/$id_/customer-validation',
-    path: '/boards/$id/customer-validation',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedBoardsIdBusinessRoute =
-  AuthenticatedBoardsIdBusinessRouteImport.update({
-    id: '/boards/$id_/business',
-    path: '/boards/$id/business',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedBoardsIdAnalysisRoute =
-  AuthenticatedBoardsIdAnalysisRouteImport.update({
-    id: '/boards/$id_/analysis',
-    path: '/boards/$id/analysis',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -218,16 +164,8 @@ export interface FileRoutesByFullPath {
   '/help/release-notes': typeof HelpReleaseNotesRoute
   '/help/user-guide': typeof HelpUserGuideRoute
   '/help/': typeof HelpIndexRoute
-  '/boards/$id': typeof AuthenticatedBoardsIdRoute
-  '/boards/new': typeof AuthenticatedBoardsNewRoute
   '/decisions/$id': typeof AuthenticatedDecisionsIdRoute
   '/decisions/new': typeof AuthenticatedDecisionsNewRoute
-  '/boards/$id/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
-  '/boards/$id/business': typeof AuthenticatedBoardsIdBusinessRoute
-  '/boards/$id/customer-validation': typeof AuthenticatedBoardsIdCustomerValidationRoute
-  '/boards/$id/operational': typeof AuthenticatedBoardsIdOperationalRoute
-  '/boards/$id/product-technical': typeof AuthenticatedBoardsIdProductTechnicalRoute
-  '/boards/$id/stakeholder-alignment': typeof AuthenticatedBoardsIdStakeholderAlignmentRoute
   '/decisions/$id/outcome': typeof AuthenticatedDecisionsIdOutcomeRoute
 }
 export interface FileRoutesByTo {
@@ -248,16 +186,8 @@ export interface FileRoutesByTo {
   '/help/release-notes': typeof HelpReleaseNotesRoute
   '/help/user-guide': typeof HelpUserGuideRoute
   '/help': typeof HelpIndexRoute
-  '/boards/$id': typeof AuthenticatedBoardsIdRoute
-  '/boards/new': typeof AuthenticatedBoardsNewRoute
   '/decisions/$id': typeof AuthenticatedDecisionsIdRoute
   '/decisions/new': typeof AuthenticatedDecisionsNewRoute
-  '/boards/$id/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
-  '/boards/$id/business': typeof AuthenticatedBoardsIdBusinessRoute
-  '/boards/$id/customer-validation': typeof AuthenticatedBoardsIdCustomerValidationRoute
-  '/boards/$id/operational': typeof AuthenticatedBoardsIdOperationalRoute
-  '/boards/$id/product-technical': typeof AuthenticatedBoardsIdProductTechnicalRoute
-  '/boards/$id/stakeholder-alignment': typeof AuthenticatedBoardsIdStakeholderAlignmentRoute
   '/decisions/$id/outcome': typeof AuthenticatedDecisionsIdOutcomeRoute
 }
 export interface FileRoutesById {
@@ -281,16 +211,8 @@ export interface FileRoutesById {
   '/help/release-notes': typeof HelpReleaseNotesRoute
   '/help/user-guide': typeof HelpUserGuideRoute
   '/help/': typeof HelpIndexRoute
-  '/_authenticated/boards/$id': typeof AuthenticatedBoardsIdRoute
-  '/_authenticated/boards/new': typeof AuthenticatedBoardsNewRoute
   '/_authenticated/decisions/$id': typeof AuthenticatedDecisionsIdRoute
   '/_authenticated/decisions/new': typeof AuthenticatedDecisionsNewRoute
-  '/_authenticated/boards/$id_/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
-  '/_authenticated/boards/$id_/business': typeof AuthenticatedBoardsIdBusinessRoute
-  '/_authenticated/boards/$id_/customer-validation': typeof AuthenticatedBoardsIdCustomerValidationRoute
-  '/_authenticated/boards/$id_/operational': typeof AuthenticatedBoardsIdOperationalRoute
-  '/_authenticated/boards/$id_/product-technical': typeof AuthenticatedBoardsIdProductTechnicalRoute
-  '/_authenticated/boards/$id_/stakeholder-alignment': typeof AuthenticatedBoardsIdStakeholderAlignmentRoute
   '/_authenticated/decisions/$id_/outcome': typeof AuthenticatedDecisionsIdOutcomeRoute
 }
 export interface FileRouteTypes {
@@ -314,16 +236,8 @@ export interface FileRouteTypes {
     | '/help/release-notes'
     | '/help/user-guide'
     | '/help/'
-    | '/boards/$id'
-    | '/boards/new'
     | '/decisions/$id'
     | '/decisions/new'
-    | '/boards/$id/analysis'
-    | '/boards/$id/business'
-    | '/boards/$id/customer-validation'
-    | '/boards/$id/operational'
-    | '/boards/$id/product-technical'
-    | '/boards/$id/stakeholder-alignment'
     | '/decisions/$id/outcome'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -344,16 +258,8 @@ export interface FileRouteTypes {
     | '/help/release-notes'
     | '/help/user-guide'
     | '/help'
-    | '/boards/$id'
-    | '/boards/new'
     | '/decisions/$id'
     | '/decisions/new'
-    | '/boards/$id/analysis'
-    | '/boards/$id/business'
-    | '/boards/$id/customer-validation'
-    | '/boards/$id/operational'
-    | '/boards/$id/product-technical'
-    | '/boards/$id/stakeholder-alignment'
     | '/decisions/$id/outcome'
   id:
     | '__root__'
@@ -376,16 +282,8 @@ export interface FileRouteTypes {
     | '/help/release-notes'
     | '/help/user-guide'
     | '/help/'
-    | '/_authenticated/boards/$id'
-    | '/_authenticated/boards/new'
     | '/_authenticated/decisions/$id'
     | '/_authenticated/decisions/new'
-    | '/_authenticated/boards/$id_/analysis'
-    | '/_authenticated/boards/$id_/business'
-    | '/_authenticated/boards/$id_/customer-validation'
-    | '/_authenticated/boards/$id_/operational'
-    | '/_authenticated/boards/$id_/product-technical'
-    | '/_authenticated/boards/$id_/stakeholder-alignment'
     | '/_authenticated/decisions/$id_/outcome'
   fileRoutesById: FileRoutesById
 }
@@ -546,20 +444,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDecisionsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/boards/new': {
-      id: '/_authenticated/boards/new'
-      path: '/boards/new'
-      fullPath: '/boards/new'
-      preLoaderRoute: typeof AuthenticatedBoardsNewRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/boards/$id': {
-      id: '/_authenticated/boards/$id'
-      path: '/boards/$id'
-      fullPath: '/boards/$id'
-      preLoaderRoute: typeof AuthenticatedBoardsIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/decisions/$id_/outcome': {
       id: '/_authenticated/decisions/$id_/outcome'
       path: '/decisions/$id/outcome'
@@ -567,81 +451,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDecisionsIdOutcomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/boards/$id_/stakeholder-alignment': {
-      id: '/_authenticated/boards/$id_/stakeholder-alignment'
-      path: '/boards/$id/stakeholder-alignment'
-      fullPath: '/boards/$id/stakeholder-alignment'
-      preLoaderRoute: typeof AuthenticatedBoardsIdStakeholderAlignmentRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/boards/$id_/product-technical': {
-      id: '/_authenticated/boards/$id_/product-technical'
-      path: '/boards/$id/product-technical'
-      fullPath: '/boards/$id/product-technical'
-      preLoaderRoute: typeof AuthenticatedBoardsIdProductTechnicalRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/boards/$id_/operational': {
-      id: '/_authenticated/boards/$id_/operational'
-      path: '/boards/$id/operational'
-      fullPath: '/boards/$id/operational'
-      preLoaderRoute: typeof AuthenticatedBoardsIdOperationalRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/boards/$id_/customer-validation': {
-      id: '/_authenticated/boards/$id_/customer-validation'
-      path: '/boards/$id/customer-validation'
-      fullPath: '/boards/$id/customer-validation'
-      preLoaderRoute: typeof AuthenticatedBoardsIdCustomerValidationRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/boards/$id_/business': {
-      id: '/_authenticated/boards/$id_/business'
-      path: '/boards/$id/business'
-      fullPath: '/boards/$id/business'
-      preLoaderRoute: typeof AuthenticatedBoardsIdBusinessRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/boards/$id_/analysis': {
-      id: '/_authenticated/boards/$id_/analysis'
-      path: '/boards/$id/analysis'
-      fullPath: '/boards/$id/analysis'
-      preLoaderRoute: typeof AuthenticatedBoardsIdAnalysisRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedBoardsIdRoute: typeof AuthenticatedBoardsIdRoute
-  AuthenticatedBoardsNewRoute: typeof AuthenticatedBoardsNewRoute
   AuthenticatedDecisionsIdRoute: typeof AuthenticatedDecisionsIdRoute
   AuthenticatedDecisionsNewRoute: typeof AuthenticatedDecisionsNewRoute
-  AuthenticatedBoardsIdAnalysisRoute: typeof AuthenticatedBoardsIdAnalysisRoute
-  AuthenticatedBoardsIdBusinessRoute: typeof AuthenticatedBoardsIdBusinessRoute
-  AuthenticatedBoardsIdCustomerValidationRoute: typeof AuthenticatedBoardsIdCustomerValidationRoute
-  AuthenticatedBoardsIdOperationalRoute: typeof AuthenticatedBoardsIdOperationalRoute
-  AuthenticatedBoardsIdProductTechnicalRoute: typeof AuthenticatedBoardsIdProductTechnicalRoute
-  AuthenticatedBoardsIdStakeholderAlignmentRoute: typeof AuthenticatedBoardsIdStakeholderAlignmentRoute
   AuthenticatedDecisionsIdOutcomeRoute: typeof AuthenticatedDecisionsIdOutcomeRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedBoardsIdRoute: AuthenticatedBoardsIdRoute,
-  AuthenticatedBoardsNewRoute: AuthenticatedBoardsNewRoute,
   AuthenticatedDecisionsIdRoute: AuthenticatedDecisionsIdRoute,
   AuthenticatedDecisionsNewRoute: AuthenticatedDecisionsNewRoute,
-  AuthenticatedBoardsIdAnalysisRoute: AuthenticatedBoardsIdAnalysisRoute,
-  AuthenticatedBoardsIdBusinessRoute: AuthenticatedBoardsIdBusinessRoute,
-  AuthenticatedBoardsIdCustomerValidationRoute:
-    AuthenticatedBoardsIdCustomerValidationRoute,
-  AuthenticatedBoardsIdOperationalRoute: AuthenticatedBoardsIdOperationalRoute,
-  AuthenticatedBoardsIdProductTechnicalRoute:
-    AuthenticatedBoardsIdProductTechnicalRoute,
-  AuthenticatedBoardsIdStakeholderAlignmentRoute:
-    AuthenticatedBoardsIdStakeholderAlignmentRoute,
   AuthenticatedDecisionsIdOutcomeRoute: AuthenticatedDecisionsIdOutcomeRoute,
 }
 
