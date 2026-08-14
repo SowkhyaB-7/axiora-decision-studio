@@ -136,7 +136,7 @@ export function computeAssessment(
   } else if (isConflict) {
     verdict = "EVIDENCE_CONFLICT";
     trace.push(
-      `${substantiveSupport.length} substantive item(s) point toward launching and ${substantiveContra.length} point against it. Axiora does not average these.`,
+      `${substantiveSupport.length} substantive ${substantiveSupport.length === 1 ? "item points" : "items point"} toward going ahead and ${substantiveContra.length} ${substantiveContra.length === 1 ? "points" : "point"} against it. Axiora does not average these.`,
     );
   } else if (substantiveContra.length > 0 && substantiveSupport.length === 0) {
     verdict = "NOT_READY";
