@@ -357,20 +357,24 @@ function DecisionBriefing() {
                   key={o.id}
                   className="rounded-lg border border-border bg-surface-muted/60 p-4 text-sm"
                 >
-                  <div className="flex items-center gap-2 text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-muted-foreground">
                     <ShieldAlert className="h-4 w-4" />
                     Chose{" "}
                     <span className="font-medium text-foreground">
                       {CHOICES.find((c) => c.value === o.override_choice)?.label ??
                         o.override_choice}
                     </span>{" "}
-                    against a verdict of{" "}
+                    while Axiora's read was{" "}
                     <span className="font-medium text-foreground">
                       {VERDICT_LABEL[o.original_verdict as keyof typeof VERDICT_LABEL] ??
                         o.original_verdict}
                     </span>
+                    <span className="text-xs">
+                      · {new Date(o.created_at).toISOString().slice(0, 10)}
+                    </span>
                   </div>
                   <p className="mt-2 text-foreground/85">{o.reason}</p>
+
                 </li>
               ))}
             </ul>
