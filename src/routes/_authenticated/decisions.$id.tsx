@@ -89,6 +89,15 @@ function DecisionBriefing() {
   const navigate = useNavigate();
   const runBriefing = useServerFn(getBriefing);
   const [adding, setAdding] = useState(false);
+  const [highlight, setHighlight] = useState<number[]>([]);
+
+  /** Links a briefing claim back to the exact stored evidence behind it. */
+  const focusEvidence = (refs: number[]) => {
+    setHighlight(refs);
+    const first = document.getElementById(`evidence-${refs[0]}`);
+    first?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
 
   const decisionQuery = useQuery({
     queryKey: ["decision", id],
