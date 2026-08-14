@@ -708,18 +708,20 @@ function DecideBlock({
       {needsOverride && (
         <div className="mt-4 rounded-lg border border-destructive/25 bg-destructive/5 p-4">
           <div className="flex items-center gap-2 text-sm font-medium text-destructive">
-            <ShieldAlert className="h-4 w-4" /> This overrides Axiora
+            <ShieldAlert className="h-4 w-4" /> Your call, not the evidence's
           </div>
           <p className="mt-1.5 text-sm text-foreground/80">
-            The evidence doesn't support going ahead. You can still choose Go,
-            but your reasoning will be recorded alongside the decision.
+            {unresolvedRead
+              ? "The evidence doesn't resolve this on its own. You can still decide, and your reasoning will be recorded alongside the decision."
+              : "The evidence doesn't support going ahead. You can still choose Go, but your reasoning will be recorded alongside the decision."}
           </p>
           <textarea
             rows={3}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="Why are you going ahead despite the evidence?"
+            placeholder="Why are you deciding this way, given the evidence?"
             className={cn(inputClass, "mt-3 resize-y")}
+
           />
         </div>
       )}
