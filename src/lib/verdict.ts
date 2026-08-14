@@ -237,11 +237,14 @@ function computeConfidence(input: {
     return {
       confidence: "Medium",
       confidenceReason:
-        input.coveredCount === 3
-          ? "Confidence is medium because all three areas are covered, but few sources are rated strong."
-          : "Confidence is medium because one of the three evidence areas is still unrepresented.",
+        input.coveredCount < 3
+          ? "Confidence is medium because one of the three evidence areas is still unrepresented."
+          : input.strongCount >= 2
+            ? "Confidence is medium because all three areas are covered by strong evidence, but each rests on a single source."
+            : "Confidence is medium because all three areas are covered, but few sources are rated strong.",
     };
   }
+
   return {
     confidence: "Low",
     confidenceReason:
