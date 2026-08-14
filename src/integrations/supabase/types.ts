@@ -141,6 +141,150 @@ export type Database = {
         }
         Relationships: []
       }
+      decision_briefings: {
+        Row: {
+          created_at: string
+          decision_id: string
+          fingerprint: string
+          id: string
+          payload: Json
+        }
+        Insert: {
+          created_at?: string
+          decision_id: string
+          fingerprint: string
+          id?: string
+          payload: Json
+        }
+        Update: {
+          created_at?: string
+          decision_id?: string
+          fingerprint?: string
+          id?: string
+          payload?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decision_briefings_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decision_outcomes: {
+        Row: {
+          created_at: string
+          decision_id: string
+          id: string
+          note: string | null
+          outcome: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          decision_id: string
+          id?: string
+          note?: string | null
+          outcome: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          decision_id?: string
+          id?: string
+          note?: string | null
+          outcome?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decision_outcomes_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: true
+            referencedRelation: "decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decision_overrides: {
+        Row: {
+          created_at: string
+          decision_id: string
+          id: string
+          original_verdict: string
+          override_choice: string
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          decision_id: string
+          id?: string
+          original_verdict: string
+          override_choice: string
+          reason: string
+        }
+        Update: {
+          created_at?: string
+          decision_id?: string
+          id?: string
+          original_verdict?: string
+          override_choice?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decision_overrides_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decisions: {
+        Row: {
+          context: string | null
+          created_at: string
+          decide_by: string | null
+          decided_at: string | null
+          final_choice: string | null
+          id: string
+          is_demo: boolean
+          owner_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string
+          decide_by?: string | null
+          decided_at?: string | null
+          final_choice?: string | null
+          id?: string
+          is_demo?: boolean
+          owner_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          context?: string | null
+          created_at?: string
+          decide_by?: string | null
+          decided_at?: string | null
+          final_choice?: string | null
+          id?: string
+          is_demo?: boolean
+          owner_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       evidence: {
         Row: {
           attachment_path: string | null
@@ -203,6 +347,59 @@ export type Database = {
           },
         ]
       }
+      evidence_items: {
+        Row: {
+          category: string
+          created_at: string
+          decision_id: string
+          direction: string
+          extraction_source: string
+          id: string
+          raw_text: string
+          ref: number
+          strength: string
+          takeaway: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          decision_id: string
+          direction: string
+          extraction_source?: string
+          id?: string
+          raw_text: string
+          ref?: number
+          strength: string
+          takeaway?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          decision_id?: string
+          direction?: string
+          extraction_source?: string
+          id?: string
+          raw_text?: string
+          ref?: number
+          strength?: string
+          takeaway?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_items_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       final_decisions: {
         Row: {
           board_id: string
@@ -261,7 +458,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      seed_demo_decision: { Args: { _user_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

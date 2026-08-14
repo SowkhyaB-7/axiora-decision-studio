@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.seed_demo_decision(uuid) FROM PUBLIC, anon, authenticated;

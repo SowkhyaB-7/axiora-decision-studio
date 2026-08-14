@@ -28,6 +28,8 @@ import { Route as HelpContactRouteImport } from './routes/help/contact'
 import { Route as HelpArchitectureRouteImport } from './routes/help/architecture'
 import { Route as HelpAboutRouteImport } from './routes/help/about'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDecisionsNewRouteImport } from './routes/_authenticated/decisions.new'
+import { Route as AuthenticatedDecisionsIdRouteImport } from './routes/_authenticated/decisions.$id'
 import { Route as AuthenticatedBoardsNewRouteImport } from './routes/_authenticated/boards.new'
 import { Route as AuthenticatedBoardsIdRouteImport } from './routes/_authenticated/boards.$id'
 import { Route as AuthenticatedBoardsIdStakeholderAlignmentRouteImport } from './routes/_authenticated/boards.$id_.stakeholder-alignment'
@@ -131,6 +133,18 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDecisionsNewRoute =
+  AuthenticatedDecisionsNewRouteImport.update({
+    id: '/decisions/new',
+    path: '/decisions/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDecisionsIdRoute =
+  AuthenticatedDecisionsIdRouteImport.update({
+    id: '/decisions/$id',
+    path: '/decisions/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedBoardsNewRoute = AuthenticatedBoardsNewRouteImport.update({
   id: '/boards/new',
   path: '/boards/new',
@@ -199,6 +213,8 @@ export interface FileRoutesByFullPath {
   '/help/': typeof HelpIndexRoute
   '/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/boards/new': typeof AuthenticatedBoardsNewRoute
+  '/decisions/$id': typeof AuthenticatedDecisionsIdRoute
+  '/decisions/new': typeof AuthenticatedDecisionsNewRoute
   '/boards/$id/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
   '/boards/$id/business': typeof AuthenticatedBoardsIdBusinessRoute
   '/boards/$id/customer-validation': typeof AuthenticatedBoardsIdCustomerValidationRoute
@@ -226,6 +242,8 @@ export interface FileRoutesByTo {
   '/help': typeof HelpIndexRoute
   '/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/boards/new': typeof AuthenticatedBoardsNewRoute
+  '/decisions/$id': typeof AuthenticatedDecisionsIdRoute
+  '/decisions/new': typeof AuthenticatedDecisionsNewRoute
   '/boards/$id/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
   '/boards/$id/business': typeof AuthenticatedBoardsIdBusinessRoute
   '/boards/$id/customer-validation': typeof AuthenticatedBoardsIdCustomerValidationRoute
@@ -256,6 +274,8 @@ export interface FileRoutesById {
   '/help/': typeof HelpIndexRoute
   '/_authenticated/boards/$id': typeof AuthenticatedBoardsIdRoute
   '/_authenticated/boards/new': typeof AuthenticatedBoardsNewRoute
+  '/_authenticated/decisions/$id': typeof AuthenticatedDecisionsIdRoute
+  '/_authenticated/decisions/new': typeof AuthenticatedDecisionsNewRoute
   '/_authenticated/boards/$id_/analysis': typeof AuthenticatedBoardsIdAnalysisRoute
   '/_authenticated/boards/$id_/business': typeof AuthenticatedBoardsIdBusinessRoute
   '/_authenticated/boards/$id_/customer-validation': typeof AuthenticatedBoardsIdCustomerValidationRoute
@@ -286,6 +306,8 @@ export interface FileRouteTypes {
     | '/help/'
     | '/boards/$id'
     | '/boards/new'
+    | '/decisions/$id'
+    | '/decisions/new'
     | '/boards/$id/analysis'
     | '/boards/$id/business'
     | '/boards/$id/customer-validation'
@@ -313,6 +335,8 @@ export interface FileRouteTypes {
     | '/help'
     | '/boards/$id'
     | '/boards/new'
+    | '/decisions/$id'
+    | '/decisions/new'
     | '/boards/$id/analysis'
     | '/boards/$id/business'
     | '/boards/$id/customer-validation'
@@ -342,6 +366,8 @@ export interface FileRouteTypes {
     | '/help/'
     | '/_authenticated/boards/$id'
     | '/_authenticated/boards/new'
+    | '/_authenticated/decisions/$id'
+    | '/_authenticated/decisions/new'
     | '/_authenticated/boards/$id_/analysis'
     | '/_authenticated/boards/$id_/business'
     | '/_authenticated/boards/$id_/customer-validation'
@@ -493,6 +519,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/decisions/new': {
+      id: '/_authenticated/decisions/new'
+      path: '/decisions/new'
+      fullPath: '/decisions/new'
+      preLoaderRoute: typeof AuthenticatedDecisionsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/decisions/$id': {
+      id: '/_authenticated/decisions/$id'
+      path: '/decisions/$id'
+      fullPath: '/decisions/$id'
+      preLoaderRoute: typeof AuthenticatedDecisionsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/boards/new': {
       id: '/_authenticated/boards/new'
       path: '/boards/new'
@@ -556,6 +596,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedBoardsIdRoute: typeof AuthenticatedBoardsIdRoute
   AuthenticatedBoardsNewRoute: typeof AuthenticatedBoardsNewRoute
+  AuthenticatedDecisionsIdRoute: typeof AuthenticatedDecisionsIdRoute
+  AuthenticatedDecisionsNewRoute: typeof AuthenticatedDecisionsNewRoute
   AuthenticatedBoardsIdAnalysisRoute: typeof AuthenticatedBoardsIdAnalysisRoute
   AuthenticatedBoardsIdBusinessRoute: typeof AuthenticatedBoardsIdBusinessRoute
   AuthenticatedBoardsIdCustomerValidationRoute: typeof AuthenticatedBoardsIdCustomerValidationRoute
@@ -568,6 +610,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedBoardsIdRoute: AuthenticatedBoardsIdRoute,
   AuthenticatedBoardsNewRoute: AuthenticatedBoardsNewRoute,
+  AuthenticatedDecisionsIdRoute: AuthenticatedDecisionsIdRoute,
+  AuthenticatedDecisionsNewRoute: AuthenticatedDecisionsNewRoute,
   AuthenticatedBoardsIdAnalysisRoute: AuthenticatedBoardsIdAnalysisRoute,
   AuthenticatedBoardsIdBusinessRoute: AuthenticatedBoardsIdBusinessRoute,
   AuthenticatedBoardsIdCustomerValidationRoute:
