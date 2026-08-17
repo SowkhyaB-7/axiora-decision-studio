@@ -37,8 +37,13 @@ function NewDecision() {
   const [context, setContext] = useState("");
   const [decideBy, setDecideBy] = useState("");
 
+  const dateError = validateDecideBy(decideBy);
+
   const create = useMutation({
     mutationFn: async () => {
+      // Application-level validation, independent of the date picker.
+      const invalid = validateDecideBy(decideBy);
+      if (invalid) throw new Error(invalid);
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("You're not signed in");
       const { data, error } = await supabase
@@ -61,7 +66,7 @@ function NewDecision() {
     onError: (e: Error) => toast.error(e.message || "Couldn't create the decision"),
   });
 
-  const valid = title.trim().length >= 8;
+  const valid = title.trim().length >= 8 && !dateError;
 
   return (
     <AppShell
