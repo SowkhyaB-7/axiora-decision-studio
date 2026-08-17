@@ -55,11 +55,18 @@ async function extractPdf(file: File): Promise<string> {
 }
 
 async function extractDocx(file: File): Promise<string> {
-  const mammoth = await import("mammoth/mammoth.browser.js");
+  const mod = (await import(
+    /* @vite-ignore */ "mammoth/mammoth.browser.js"
+  )) as unknown as {
+    default?: {
+      extractRawText: (o: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }>;
+    };
+    extractRawText?: (o: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }>;
+  };
+  const extractRawText = mod.extractRawText ?? mod.default?.extractRawText;
+  if (!extractRawText) throw new Error(FAILED_MESSAGE);
   const buf = await file.arrayBuffer();
-  const res = await (mammoth as unknown as {
-    extractRawText: (o: { arrayBuffer: ArrayBuffer }) => Promise<{ value: string }>;
-  }).extractRawText({ arrayBuffer: buf });
+  const res = await extractRawText({ arrayBuffer: buf });
   return res.value;
 }
 
