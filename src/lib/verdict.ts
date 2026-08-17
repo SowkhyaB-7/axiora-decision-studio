@@ -38,6 +38,10 @@ export type EvidenceItem = {
   strength: Strength;
   takeaway: string | null;
   created_at: string;
+  source_type?: string | null;
+  source_filename?: string | null;
+  source_file_type?: string | null;
+  source_storage_path?: string | null;
 };
 
 export const RULES = {

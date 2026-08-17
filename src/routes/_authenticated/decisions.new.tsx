@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { supabase } from "@/integrations/supabase/client";
+import { localToday, validateDecideBy } from "@/lib/decide-by";
 
 export const Route = createFileRoute("/_authenticated/decisions/new")({
   head: () => ({
@@ -36,8 +37,13 @@ function NewDecision() {
   const [context, setContext] = useState("");
   const [decideBy, setDecideBy] = useState("");
 
+  const dateError = validateDecideBy(decideBy);
+
   const create = useMutation({
     mutationFn: async () => {
+      // Application-level validation, independent of the date picker.
+      const invalid = validateDecideBy(decideBy);
+      if (invalid) throw new Error(invalid);
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("You're not signed in");
       const { data, error } = await supabase
@@ -60,7 +66,7 @@ function NewDecision() {
     onError: (e: Error) => toast.error(e.message || "Couldn't create the decision"),
   });
 
-  const valid = title.trim().length >= 8;
+  const valid = title.trim().length >= 8 && !dateError;
 
   return (
     <AppShell
@@ -109,10 +115,21 @@ function NewDecision() {
             </span>
             <input
               type="date"
+              min={localToday()}
               className={inputClass}
               value={decideBy}
               onChange={(e) => setDecideBy(e.target.value)}
+              aria-invalid={!!dateError}
             />
+            {dateError ? (
+              <span className="mt-1.5 block text-xs text-destructive">
+                {dateError}
+              </span>
+            ) : (
+              <span className="mt-1.5 block text-xs text-muted-foreground">
+                Today or later.
+              </span>
+            )}
           </label>
 
           <div className="flex items-center gap-3 border-t border-border pt-5">
