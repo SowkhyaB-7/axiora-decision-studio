@@ -115,10 +115,21 @@ function NewDecision() {
             </span>
             <input
               type="date"
+              min={localToday()}
               className={inputClass}
               value={decideBy}
               onChange={(e) => setDecideBy(e.target.value)}
+              aria-invalid={!!dateError}
             />
+            {dateError ? (
+              <span className="mt-1.5 block text-xs text-destructive">
+                {dateError}
+              </span>
+            ) : (
+              <span className="mt-1.5 block text-xs text-muted-foreground">
+                Today or later.
+              </span>
+            )}
           </label>
 
           <div className="flex items-center gap-3 border-t border-border pt-5">
