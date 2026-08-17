@@ -582,12 +582,47 @@ function EvidenceCard({
         </p>
       )}
 
+      {item.source_type === "DOCUMENT" && item.source_filename && (
+        <p className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+          <FileText className="h-3.5 w-3.5" />
+          <span className="uppercase tracking-wide">Source</span>
+          <span className="text-foreground/80">{item.source_filename}</span>
+          {item.source_file_type && (
+            <span className="rounded border border-border px-1.5 py-0.5">
+              {item.source_file_type}
+            </span>
+          )}
+          {item.source_storage_path && (
+            <button
+              type="button"
+              onClick={async () => {
+                const { data, error } = await supabase.storage
+                  .from("evidence-attachments")
+                  .createSignedUrl(item.source_storage_path!, 60);
+                if (error || !data) {
+                  toast.error("Couldn't open the original document");
+                  return;
+                }
+                window.open(data.signedUrl, "_blank", "noopener");
+              }}
+              className="text-primary hover:underline"
+            >
+              Open original
+            </button>
+          )}
+        </p>
+      )}
+
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="mt-3 text-xs text-primary hover:underline"
       >
-        {open ? "Hide original note" : "Show original note"}
+        {open
+          ? "Hide original text"
+          : item.source_type === "DOCUMENT"
+            ? "Show extracted text"
+            : "Show original note"}
       </button>
       {open && (
         <p className="mt-2 whitespace-pre-wrap rounded-lg border border-border bg-surface-muted/60 p-3 text-sm leading-relaxed text-foreground/80">
