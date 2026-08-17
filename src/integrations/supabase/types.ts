@@ -357,6 +357,10 @@ export type Database = {
           id: string
           raw_text: string
           ref: number
+          source_file_type: string | null
+          source_filename: string | null
+          source_storage_path: string | null
+          source_type: string
           strength: string
           takeaway: string | null
           title: string
@@ -371,6 +375,10 @@ export type Database = {
           id?: string
           raw_text: string
           ref?: number
+          source_file_type?: string | null
+          source_filename?: string | null
+          source_storage_path?: string | null
+          source_type?: string
           strength: string
           takeaway?: string | null
           title: string
@@ -385,6 +393,10 @@ export type Database = {
           id?: string
           raw_text?: string
           ref?: number
+          source_file_type?: string | null
+          source_filename?: string | null
+          source_storage_path?: string | null
+          source_type?: string
           strength?: string
           takeaway?: string | null
           title?: string
