@@ -6,3 +6,5 @@
 - [x] Add clarification, blocker confirmation, and mode correction
 - [x] Preserve decision briefing, evidence, and outcome flows
 - [x] Verify desktop/mobile rendering and all four modes
+- [x] Refine urgency, clarification, and inferred-step rules
+- [x] Verify the five intelligence refinement examples

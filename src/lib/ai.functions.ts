@@ -144,7 +144,7 @@ export const correctWorkItemMode = createServerFn({ method: "POST" })
       .from("work_items")
       .update({
         mode: data.mode,
-        status: data.mode === "DEPENDENCY" ? "BLOCKED" : "NEXT",
+        status: data.mode === "DEPENDENCY" ? "BLOCKED" : "UNSCHEDULED",
         blocker_confirmed: data.mode === "DEPENDENCY" ? null : false,
         decision_id: decisionId,
         user_corrections: [

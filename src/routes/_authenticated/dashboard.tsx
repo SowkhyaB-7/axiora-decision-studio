@@ -142,7 +142,7 @@ function Home() {
       .from("work_items")
       .update({
         blocker_confirmed: confirmed,
-        status: confirmed ? "BLOCKED" : "NEXT",
+        status: confirmed ? "BLOCKED" : "UNSCHEDULED",
         mode: confirmed ? "DEPENDENCY" : "SIMPLE",
         user_corrections: corrections,
       })

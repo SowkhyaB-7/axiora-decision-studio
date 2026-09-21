@@ -9,10 +9,10 @@
 export const MODES = ["SIMPLE", "AMBIGUOUS", "DEPENDENCY", "DECISION"] as const;
 export type Mode = (typeof MODES)[number];
 
-export const STATUSES = ["NOW", "NEXT", "LATER", "BLOCKED", "COMPLETED"] as const;
+export const STATUSES = ["UNSCHEDULED", "NOW", "NEXT", "LATER", "BLOCKED", "COMPLETED"] as const;
 export type Status = (typeof STATUSES)[number];
 
-export const URGENCIES = ["NOW", "NEXT", "LATER"] as const;
+export const URGENCIES = ["UNSCHEDULED", "NOW", "NEXT", "LATER"] as const;
 export type Urgency = (typeof URGENCIES)[number];
 
 export const MODE_LABEL: Record<Mode, string> = {
@@ -23,6 +23,7 @@ export const MODE_LABEL: Record<Mode, string> = {
 };
 
 export const STATUS_LABEL: Record<Status, string> = {
+  UNSCHEDULED: "Unscheduled",
   NOW: "Now",
   NEXT: "Next",
   LATER: "Later",
@@ -32,7 +33,7 @@ export const STATUS_LABEL: Record<Status, string> = {
 
 /** How Axiora opens, per mode. Intelligent colleague, not chatbot. */
 export const MODE_OPENER: Record<Mode, string> = {
-  SIMPLE: "Straightforward. Here's what needs to happen.",
+  SIMPLE: "Straightforward. Here's a reasonable way to approach it.",
   AMBIGUOUS: "Before I break this down, I need one clarification.",
   DEPENDENCY: "You can do this, but something may be in the way first.",
   DECISION: "This is a decision, and decisions need evidence before an answer.",
@@ -73,7 +74,7 @@ export function toWorkItem(row: Record<string, unknown>): WorkItem {
     workstream: String(row["workstream"] ?? "General"),
     status: (STATUSES as readonly string[]).includes(String(row["status"]))
       ? (row["status"] as Status)
-      : "NEXT",
+      : "UNSCHEDULED",
     mode: (MODES as readonly string[]).includes(String(row["mode"]))
       ? (row["mode"] as Mode)
       : "SIMPLE",
@@ -99,8 +100,9 @@ const PROMINENCE: Record<Status, number> = {
   NOW: 0,
   BLOCKED: 1,
   NEXT: 2,
-  LATER: 3,
-  COMPLETED: 4,
+  UNSCHEDULED: 3,
+  LATER: 4,
+  COMPLETED: 5,
 };
 
 export function byProminence(a: WorkItem, b: WorkItem): number {

@@ -13,8 +13,8 @@ import {
   type Verdict,
 } from "@/lib/verdict";
 
-const MODEL = "google/gemini-2.5-flash";
-const ENDPOINT = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const MODEL = "openai/gpt-6-astra";
+const ENDPOINT = "https://ai.gateway.lovable.dev/v1/responses";
 
 const GUARDRAILS = `Hard rules you must obey:
 - Use ONLY the information given to you in this request.
@@ -35,12 +35,14 @@ async function callModel(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+      "Lovable-API-Key": apiKey,
+      "X-Lovable-AIG-SDK": "fetch",
     },
     body: JSON.stringify({
       model: MODEL,
-      temperature: 0.2,
-      messages: [
+      stream: true,
+      reasoning: { effort: "medium", summary: "auto" },
+      input: [
         { role: "system", content: `${system}\n\n${GUARDRAILS}` },
         { role: "user", content: user },
       ],
@@ -52,10 +54,47 @@ async function callModel(
     throw new Error(`AI request failed (${res.status}): ${detail.slice(0, 300)}`);
   }
 
-  const json = (await res.json()) as {
-    choices?: { message?: { content?: string } }[];
+  if (!res.body) throw new Error("AI returned an empty response");
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let pending = "";
+  let content = "";
+  let reasoningSummary = "";
+
+  const consumeEvent = (block: string) => {
+    for (const line of block.split("\n")) {
+      if (!line.startsWith("data:")) continue;
+      const payload = line.slice(5).trim();
+      if (!payload || payload === "[DONE]") continue;
+      let event: Record<string, unknown>;
+      try {
+        event = JSON.parse(payload) as Record<string, unknown>;
+      } catch {
+        continue;
+      }
+      if (event["type"] === "response.output_text.delta" && typeof event["delta"] === "string") {
+        content += event["delta"];
+      }
+      if (
+        event["type"] === "response.reasoning_summary_text.delta" &&
+        typeof event["delta"] === "string"
+      ) {
+        reasoningSummary += event["delta"];
+      }
+    }
   };
-  const content = json.choices?.[0]?.message?.content ?? "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    pending += decoder.decode(value, { stream: !done });
+    const blocks = pending.split("\n\n");
+    pending = blocks.pop() ?? "";
+    blocks.forEach(consumeEvent);
+    if (done) break;
+  }
+  if (pending.trim()) consumeEvent(pending);
+  if (!content.trim() && reasoningSummary.trim()) content = reasoningSummary;
   return parseJsonObject(content);
 }
 
@@ -89,6 +128,13 @@ const stringArray = (value: unknown, limit: number): string[] =>
     .map((item) => str(item))
     .filter((item): item is string => item !== null)
     .slice(0, limit);
+
+/** Timing must come from the user, never from the perceived importance of the work. */
+function hasExplicitTimingContext(value: string): boolean {
+  return /\b(today|tonight|tomorrow|yesterday|now|urgent(?:ly)?|asap|immediately|this\s+(?:morning|afternoon|evening|week|weekend|month|quarter|year)|next\s+(?:week|month|quarter|year)|by\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|eod|end of day|end of (?:the )?(?:week|month|quarter|year)|\d{1,2}(?::\d{2})?\s*(?:am|pm)?|\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?|[a-z]+\s+\d{1,2})|before\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|eod|end of day)|due\s+(?:on|by)?|deadline|in\s+\d+\s+(?:minute|hour|day|week|month|quarter|year)s?)\b/i.test(
+    value,
+  );
+}
 
 export type GoalInterpretation = {
   mode: Mode;
@@ -126,8 +172,8 @@ Return JSON with exactly these keys:
   "title": concise work title, max 12 words,
   "description": one sentence using only the user's information, or null,
   "workstream": a concise domain emerging from the goal, such as Product, Security, Marketing, Sales, Operations, Engineering, Finance, or General,
-  "urgency": "NOW" | "NEXT" | "LATER",
-  "steps": 3-5 concise action steps for SIMPLE or a clarified goal; otherwise [],
+  "urgency": "UNSCHEDULED" | "NOW" | "NEXT" | "LATER",
+  "steps": 3-5 concise proposed execution steps for SIMPLE or a clarified goal; otherwise [],
   "next_action": one concrete immediate action for SIMPLE or clarified work; otherwise null,
   "clarifying_question": exactly one question for AMBIGUOUS; otherwise null,
   "clarifying_options": 3-4 short answer options for AMBIGUOUS; otherwise [],
@@ -135,7 +181,14 @@ Return JSON with exactly these keys:
   "reasoning": one short sentence explaining why this mode fits, phrased as an inference rather than certainty
 }
 
-Do not use a keyword-only heuristic. Consider whether the user can act, whether information is missing, whether another condition must be met, and whether a consequential choice is being made. Keep simple work simple.`;
+Interpretation rules:
+- Ask a clarification only when the answer would materially change what you produce or recommend. If a useful, reasonable execution path is possible, choose SIMPLE and surface uncertainty in the description or reasoning instead of asking.
+- After the user has answered one clarification, do not ask another unless no useful next step can be produced without it.
+- Urgency must be UNSCHEDULED unless timing is supported by explicit temporal language, an explicit deadline, user-provided timing context, or a real sequencing constraint. Importance, complexity, and verbs such as deploy or launch do not establish urgency.
+- Steps are proposed execution steps, not facts about the user's process. Do not invent approvals, stakeholders, tools, deadlines, organizational processes, or required deliverables.
+- Distinguish explicitly supplied facts from reasonable inferences and optional suggestions. Keep that calibration concise rather than adding disclaimers to every line.
+
+Do not use a keyword-only heuristic. Consider whether the user can act, whether information is materially missing, whether another condition must be met, and whether a consequential choice is being made. Keep simple work simple.`;
 
   const user = clarification
     ? `Original goal: """${rawGoal.slice(0, 4000)}"""\n\nThe user answered Axiora's clarification with: """${clarification.slice(0, 1000)}"""\n\nInterpret the now-clarified goal. Do not return AMBIGUOUS unless one truly essential ambiguity still remains.`
@@ -145,13 +198,18 @@ Do not use a keyword-only heuristic. Consider whether the user can act, whether 
   const mode = pickEnum(data["mode"], MODES);
   const title = str(data["title"]);
   if (!mode || !title) throw new Error("Axiora couldn't interpret that goal");
+  const timingContext = clarification ? `${rawGoal}\n${clarification}` : rawGoal;
+  const modelUrgency = pickEnum(data["urgency"], URGENCIES);
+  const urgency = hasExplicitTimingContext(timingContext)
+    ? modelUrgency ?? "UNSCHEDULED"
+    : "UNSCHEDULED";
 
   return {
     mode,
     title,
     description: str(data["description"]),
     workstream: str(data["workstream"]) ?? "General",
-    urgency: pickEnum(data["urgency"], URGENCIES) ?? "NEXT",
+    urgency,
     steps: mode === "SIMPLE" ? stringArray(data["steps"], 5) : [],
     nextAction: mode === "SIMPLE" ? str(data["next_action"]) : null,
     clarifyingQuestion: mode === "AMBIGUOUS" ? str(data["clarifying_question"]) : null,
