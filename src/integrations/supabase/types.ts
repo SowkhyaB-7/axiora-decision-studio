@@ -465,6 +465,93 @@ export type Database = {
         }
         Relationships: []
       }
+      work_items: {
+        Row: {
+          ai_reasoning: string | null
+          blocked_by: string | null
+          blocker_confirmed: boolean | null
+          blocker_label: string | null
+          clarifying_answer: string | null
+          clarifying_options: Json
+          clarifying_question: string | null
+          created_at: string
+          decision_id: string | null
+          description: string | null
+          id: string
+          mode: string
+          next_action: string | null
+          owner_id: string
+          raw_goal: string
+          status: string
+          steps: Json
+          title: string
+          updated_at: string
+          user_corrections: Json
+          workstream: string
+        }
+        Insert: {
+          ai_reasoning?: string | null
+          blocked_by?: string | null
+          blocker_confirmed?: boolean | null
+          blocker_label?: string | null
+          clarifying_answer?: string | null
+          clarifying_options?: Json
+          clarifying_question?: string | null
+          created_at?: string
+          decision_id?: string | null
+          description?: string | null
+          id?: string
+          mode?: string
+          next_action?: string | null
+          owner_id: string
+          raw_goal: string
+          status?: string
+          steps?: Json
+          title: string
+          updated_at?: string
+          user_corrections?: Json
+          workstream?: string
+        }
+        Update: {
+          ai_reasoning?: string | null
+          blocked_by?: string | null
+          blocker_confirmed?: boolean | null
+          blocker_label?: string | null
+          clarifying_answer?: string | null
+          clarifying_options?: Json
+          clarifying_question?: string | null
+          created_at?: string
+          decision_id?: string | null
+          description?: string | null
+          id?: string
+          mode?: string
+          next_action?: string | null
+          owner_id?: string
+          raw_goal?: string
+          status?: string
+          steps?: Json
+          title?: string
+          updated_at?: string
+          user_corrections?: Json
+          workstream?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_items_blocked_by_fkey"
+            columns: ["blocked_by"]
+            isOneToOne: false
+            referencedRelation: "work_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_items_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
