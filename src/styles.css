@@ -184,3 +184,18 @@
   color: var(--color-muted-foreground);
 }
 .prose-help tr:last-child td { border-bottom: 0; }
+
+/* The workspace uses restrained polygonal geometry rather than dashboard columns. */
+.work-node {
+  clip-path: polygon(0 10px, 14px 0, calc(100% - 9px) 0, 100% 12px, 100% calc(100% - 14px), calc(100% - 16px) 100%, 10px 100%, 0 calc(100% - 10px));
+}
+
+.workspace-input-frame {
+  clip-path: polygon(0 8px, 10px 0, calc(100% - 14px) 0, 100% 10px, 100% calc(100% - 8px), calc(100% - 10px) 100%, 8px 100%, 0 calc(100% - 12px));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .work-node:hover {
+    transform: translateY(-2px);
+  }
+}
