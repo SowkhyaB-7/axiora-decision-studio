@@ -55,7 +55,7 @@ export function WorkspaceCanvas({
     title: decision.title,
     description: null,
     workstream: "Decisions",
-    status: "NOW",
+    status: "UNSCHEDULED",
     mode: "DECISION",
     steps: [],
     next_action: null,
