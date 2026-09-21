@@ -21,7 +21,7 @@ export function AppSidebar() {
         <div className="flex flex-col leading-tight">
           <span className="font-display text-xl">Axiora</span>
           <span className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-            Decision Intelligence
+            Intelligent Workspace
           </span>
         </div>
       </div>
