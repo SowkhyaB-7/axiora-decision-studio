@@ -153,8 +153,12 @@ function WorkNode({
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-            <span>{STATUS_LABEL[item.status]}</span>
-            <span aria-hidden>·</span>
+            {item.status !== "UNSCHEDULED" && (
+              <>
+                <span>{STATUS_LABEL[item.status]}</span>
+                <span aria-hidden>·</span>
+              </>
+            )}
             <span>{MODE_LABEL[item.mode]}</span>
           </div>
           <h3 className={cn("mt-2 font-display leading-tight", prominent ? "text-xl" : "text-lg")}>
@@ -207,19 +211,22 @@ function WorkNode({
       {item.mode === "SIMPLE" && (
         <>
           {details && item.steps.length > 0 && (
-            <ol className="mt-3 space-y-2 text-sm text-foreground/75">
-              {item.steps.map((step, index) => (
-                <li key={`${step}-${index}`} className="flex gap-2">
-                  <span className="text-muted-foreground">{index + 1}.</span>
-                  <span>{step}</span>
-                </li>
-              ))}
-            </ol>
+            <div className="mt-3">
+              <p className="text-xs font-semibold uppercase text-muted-foreground">Proposed approach</p>
+              <ol className="mt-2 space-y-2 text-sm text-foreground/75">
+                {item.steps.map((step, index) => (
+                  <li key={`${step}-${index}`} className="flex gap-2">
+                    <span className="text-muted-foreground">{index + 1}.</span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
           )}
           {item.next_action && (
             <div className="mt-4 flex items-start gap-2 border-t border-border pt-3 text-sm">
               <CornerDownRight className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-              <div><span className="text-xs font-semibold uppercase text-muted-foreground">Next</span><br />{item.next_action}</div>
+              <div><span className="text-xs font-semibold uppercase text-muted-foreground">Suggested next</span><br />{item.next_action}</div>
             </div>
           )}
           {item.steps.length > 0 && (

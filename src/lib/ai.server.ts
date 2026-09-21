@@ -13,8 +13,8 @@ import {
   type Verdict,
 } from "@/lib/verdict";
 
-const MODEL = "google/gemini-2.5-flash";
-const ENDPOINT = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const MODEL = "openai/gpt-6-astra";
+const ENDPOINT = "https://ai.gateway.lovable.dev/v1/responses";
 
 const GUARDRAILS = `Hard rules you must obey:
 - Use ONLY the information given to you in this request.
@@ -35,12 +35,14 @@ async function callModel(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+      "Lovable-API-Key": apiKey,
+      "X-Lovable-AIG-SDK": "fetch",
     },
     body: JSON.stringify({
       model: MODEL,
-      temperature: 0.2,
-      messages: [
+      stream: true,
+      reasoning: { effort: "medium", summary: "auto" },
+      input: [
         { role: "system", content: `${system}\n\n${GUARDRAILS}` },
         { role: "user", content: user },
       ],
@@ -52,10 +54,47 @@ async function callModel(
     throw new Error(`AI request failed (${res.status}): ${detail.slice(0, 300)}`);
   }
 
-  const json = (await res.json()) as {
-    choices?: { message?: { content?: string } }[];
+  if (!res.body) throw new Error("AI returned an empty response");
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let pending = "";
+  let content = "";
+  let reasoningSummary = "";
+
+  const consumeEvent = (block: string) => {
+    for (const line of block.split("\n")) {
+      if (!line.startsWith("data:")) continue;
+      const payload = line.slice(5).trim();
+      if (!payload || payload === "[DONE]") continue;
+      let event: Record<string, unknown>;
+      try {
+        event = JSON.parse(payload) as Record<string, unknown>;
+      } catch {
+        continue;
+      }
+      if (event["type"] === "response.output_text.delta" && typeof event["delta"] === "string") {
+        content += event["delta"];
+      }
+      if (
+        event["type"] === "response.reasoning_summary_text.delta" &&
+        typeof event["delta"] === "string"
+      ) {
+        reasoningSummary += event["delta"];
+      }
+    }
   };
-  const content = json.choices?.[0]?.message?.content ?? "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    pending += decoder.decode(value, { stream: !done });
+    const blocks = pending.split("\n\n");
+    pending = blocks.pop() ?? "";
+    blocks.forEach(consumeEvent);
+    if (done) break;
+  }
+  if (pending.trim()) consumeEvent(pending);
+  if (!content.trim() && reasoningSummary.trim()) content = reasoningSummary;
   return parseJsonObject(content);
 }
 
