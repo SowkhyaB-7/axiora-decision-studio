@@ -1,4 +1,5 @@
 import type { Briefing } from "@/lib/briefing";
+import { MODES, URGENCIES, type Mode, type Urgency } from "@/lib/work";
 import {
   CATEGORIES,
   DIRECTIONS,
@@ -81,6 +82,84 @@ function pickEnum<T extends string>(v: unknown, allowed: readonly T[]): T | null
   if (!s) return null;
   const up = s.toUpperCase();
   return (allowed as readonly string[]).includes(up) ? (up as T) : null;
+}
+
+const stringArray = (value: unknown, limit: number): string[] =>
+  (Array.isArray(value) ? value : [])
+    .map((item) => str(item))
+    .filter((item): item is string => item !== null)
+    .slice(0, limit);
+
+export type GoalInterpretation = {
+  mode: Mode;
+  title: string;
+  description: string | null;
+  workstream: string;
+  urgency: Urgency;
+  steps: string[];
+  nextAction: string | null;
+  clarifyingQuestion: string | null;
+  clarifyingOptions: string[];
+  possibleBlocker: string | null;
+  reasoning: string;
+};
+
+/**
+ * Interprets a messy goal without pretending the classification is certain.
+ * The returned reasoning is displayed as an inference and can be corrected.
+ */
+export async function interpretGoalText(
+  rawGoal: string,
+  clarification?: string,
+): Promise<GoalInterpretation> {
+  const system = `You are Axiora's work-intent interpreter. Decide the minimum useful help for a product manager's messy goal.
+
+Classify into exactly one mode:
+- SIMPLE: straightforward execution work. Give 3-5 concise steps and one immediate next action.
+- AMBIGUOUS: the goal lacks one essential piece of context. Ask exactly one high-value question and give 3-4 short suggested answers. Do not invent a plan yet.
+- DEPENDENCY: the goal is executable but a prerequisite or blocker is explicitly stated or strongly implied. Phrase it as a possible blocker, never a fact.
+- DECISION: the user must choose among consequential options, often expressed as should/whether/go-no-go. Do not answer it or invent evidence.
+
+Return JSON with exactly these keys:
+{
+  "mode": "SIMPLE" | "AMBIGUOUS" | "DEPENDENCY" | "DECISION",
+  "title": concise work title, max 12 words,
+  "description": one sentence using only the user's information, or null,
+  "workstream": a concise domain emerging from the goal, such as Product, Security, Marketing, Sales, Operations, Engineering, Finance, or General,
+  "urgency": "NOW" | "NEXT" | "LATER",
+  "steps": 3-5 concise action steps for SIMPLE or a clarified goal; otherwise [],
+  "next_action": one concrete immediate action for SIMPLE or clarified work; otherwise null,
+  "clarifying_question": exactly one question for AMBIGUOUS; otherwise null,
+  "clarifying_options": 3-4 short answer options for AMBIGUOUS; otherwise [],
+  "possible_blocker": a concise possible prerequisite for DEPENDENCY; otherwise null,
+  "reasoning": one short sentence explaining why this mode fits, phrased as an inference rather than certainty
+}
+
+Do not use a keyword-only heuristic. Consider whether the user can act, whether information is missing, whether another condition must be met, and whether a consequential choice is being made. Keep simple work simple.`;
+
+  const user = clarification
+    ? `Original goal: """${rawGoal.slice(0, 4000)}"""\n\nThe user answered Axiora's clarification with: """${clarification.slice(0, 1000)}"""\n\nInterpret the now-clarified goal. Do not return AMBIGUOUS unless one truly essential ambiguity still remains.`
+    : `Goal from the user:\n"""${rawGoal.slice(0, 4000)}"""`;
+
+  const data = await callModel(system, user);
+  const mode = pickEnum(data["mode"], MODES);
+  const title = str(data["title"]);
+  if (!mode || !title) throw new Error("Axiora couldn't interpret that goal");
+
+  return {
+    mode,
+    title,
+    description: str(data["description"]),
+    workstream: str(data["workstream"]) ?? "General",
+    urgency: pickEnum(data["urgency"], URGENCIES) ?? "NEXT",
+    steps: mode === "SIMPLE" ? stringArray(data["steps"], 5) : [],
+    nextAction: mode === "SIMPLE" ? str(data["next_action"]) : null,
+    clarifyingQuestion: mode === "AMBIGUOUS" ? str(data["clarifying_question"]) : null,
+    clarifyingOptions:
+      mode === "AMBIGUOUS" ? stringArray(data["clarifying_options"], 4) : [],
+    possibleBlocker: mode === "DEPENDENCY" ? str(data["possible_blocker"]) : null,
+    reasoning: str(data["reasoning"]) ?? "Axiora inferred this from the goal as written.",
+  };
 }
 
 export type Extraction = {
