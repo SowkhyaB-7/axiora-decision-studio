@@ -8,3 +8,4 @@
 - [x] Verify desktop/mobile rendering and all four modes
 - [x] Refine urgency, clarification, and inferred-step rules
 - [x] Verify the five intelligence refinement examples
+- [ ] Restore preview reload and verify decision flows
