@@ -5,7 +5,20 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
-    meta: [{ title: "Axiora — Decision Intelligence for Product Teams" }],
+    meta: [
+      { title: "Axiora — Decision Intelligence for Product Teams" },
+      {
+        name: "description",
+        content: "Turn unstructured product work into clear next actions and evidence-grounded decisions.",
+      },
+      { property: "og:title", content: "Axiora — Decision Intelligence for Product Teams" },
+      {
+        property: "og:description",
+        content: "Turn unstructured product work into clear next actions and evidence-grounded decisions.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
   }),
   component: IndexRedirect,
 });

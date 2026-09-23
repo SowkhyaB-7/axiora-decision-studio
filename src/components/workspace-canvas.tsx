@@ -47,7 +47,9 @@ export function WorkspaceCanvas({
   onCorrectMode: (item: WorkItem, mode: Mode) => void;
   onBlockerResponse: (item: WorkItem, confirmed: boolean) => void;
 }) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const linkedDecisions = new Set(items.map((item) => item.decision_id).filter(Boolean));
+  const decisionVerdicts = new Map(decisions.map((decision) => [decision.id, decision.verdict]));
   const standaloneDecisions = decisions.filter((decision) => !linkedDecisions.has(decision.id));
   const decisionItems: WorkItem[] = standaloneDecisions.map((decision) => ({
     id: `decision-${decision.id}`,
@@ -70,11 +72,13 @@ export function WorkspaceCanvas({
     decision_id: decision.id,
     created_at: "",
   }));
-  const groups = groupByWorkstream([...items, ...decisionItems]);
+  const allItems = [...items, ...decisionItems];
+  const groups = groupByWorkstream(allItems);
+  const selectedItem = allItems.find((item) => item.id === selectedId) ?? null;
 
   if (groups.length === 0) {
     return (
-      <div className="mx-auto mt-10 max-w-md text-center">
+      <div className="mx-auto mt-12 max-w-md text-center">
         <CircleDotDashed className="mx-auto h-7 w-7 text-muted-foreground" />
         <h2 className="mt-3 font-display text-xl">Your workspace starts with a goal</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
@@ -85,229 +89,277 @@ export function WorkspaceCanvas({
   }
 
   return (
-    <div className="mt-10 space-y-10" aria-label="Workspace">
-      {groups.map(([workstream, group], groupIndex) => (
-        <section key={workstream} className="relative">
-          <div className="mb-4 flex items-center gap-3">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              {workstream}
-            </span>
-            <span className="h-px flex-1 bg-border" />
-          </div>
-          <div
-            className={cn(
-              "grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3",
-              groupIndex % 2 === 1 && "md:pl-10 xl:pl-16",
-            )}
+    <>
+      <div className="workspace-map mt-12" aria-label="Workspace">
+        {groups.map(([workstream, group], groupIndex) => (
+          <section
+            key={workstream}
+            className={cn("workspace-cluster", groupIndex % 2 === 1 && "workspace-cluster-offset")}
           >
-            {group.map((item, index) => (
-              <WorkNode
-                key={item.id}
-                item={item}
-                offset={index % 3}
-                busy={busyId === item.id}
-                onClarify={onClarify}
-                onCorrectMode={onCorrectMode}
-                onBlockerResponse={onBlockerResponse}
-              />
-            ))}
-          </div>
-        </section>
-      ))}
-    </div>
+            <div className="workspace-cluster-heading">
+              <span>{workstream}</span>
+              <span>{group.length} {group.length === 1 ? "item" : "items"}</span>
+            </div>
+            <div className="workspace-cluster-nodes">
+              {group.map((item, index) => (
+                <WorkNode
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  verdict={item.decision_id ? decisionVerdicts.get(item.decision_id) : undefined}
+                  onOpen={() => setSelectedId(item.id)}
+                />
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+
+      {selectedItem && selectedItem.mode !== "DECISION" && (
+        <WorkDetail
+          item={selectedItem}
+          busy={busyId === selectedItem.id}
+          onClose={() => setSelectedId(null)}
+          onClarify={onClarify}
+          onCorrectMode={onCorrectMode}
+          onBlockerResponse={onBlockerResponse}
+        />
+      )}
+    </>
   );
 }
 
 function WorkNode({
   item,
-  offset,
+  index,
+  verdict,
+  onOpen,
+}: {
+  item: WorkItem;
+  index: number;
+  verdict?: string;
+  onOpen: () => void;
+}) {
+  const prominent = item.status === "NOW" || item.status === "BLOCKED" || item.mode === "AMBIGUOUS";
+  const summary = getNodeSummary(item, verdict);
+  const content = (
+    <>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2 text-[10px] font-semibold uppercase text-muted-foreground">
+          <span className={cn("workspace-node-mark", `workspace-node-mark-${item.mode.toLowerCase()}`)} />
+          <span>{nodeStateLabel(item)}</span>
+        </div>
+        {item.mode !== "DECISION" && <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+      </div>
+      <h3 className={cn("mt-3 font-display leading-tight", prominent ? "text-xl" : "text-lg")}>
+        {item.title}
+      </h3>
+      {summary && (
+        <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{summary}</p>
+      )}
+    </>
+  );
+
+  const nodeClass = cn(
+    "workspace-node block w-full text-left",
+    prominent && "workspace-node-prominent",
+    item.mode === "DECISION" && "workspace-node-decision",
+    item.mode === "AMBIGUOUS" && "workspace-node-input",
+    item.status === "BLOCKED" && "workspace-node-blocked",
+    item.status === "LATER" && "workspace-node-later",
+    item.status === "COMPLETED" && "workspace-node-completed",
+    index % 4 === 1 && "workspace-node-drift-down",
+    index % 4 === 3 && "workspace-node-drift-up",
+  );
+
+  if (item.mode === "DECISION" && item.decision_id) {
+    return (
+      <Button asChild variant="ghost" className={nodeClass}>
+        <Link to="/decisions/$id" params={{ id: item.decision_id }}>
+          <span>{content}</span>
+        </Link>
+      </Button>
+    );
+  }
+
+  return (
+    <Button type="button" variant="ghost" className={nodeClass} onClick={onOpen}>
+      <span>{content}</span>
+    </Button>
+  );
+}
+
+function WorkDetail({
+  item,
   busy,
+  onClose,
   onClarify,
   onCorrectMode,
   onBlockerResponse,
 }: {
   item: WorkItem;
-  offset: number;
   busy: boolean;
+  onClose: () => void;
   onClarify: (item: WorkItem, answer: string) => void;
   onCorrectMode: (item: WorkItem, mode: Mode) => void;
   onBlockerResponse: (item: WorkItem, confirmed: boolean) => void;
 }) {
-  const [details, setDetails] = useState(item.mode === "AMBIGUOUS");
   const [correctionOpen, setCorrectionOpen] = useState(false);
   const [customAnswer, setCustomAnswer] = useState("");
-  const prominent = item.status === "NOW" || item.status === "BLOCKED";
 
   return (
-    <article
-      className={cn(
-        "work-node relative border bg-surface px-5 pb-5 pt-6 transition-all",
-        prominent ? "min-h-52 border-primary/30 shadow-sm" : "min-h-44 border-border",
-        item.status === "LATER" && "opacity-75",
-        item.status === "COMPLETED" && "opacity-55",
-        item.status === "BLOCKED" && "border-warning/60 bg-warning/5",
-        offset === 1 && "md:mt-7",
-        offset === 2 && "xl:mt-3",
-      )}
-    >
-      <div className="flex items-start gap-3">
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-            {item.status !== "UNSCHEDULED" && (
-              <>
-                <span>{STATUS_LABEL[item.status]}</span>
-                <span aria-hidden>·</span>
-              </>
-            )}
-            <span>{MODE_LABEL[item.mode]}</span>
+    <div className="fixed inset-0 z-50 flex justify-end bg-foreground/15" role="presentation">
+      <aside
+        className="workspace-detail h-full w-full overflow-y-auto border-l border-border bg-background p-5 shadow-xl sm:max-w-lg sm:p-8"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="work-detail-title"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase text-muted-foreground">
+              {item.workstream} · {nodeStateLabel(item)}
+            </p>
+            <h2 id="work-detail-title" className="mt-2 font-display text-3xl leading-tight">
+              {item.title}
+            </h2>
           </div>
-          <h3 className={cn("mt-2 font-display leading-tight", prominent ? "text-xl" : "text-lg")}>
-            {item.title}
-          </h3>
-        </div>
-        {!item.id.startsWith("decision-") && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 shrink-0"
-            onClick={() => setCorrectionOpen((open) => !open)}
-            aria-label={`Correct classification for ${item.title}`}
-            title="Correct classification"
-          >
-            <MoreHorizontal />
+          <Button type="button" variant="ghost" size="icon" onClick={onClose} aria-label="Close work details">
+            <X />
           </Button>
+        </div>
+
+        <div className="mt-8 border-t border-border pt-6">
+          <p className="text-sm leading-relaxed text-foreground/80">{MODE_OPENER[item.mode]}</p>
+          {item.ai_reasoning && (
+            <div className="mt-5 bg-surface-muted p-4">
+              <p className="text-[11px] font-semibold uppercase text-muted-foreground">Axiora’s interpretation</p>
+              <p className="mt-2 text-sm leading-relaxed text-foreground/75">{item.ai_reasoning}</p>
+            </div>
+          )}
+        </div>
+
+        {item.mode === "SIMPLE" && (
+          <div className="mt-8 space-y-7">
+            {item.steps.length > 0 && (
+              <div>
+                <p className="text-[11px] font-semibold uppercase text-muted-foreground">Proposed approach</p>
+                <ol className="mt-3 space-y-3 text-sm text-foreground/80">
+                  {item.steps.map((step, index) => (
+                    <li key={`${step}-${index}`} className="flex gap-3">
+                      <span className="text-muted-foreground">{index + 1}.</span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+            {item.next_action && (
+              <div className="flex items-start gap-3 border-t border-border pt-5 text-sm">
+                <CornerDownRight className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                <div>
+                  <span className="text-[11px] font-semibold uppercase text-muted-foreground">Suggested next</span>
+                  <p className="mt-1 leading-relaxed">{item.next_action}</p>
+                </div>
+              </div>
+            )}
+          </div>
         )}
-      </div>
 
-      {item.ai_reasoning && (
-        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-          <span className="font-medium text-foreground/70">Inference:</span> {item.ai_reasoning}
-        </p>
-      )}
-
-      {correctionOpen && (
-        <div className="mt-3 border-y border-border py-3">
-          <p className="text-xs font-medium">Axiora got the mode wrong?</p>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {MODES.filter((mode) => mode !== item.mode).map((mode) => (
-              <Button
-                key={mode}
-                type="button"
-                size="sm"
-                variant="outline"
-                disabled={busy}
-                onClick={() => onCorrectMode(item, mode)}
-              >
-                {MODE_LABEL[mode]}
+        {item.mode === "AMBIGUOUS" && item.clarifying_question && (
+          <div className="mt-8">
+            <p className="font-display text-xl leading-snug">{item.clarifying_question}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {item.clarifying_options.map((option) => (
+                <Button key={option} type="button" variant="outline" size="sm" disabled={busy} onClick={() => onClarify(item, option)}>
+                  {option}
+                </Button>
+              ))}
+            </div>
+            <form
+              className="mt-4 flex gap-2"
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (customAnswer.trim()) onClarify(item, customAnswer.trim());
+              }}
+            >
+              <input
+                value={customAnswer}
+                onChange={(event) => setCustomAnswer(event.target.value)}
+                className="min-w-0 flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/20"
+                placeholder="Something else"
+                aria-label="Clarifying answer"
+              />
+              <Button type="submit" size="icon" disabled={!customAnswer.trim() || busy} aria-label="Submit answer">
+                {busy ? <Loader2 className="animate-spin" /> : <ArrowRight />}
               </Button>
-            ))}
+            </form>
           </div>
-        </div>
-      )}
+        )}
 
-      <p className="mt-4 text-sm leading-relaxed text-foreground/80">{MODE_OPENER[item.mode]}</p>
+        {item.mode === "DEPENDENCY" && (
+          <div className="mt-8 border-l-2 border-warning pl-4">
+            <div className="flex items-start gap-2 text-sm">
+              <GitBranch className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+              <p>
+                <span className="font-medium">Possible blocker:</span>{" "}
+                {item.blocker_label ?? "A prerequisite may need attention first."}
+              </p>
+            </div>
+            {item.blocker_confirmed === null ? (
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button type="button" size="sm" disabled={busy} onClick={() => onBlockerResponse(item, true)}>
+                  <Check /> Confirm blocker
+                </Button>
+                <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => onBlockerResponse(item, false)}>
+                  <X /> Not a blocker
+                </Button>
+              </div>
+            ) : (
+              <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+                {item.blocker_confirmed ? <Check className="h-3.5 w-3.5" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                {item.blocker_confirmed ? "Confirmed by you" : "Corrected by you"}
+              </p>
+            )}
+          </div>
+        )}
 
-      {item.mode === "SIMPLE" && (
-        <>
-          {details && item.steps.length > 0 && (
+        <div className="mt-10 border-t border-border pt-5">
+          <Button type="button" variant="ghost" size="sm" className="px-0" onClick={() => setCorrectionOpen((open) => !open)}>
+            <MoreHorizontal /> Correct interpretation
+          </Button>
+          {correctionOpen && (
             <div className="mt-3">
-              <p className="text-xs font-semibold uppercase text-muted-foreground">Proposed approach</p>
-              <ol className="mt-2 space-y-2 text-sm text-foreground/75">
-                {item.steps.map((step, index) => (
-                  <li key={`${step}-${index}`} className="flex gap-2">
-                    <span className="text-muted-foreground">{index + 1}.</span>
-                    <span>{step}</span>
-                  </li>
+              <p className="text-xs text-muted-foreground">Choose the interpretation that better fits this work.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {MODES.filter((mode) => mode !== item.mode).map((mode) => (
+                  <Button key={mode} type="button" size="sm" variant="outline" disabled={busy} onClick={() => onCorrectMode(item, mode)}>
+                    {MODE_LABEL[mode]}
+                  </Button>
                 ))}
-              </ol>
+              </div>
             </div>
-          )}
-          {item.next_action && (
-            <div className="mt-4 flex items-start gap-2 border-t border-border pt-3 text-sm">
-              <CornerDownRight className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-              <div><span className="text-xs font-semibold uppercase text-muted-foreground">Suggested next</span><br />{item.next_action}</div>
-            </div>
-          )}
-          {item.steps.length > 0 && (
-            <Button type="button" variant="ghost" size="sm" className="mt-3 px-0" onClick={() => setDetails((open) => !open)}>
-              {details ? "Hide steps" : "Show steps"}
-            </Button>
-          )}
-        </>
-      )}
-
-      {item.mode === "AMBIGUOUS" && item.clarifying_question && (
-        <div className="mt-4">
-          <p className="font-medium leading-snug">{item.clarifying_question}</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {item.clarifying_options.map((option) => (
-              <Button key={option} type="button" variant="outline" size="sm" disabled={busy} onClick={() => onClarify(item, option)}>
-                {option}
-              </Button>
-            ))}
-          </div>
-          <form
-            className="mt-3 flex gap-2"
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (customAnswer.trim()) onClarify(item, customAnswer.trim());
-            }}
-          >
-            <input
-              value={customAnswer}
-              onChange={(event) => setCustomAnswer(event.target.value)}
-              className="min-w-0 flex-1 rounded-md border border-border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring/20"
-              placeholder="Something else"
-              aria-label="Clarifying answer"
-            />
-            <Button type="submit" size="icon" disabled={!customAnswer.trim() || busy} aria-label="Submit answer">
-              {busy ? <Loader2 className="animate-spin" /> : <ArrowRight />}
-            </Button>
-          </form>
-        </div>
-      )}
-
-      {item.mode === "DEPENDENCY" && (
-        <div className="mt-4">
-          <div className="flex items-start gap-2 text-sm">
-            <GitBranch className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-            <p>
-              <span className="font-medium">Possible blocker:</span>{" "}
-              {item.blocker_label ?? "A prerequisite may need attention first."}
-            </p>
-          </div>
-          {item.blocker_confirmed === null ? (
-            <div className="mt-3 flex flex-wrap gap-2">
-              <Button type="button" size="sm" disabled={busy} onClick={() => onBlockerResponse(item, true)}>
-                <Check /> Confirm blocker
-              </Button>
-              <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => onBlockerResponse(item, false)}>
-                <X /> Not a blocker
-              </Button>
-            </div>
-          ) : (
-            <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-              {item.blocker_confirmed ? <Check className="h-3.5 w-3.5" /> : <RotateCcw className="h-3.5 w-3.5" />}
-              {item.blocker_confirmed ? "Confirmed by you" : "Corrected by you"}
-            </p>
           )}
         </div>
-      )}
-
-      {item.mode === "DECISION" && item.decision_id && (
-        <Button asChild size="sm" className="mt-4">
-          <Link to="/decisions/$id" params={{ id: item.decision_id }}>
-            Open briefing <ArrowRight />
-          </Link>
-        </Button>
-      )}
-
-      {busy && item.mode !== "AMBIGUOUS" && (
-        <span className="absolute bottom-4 right-5 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /></span>
-      )}
-    </article>
+      </aside>
+    </div>
   );
+}
+
+function nodeStateLabel(item: WorkItem) {
+  if (item.mode === "AMBIGUOUS") return "Needs input";
+  if (item.status === "BLOCKED") return "Blocked / waiting";
+  if (item.mode === "DEPENDENCY") return "Possible blocker";
+  if (item.mode === "DECISION") return "Decision";
+  if (item.status !== "UNSCHEDULED") return STATUS_LABEL[item.status];
+  return MODE_LABEL[item.mode];
+}
+
+function getNodeSummary(item: WorkItem, verdict?: string) {
+  if (item.mode === "AMBIGUOUS") return item.clarifying_question ?? "Axiora needs one answer before structuring this work.";
+  if (item.mode === "DEPENDENCY") return item.blocker_label ?? "A prerequisite may need attention first.";
+  if (item.mode === "DECISION") return verdict ? `Briefing · ${verdict}` : "Open the decision briefing";
+  return item.next_action ?? item.description;
 }
 
 export function GoalInput({
@@ -329,8 +381,7 @@ export function GoalInput({
         if (value.trim() && !pending) onSubmit();
       }}
     >
-      <div className="pointer-events-none absolute -inset-3 border border-border/70 workspace-input-frame" />
-      <div className="relative flex items-center gap-3 border border-primary/20 bg-surface px-4 py-3 shadow-sm">
+      <div className="relative flex items-center gap-3 border border-primary/20 bg-surface px-4 py-3 shadow-sm ring-4 ring-border/30">
         <Sparkles className="h-5 w-5 shrink-0 text-accent" />
         <input
           autoFocus

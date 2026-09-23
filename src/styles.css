@@ -185,17 +185,156 @@
 }
 .prose-help tr:last-child td { border-bottom: 0; }
 
-/* The workspace uses restrained polygonal geometry rather than dashboard columns. */
-.work-node {
-  clip-path: polygon(0 10px, 14px 0, calc(100% - 9px) 0, 100% 12px, 100% calc(100% - 14px), calc(100% - 16px) 100%, 10px 100%, 0 calc(100% - 10px));
+/* Spatial workspace: content relationships set the rhythm, not fixed columns. */
+.workspace-map {
+  display: grid;
+  gap: 3.5rem;
 }
 
-.workspace-input-frame {
-  clip-path: polygon(0 8px, 10px 0, calc(100% - 14px) 0, 100% 10px, 100% calc(100% - 8px), calc(100% - 10px) 100%, 8px 100%, 0 calc(100% - 12px));
+.workspace-cluster {
+  min-width: 0;
+}
+
+.workspace-cluster-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-muted-foreground);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.workspace-cluster-heading span:last-child {
+  font-weight: 400;
+  text-transform: none;
+}
+
+.workspace-cluster-nodes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 1rem;
+}
+
+.workspace-node {
+  width: clamp(14rem, 30%, 18rem);
+  flex: 0 1 auto;
+  height: auto;
+  min-height: 9.5rem;
+  justify-content: flex-start;
+  white-space: normal;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: 1.15rem;
+  color: var(--color-foreground);
+  box-shadow: 0 10px 28px -26px color-mix(in oklab, var(--color-foreground) 45%, transparent);
+}
+
+.workspace-node > span {
+  display: block;
+  width: 100%;
+}
+
+.workspace-node-prominent {
+  width: clamp(16rem, 38%, 21rem);
+  min-height: 11rem;
+  border-color: color-mix(in oklab, var(--color-accent) 35%, var(--color-border));
+}
+
+.workspace-node-decision {
+  border-left: 3px solid var(--color-accent);
+  background: color-mix(in oklab, var(--color-accent) 5%, var(--color-surface));
+}
+
+.workspace-node-input {
+  border-color: color-mix(in oklab, var(--color-info) 45%, var(--color-border));
+  background: color-mix(in oklab, var(--color-info) 5%, var(--color-surface));
+}
+
+.workspace-node-blocked {
+  border-color: color-mix(in oklab, var(--color-warning) 60%, var(--color-border));
+  background: color-mix(in oklab, var(--color-warning) 7%, var(--color-surface));
+}
+
+.workspace-node-later {
+  opacity: 0.72;
+}
+
+.workspace-node-completed {
+  opacity: 0.5;
+}
+
+.workspace-node-mark {
+  width: 0.45rem;
+  height: 0.45rem;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--color-muted-foreground);
+}
+
+.workspace-node-mark-decision { background: var(--color-accent); }
+.workspace-node-mark-ambiguous { background: var(--color-info); }
+.workspace-node-mark-dependency { background: var(--color-warning); }
+.workspace-node-mark-simple { background: var(--color-success); }
+
+.workspace-detail {
+  animation: workspace-detail-in 180ms ease-out;
+}
+
+@keyframes workspace-detail-in {
+  from { transform: translateX(1rem); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@media (min-width: 1024px) {
+  .workspace-map {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 2rem;
+    row-gap: 4.5rem;
+  }
+
+  .workspace-cluster {
+    grid-column: span 7;
+  }
+
+  .workspace-cluster:nth-child(3n + 2) {
+    grid-column: 6 / span 7;
+  }
+
+  .workspace-cluster:nth-child(3n) {
+    grid-column: 2 / span 9;
+  }
+
+  .workspace-node-drift-down { margin-top: 2rem; }
+  .workspace-node-drift-up { margin-top: 0.75rem; }
+}
+
+@media (max-width: 1023px) {
+  .workspace-node { width: clamp(14rem, 46%, 20rem); }
+  .workspace-node-prominent { width: clamp(16rem, 55%, 22rem); }
+}
+
+@media (max-width: 639px) {
+  .workspace-map { gap: 2.75rem; }
+  .workspace-cluster-nodes { display: flex; flex-direction: column; }
+  .workspace-node,
+  .workspace-node-prominent { width: 100%; min-height: 0; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .work-node:hover {
+  .workspace-node:hover {
     transform: translateY(-2px);
+    box-shadow: 0 16px 34px -28px color-mix(in oklab, var(--color-foreground) 55%, transparent);
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-detail { animation: none; }
 }
