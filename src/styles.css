@@ -400,11 +400,11 @@
 
 /* Single workstream: use the full width */
 .workspace-map.workspace-map-focused { grid-template-columns: minmax(0, 1fr); }
-.workspace-map.workspace-map-focused .workspace-cluster-nodes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.workspace-map.workspace-map-focused:has(.workspace-cluster) .workspace-cluster-nodes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 @media (max-width: 1023px) {
-  .workspace-map.workspace-map-focused .workspace-cluster-nodes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .workspace-map.workspace-map-focused:has(.workspace-cluster) .workspace-cluster-nodes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 639px) {
   .workspace-cluster-nodes,
-  .workspace-map.workspace-map-focused .workspace-cluster-nodes { grid-template-columns: minmax(0, 1fr); }
+  .workspace-map.workspace-map-focused:has(.workspace-cluster) .workspace-cluster-nodes { grid-template-columns: minmax(0, 1fr); }
 }
