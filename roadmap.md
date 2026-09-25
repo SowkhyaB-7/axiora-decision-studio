@@ -12,3 +12,5 @@
 - [x] Replace expanded workspace cards with compact visual work nodes
 - [x] Add progressive work detail disclosure without changing intelligence behavior
 - [x] Verify spatial workspace on desktop/mobile and preserve all four flows
+- [x] Add human contextual workspace language and workstream filtering
+- [x] Bound the workspace and verify dense desktop/mobile states

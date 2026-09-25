@@ -185,14 +185,50 @@
 }
 .prose-help tr:last-child td { border-bottom: 0; }
 
-/* Spatial workspace: content relationships set the rhythm, not fixed columns. */
+/* A bounded workstream overview: more work visible, less detail shown at once. */
+.workspace-surface {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: color-mix(in oklab, var(--color-surface) 88%, var(--color-surface-muted));
+  box-shadow: 0 18px 48px -42px color-mix(in oklab, var(--color-foreground) 45%, transparent);
+}
+
+.workspace-filters {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  scrollbar-width: none;
+}
+
+.workspace-filters::-webkit-scrollbar { display: none; }
+
+.workspace-filter {
+  flex: 0 0 auto;
+  height: 1.9rem;
+  border-radius: 999px;
+  padding-inline: 0.8rem;
+  font-size: 0.72rem;
+}
+
 .workspace-map {
   display: grid;
-  gap: 3.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 1px;
+  max-height: min(43rem, calc(100vh - 17rem));
+  min-height: 15rem;
+  overflow-y: auto;
+  background: var(--color-border);
 }
 
 .workspace-cluster {
   min-width: 0;
+  align-self: stretch;
+  background: var(--color-background);
+  padding: 1rem;
 }
 
 .workspace-cluster-heading {
@@ -200,12 +236,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1rem;
-  padding-bottom: 0.65rem;
-  border-bottom: 1px solid var(--color-border);
-  color: var(--color-muted-foreground);
-  font-size: 0.6875rem;
-  font-weight: 600;
+  margin-bottom: 0.7rem;
+  color: var(--color-foreground);
+  font-size: 0.75rem;
+  font-weight: 700;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -213,26 +247,27 @@
 .workspace-cluster-heading span:last-child {
   font-weight: 400;
   text-transform: none;
+  color: var(--color-muted-foreground);
+  font-size: 0.65rem;
 }
 
 .workspace-cluster-nodes {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
-  gap: 1rem;
+  gap: 0.55rem;
 }
 
 .workspace-node {
-  width: clamp(14rem, 30%, 18rem);
-  flex: 0 1 auto;
+  width: 100%;
   height: auto;
-  min-height: 9.5rem;
+  min-height: 6.6rem;
   justify-content: flex-start;
   white-space: normal;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
-  padding: 1.15rem;
+  padding: 0.8rem;
   color: var(--color-foreground);
   box-shadow: 0 10px 28px -26px color-mix(in oklab, var(--color-foreground) 45%, transparent);
 }
@@ -243,8 +278,7 @@
 }
 
 .workspace-node-prominent {
-  width: clamp(16rem, 38%, 21rem);
-  min-height: 11rem;
+  min-height: 7.35rem;
   border-color: color-mix(in oklab, var(--color-accent) 35%, var(--color-border));
 }
 
@@ -294,38 +328,27 @@
 }
 
 @media (min-width: 1024px) {
-  .workspace-map {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    column-gap: 2rem;
-    row-gap: 4.5rem;
+  .workspace-map:has(.workspace-cluster:only-child) {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .workspace-cluster {
-    grid-column: span 7;
+  .workspace-map:has(.workspace-cluster:only-child) .workspace-cluster-nodes {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
-
-  .workspace-cluster:nth-child(3n + 2) {
-    grid-column: 6 / span 7;
-  }
-
-  .workspace-cluster:nth-child(3n) {
-    grid-column: 2 / span 9;
-  }
-
-  .workspace-node-drift-down { margin-top: 2rem; }
-  .workspace-node-drift-up { margin-top: 0.75rem; }
 }
 
 @media (max-width: 1023px) {
-  .workspace-node { width: clamp(14rem, 46%, 20rem); }
-  .workspace-node-prominent { width: clamp(16rem, 55%, 22rem); }
+  .workspace-map { max-height: none; }
+  .workspace-cluster-nodes { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 639px) {
-  .workspace-map { gap: 2.75rem; }
-  .workspace-cluster-nodes { display: flex; flex-direction: column; }
+  .workspace-surface { margin-inline: -0.25rem; }
+  .workspace-map { grid-template-columns: minmax(0, 1fr); }
+  .workspace-cluster { padding: 0.9rem; }
+  .workspace-cluster-nodes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .workspace-node,
-  .workspace-node-prominent { width: 100%; min-height: 0; }
+  .workspace-node-prominent { min-height: 6.25rem; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
