@@ -48,6 +48,7 @@ export function WorkspaceCanvas({
   onBlockerResponse: (item: WorkItem, confirmed: boolean) => void;
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [activeWorkstream, setActiveWorkstream] = useState<string | null>(null);
   const linkedDecisions = new Set(items.map((item) => item.decision_id).filter(Boolean));
   const decisionVerdicts = new Map(decisions.map((decision) => [decision.id, decision.verdict]));
   const standaloneDecisions = decisions.filter((decision) => !linkedDecisions.has(decision.id));
@@ -74,6 +75,9 @@ export function WorkspaceCanvas({
   }));
   const allItems = [...items, ...decisionItems];
   const groups = groupByWorkstream(allItems);
+  const visibleGroups = activeWorkstream
+    ? groups.filter(([workstream]) => workstream === activeWorkstream)
+    : groups;
   const selectedItem = allItems.find((item) => item.id === selectedId) ?? null;
 
   if (groups.length === 0) {
@@ -90,29 +94,53 @@ export function WorkspaceCanvas({
 
   return (
     <>
-      <div className="workspace-map mt-12" aria-label="Workspace">
-        {groups.map(([workstream, group], groupIndex) => (
-          <section
-            key={workstream}
-            className={cn("workspace-cluster", groupIndex % 2 === 1 && "workspace-cluster-offset")}
+      <div className="workspace-surface mt-8">
+        <nav className="workspace-filters" aria-label="Filter by workstream">
+          <Button
+            type="button"
+            variant={activeWorkstream === null ? "default" : "outline"}
+            size="sm"
+            className="workspace-filter"
+            aria-pressed={activeWorkstream === null}
+            onClick={() => setActiveWorkstream(null)}
           >
-            <div className="workspace-cluster-heading">
-              <span>{workstream}</span>
-              <span>{group.length} {group.length === 1 ? "item" : "items"}</span>
-            </div>
-            <div className="workspace-cluster-nodes">
-              {group.map((item, index) => (
-                <WorkNode
-                  key={item.id}
-                  item={item}
-                  index={index}
-                  verdict={item.decision_id ? decisionVerdicts.get(item.decision_id) : undefined}
-                  onOpen={() => setSelectedId(item.id)}
-                />
-              ))}
-            </div>
-          </section>
-        ))}
+            All work
+          </Button>
+          {groups.map(([workstream]) => (
+            <Button
+              key={workstream}
+              type="button"
+              variant={activeWorkstream === workstream ? "default" : "outline"}
+              size="sm"
+              className="workspace-filter"
+              aria-pressed={activeWorkstream === workstream}
+              onClick={() => setActiveWorkstream(workstream)}
+            >
+              {workstream}
+            </Button>
+          ))}
+        </nav>
+
+        <div className="workspace-map" aria-label="Workspace">
+          {visibleGroups.map(([workstream, group]) => (
+            <section key={workstream} className="workspace-cluster">
+              <div className="workspace-cluster-heading">
+                <span>{workstream}</span>
+                <span>{group.length} {group.length === 1 ? "piece of work" : "pieces of work"}</span>
+              </div>
+              <div className="workspace-cluster-nodes">
+                {group.map((item) => (
+                  <WorkNode
+                    key={item.id}
+                    item={item}
+                    verdict={item.decision_id ? decisionVerdicts.get(item.decision_id) : undefined}
+                    onOpen={() => setSelectedId(item.id)}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
       </div>
 
       {selectedItem && selectedItem.mode !== "DECISION" && (
@@ -131,12 +159,10 @@ export function WorkspaceCanvas({
 
 function WorkNode({
   item,
-  index,
   verdict,
   onOpen,
 }: {
   item: WorkItem;
-  index: number;
   verdict?: string;
   onOpen: () => void;
 }) {
@@ -147,15 +173,15 @@ function WorkNode({
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2 text-[10px] font-semibold uppercase text-muted-foreground">
           <span className={cn("workspace-node-mark", `workspace-node-mark-${item.mode.toLowerCase()}`)} />
-          <span>{nodeStateLabel(item)}</span>
+          <span className="truncate">{nodeStateLabel(item)}</span>
         </div>
         {item.mode !== "DECISION" && <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
       </div>
-      <h3 className={cn("mt-3 font-display leading-tight", prominent ? "text-xl" : "text-lg")}>
+      <h3 className={cn("mt-2 line-clamp-2 font-display leading-tight", prominent ? "text-lg" : "text-base")}>
         {item.title}
       </h3>
       {summary && (
-        <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">{summary}</p>
+        <p className="mt-2 line-clamp-1 text-xs leading-relaxed text-muted-foreground">{summary}</p>
       )}
     </>
   );
@@ -168,8 +194,6 @@ function WorkNode({
     item.status === "BLOCKED" && "workspace-node-blocked",
     item.status === "LATER" && "workspace-node-later",
     item.status === "COMPLETED" && "workspace-node-completed",
-    index % 4 === 1 && "workspace-node-drift-down",
-    index % 4 === 3 && "workspace-node-drift-up",
   );
 
   if (item.mode === "DECISION" && item.decision_id) {
@@ -347,12 +371,35 @@ function WorkDetail({
 }
 
 function nodeStateLabel(item: WorkItem) {
-  if (item.mode === "AMBIGUOUS") return "Needs input";
-  if (item.status === "BLOCKED") return "Blocked / waiting";
-  if (item.mode === "DEPENDENCY") return "Possible blocker";
-  if (item.mode === "DECISION") return "Decision";
-  if (item.status !== "UNSCHEDULED") return STATUS_LABEL[item.status];
-  return MODE_LABEL[item.mode];
+  if (item.mode === "AMBIGUOUS") return "I need your input";
+  if (item.mode === "DECISION") return "A decision to make";
+  if (item.mode === "DEPENDENCY" && item.blocker_confirmed !== true) return "Possible hold-up";
+  if (item.status === "BLOCKED" || item.blocker_confirmed === true) return "Waiting on…";
+  if (item.status === "COMPLETED") return "Completed";
+
+  const timing = explicitTimingLabel(item.raw_goal);
+  if (timing) return timing;
+  if (item.status === "NOW") return "Due soon";
+  if (item.status === "NEXT") return "Coming up";
+  if (item.status === "LATER") return "Later";
+  return "No deadline";
+}
+
+function explicitTimingLabel(goal: string) {
+  const normalized = goal.toLowerCase();
+  const weekday = normalized.match(/\b(?:by|before|on|this|next)\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i);
+  if (weekday?.[1]) return `Due ${titleCase(weekday[1])}`;
+  if (/\btomorrow\b/i.test(normalized)) return "Due tomorrow";
+  if (/\btoday\b/i.test(normalized)) return "Due today";
+  if (/\bnext month\b/i.test(normalized)) return "Next month";
+  if (/\blater this month\b/i.test(normalized)) return "Later this month";
+  if (/\bthis week\b/i.test(normalized)) return "Due this week";
+  if (/\bnext week\b/i.test(normalized)) return "Next week";
+  return null;
+}
+
+function titleCase(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 }
 
 function getNodeSummary(item: WorkItem, verdict?: string) {
