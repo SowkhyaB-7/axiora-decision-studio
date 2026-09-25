@@ -48,6 +48,8 @@ export function WorkspaceCanvas({
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeWorkstream, setActiveWorkstream] = useState<string | null>(null);
+  const [timingFilter, setTimingFilter] = useState<TimingFilter>("ALL");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("DEFAULT");
   const linkedDecisions = new Set(items.map((item) => item.decision_id).filter(Boolean));
   const decisionVerdicts = new Map(decisions.map((decision) => [decision.id, decision.verdict]));
   const standaloneDecisions = decisions.filter((decision) => !linkedDecisions.has(decision.id));
@@ -74,9 +76,16 @@ export function WorkspaceCanvas({
   }));
   const allItems = [...items, ...decisionItems];
   const groups = groupByWorkstream(allItems);
-  const visibleGroups = activeWorkstream
+  const visibleGroups = (activeWorkstream
     ? groups.filter(([workstream]) => workstream === activeWorkstream)
-    : groups;
+    : groups
+  )
+    .map(([workstream, group]) => {
+      const filtered = group.filter((item) => timingFilter === "ALL" || timingOf(item).bucket === timingFilter);
+      const ordered = sortOrder === "DEFAULT" ? filtered : sortByTiming(filtered, sortOrder);
+      return [workstream, ordered] as [string, WorkItem[]];
+    })
+    .filter(([, group]) => group.length > 0);
   const selectedItem = allItems.find((item) => item.id === selectedId) ?? null;
 
   if (groups.length === 0) {
@@ -103,7 +112,7 @@ export function WorkspaceCanvas({
             aria-pressed={activeWorkstream === null}
             onClick={() => setActiveWorkstream(null)}
           >
-            All work
+            All
           </Button>
           {groups.map(([workstream]) => (
             <Button
@@ -120,7 +129,29 @@ export function WorkspaceCanvas({
           ))}
         </nav>
 
-        <div className="workspace-map" aria-label="Workspace">
+        <div className="workspace-controls">
+          <label className="workspace-control">
+            <span>Filter</span>
+            <select value={timingFilter} onChange={(e) => setTimingFilter(e.target.value as TimingFilter)} aria-label="Filter by timing">
+              {TIMING_FILTERS.map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </label>
+          <label className="workspace-control">
+            <span>Sort</span>
+            <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as SortOrder)} aria-label="Sort by due date">
+              <option value="DEFAULT">As organized</option>
+              <option value="EARLIEST">Due date — earliest first</option>
+              <option value="LATEST">Due date — latest first</option>
+            </select>
+          </label>
+        </div>
+
+        <div className={cn("workspace-map", activeWorkstream && "workspace-map-focused")} aria-label="Workspace">
+          {visibleGroups.length === 0 && (
+            <p className="workspace-empty">Nothing here matches this timing.</p>
+          )}
           {visibleGroups.map(([workstream, group]) => (
             <section key={workstream} className="workspace-cluster">
               <div className="workspace-cluster-heading">
@@ -367,6 +398,52 @@ function WorkDetail({
       </aside>
     </div>
   );
+}
+
+type TimingFilter = "ALL" | "SOON" | "WEEK" | "LATER" | "NONE";
+type SortOrder = "DEFAULT" | "EARLIEST" | "LATEST";
+
+const TIMING_FILTERS: [TimingFilter, string][] = [
+  ["ALL", "All timing"],
+  ["SOON", "Due soon"],
+  ["WEEK", "Due this week"],
+  ["LATER", "Due later"],
+  ["NONE", "No deadline"],
+];
+
+const WEEKDAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+
+// Reads only timing Axiora already has: explicit language in the goal, or the stored status.
+// rank orders dated work relative to other dated work; null means no supported timing.
+function timingOf(item: WorkItem): { bucket: Exclude<TimingFilter, "ALL">; rank: number | null } {
+  const goal = item.raw_goal.toLowerCase();
+  if (/\btoday\b/.test(goal)) return { bucket: "SOON", rank: 0 };
+  if (/\btomorrow\b/.test(goal)) return { bucket: "SOON", rank: 1 };
+  const weekday = goal.match(/\b(?:by|before|on|this)\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/);
+  if (weekday?.[1]) {
+    const from = item.created_at ? new Date(item.created_at).getDay() : 0;
+    const offset = (WEEKDAYS.indexOf(weekday[1]) - from + 7) % 7;
+    return { bucket: "WEEK", rank: 2 + offset / 10 };
+  }
+  if (/\bthis week\b/.test(goal)) return { bucket: "WEEK", rank: 2.8 };
+  if (/\bnext\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/.test(goal)) return { bucket: "LATER", rank: 3 };
+  if (/\bnext week\b/.test(goal)) return { bucket: "LATER", rank: 3.1 };
+  if (/\blater this month\b/.test(goal)) return { bucket: "LATER", rank: 4 };
+  if (/\bnext month\b/.test(goal)) return { bucket: "LATER", rank: 5 };
+  if (item.status === "NOW") return { bucket: "SOON", rank: 1.5 };
+  if (item.status === "NEXT") return { bucket: "LATER", rank: 3.5 };
+  if (item.status === "LATER") return { bucket: "LATER", rank: 6 };
+  return { bucket: "NONE", rank: null };
+}
+
+function sortByTiming(group: WorkItem[], order: Exclude<SortOrder, "DEFAULT">) {
+  const dated = group.filter((item) => timingOf(item).rank !== null);
+  const undated = group.filter((item) => timingOf(item).rank === null);
+  dated.sort((a, b) => {
+    const diff = (timingOf(a).rank ?? 0) - (timingOf(b).rank ?? 0);
+    return order === "EARLIEST" ? diff : -diff;
+  });
+  return [...dated, ...undated];
 }
 
 function nodeStateLabel(item: WorkItem) {

@@ -361,3 +361,50 @@
 @media (prefers-reduced-motion: reduce) {
   .workspace-detail { animation: none; }
 }
+
+/* Timing filter + sort: lightweight inline controls */
+.workspace-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem 1rem;
+  padding: 0.55rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.workspace-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--color-muted-foreground);
+}
+.workspace-control select {
+  border: 0;
+  background: transparent;
+  color: var(--color-foreground);
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.2rem 0.1rem;
+  cursor: pointer;
+  outline: none;
+}
+.workspace-control select:focus-visible { box-shadow: 0 0 0 2px var(--color-ring); border-radius: 4px; }
+.workspace-empty {
+  grid-column: 1 / -1;
+  background: var(--color-background);
+  padding: 3rem 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-muted-foreground);
+}
+
+/* Single workstream: use the full width */
+.workspace-map.workspace-map-focused { grid-template-columns: minmax(0, 1fr); }
+.workspace-map.workspace-map-focused .workspace-cluster-nodes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 1023px) {
+  .workspace-map.workspace-map-focused .workspace-cluster-nodes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 639px) {
+  .workspace-cluster-nodes,
+  .workspace-map.workspace-map-focused .workspace-cluster-nodes { grid-template-columns: minmax(0, 1fr); }
+}
