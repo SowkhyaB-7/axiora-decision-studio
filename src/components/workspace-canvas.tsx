@@ -18,7 +18,6 @@ import {
   MODE_LABEL,
   MODE_OPENER,
   MODES,
-  STATUS_LABEL,
   groupByWorkstream,
   type Mode,
   type WorkItem,
