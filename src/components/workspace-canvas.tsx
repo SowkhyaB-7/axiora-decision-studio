@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import {
   MODE_LABEL,
@@ -103,6 +104,7 @@ export function WorkspaceCanvas({
   return (
     <>
       <div className="workspace-surface mt-8">
+        <div className="workspace-toolbar">
         <nav className="workspace-filters" aria-label="Filter by workstream">
           <Button
             type="button"
@@ -130,22 +132,25 @@ export function WorkspaceCanvas({
         </nav>
 
         <div className="workspace-controls">
-          <label className="workspace-control">
-            <span>Filter</span>
-            <select value={timingFilter} onChange={(e) => setTimingFilter(e.target.value as TimingFilter)} aria-label="Filter by timing">
-              {TIMING_FILTERS.map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
-            </select>
-          </label>
-          <label className="workspace-control">
-            <span>Sort</span>
-            <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value as SortOrder)} aria-label="Sort by due date">
-              <option value="DEFAULT">As organized</option>
-              <option value="EARLIEST">Due date — earliest first</option>
-              <option value="LATEST">Due date — latest first</option>
-            </select>
-          </label>
+          <WorkspaceSelect
+            label="Filter"
+            ariaLabel="Filter by timing"
+            value={timingFilter}
+            onChange={(v) => setTimingFilter(v as TimingFilter)}
+            options={TIMING_FILTERS}
+          />
+          <WorkspaceSelect
+            label="Sort"
+            ariaLabel="Sort by due date"
+            value={sortOrder}
+            onChange={(v) => setSortOrder(v as SortOrder)}
+            options={[
+              ["DEFAULT", "As organized"],
+              ["EARLIEST", "Due date — earliest first"],
+              ["LATEST", "Due date — latest first"],
+            ]}
+          />
+        </div>
         </div>
 
         <div className={cn("workspace-map", activeWorkstream && "workspace-map-focused")} aria-label="Workspace">
@@ -184,6 +189,38 @@ export function WorkspaceCanvas({
         />
       )}
     </>
+  );
+}
+
+function WorkspaceSelect({
+  label,
+  ariaLabel,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  ariaLabel: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: [string, string][];
+}) {
+  return (
+    <div className="workspace-control">
+      <span>{label}</span>
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger aria-label={ariaLabel} className="workspace-select-trigger">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent align="end" className="workspace-select-content">
+          {options.map(([v, text]) => (
+            <SelectItem key={v} value={v} className="workspace-select-item">
+              {text}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }
 
