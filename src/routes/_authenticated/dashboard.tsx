@@ -194,8 +194,10 @@ function Home() {
   const toggleComplete = (item: WorkItem) =>
     updateItem(
       item,
-      { status: item.status === "COMPLETED" ? (item.mode === "DEPENDENCY" && item.blocker_confirmed ? "BLOCKED" : "UNSCHEDULED") : "COMPLETED" },
-      item.status === "COMPLETED" ? "Reopened" : "Marked complete",
+      item.status === "COMPLETED"
+        ? { status: item.mode === "DEPENDENCY" && item.blocker_confirmed ? "BLOCKED" : "UNSCHEDULED", completed_at: null }
+        : { status: "COMPLETED", completed_at: new Date().toISOString() },
+      item.status === "COMPLETED" ? "Reopened and back in your workspace" : "Marked as completed. Find it under Filter → Completed",
     );
 
   const respondToBlocker = async (item: WorkItem, confirmed: boolean) => {
