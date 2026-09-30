@@ -475,8 +475,12 @@ export type Database = {
           clarifying_options: Json
           clarifying_question: string | null
           created_at: string
+          deadline_checked: boolean
+          deadline_source: string | null
           decision_id: string | null
           description: string | null
+          due_at: string | null
+          due_date: string | null
           id: string
           mode: string
           next_action: string | null
@@ -498,8 +502,12 @@ export type Database = {
           clarifying_options?: Json
           clarifying_question?: string | null
           created_at?: string
+          deadline_checked?: boolean
+          deadline_source?: string | null
           decision_id?: string | null
           description?: string | null
+          due_at?: string | null
+          due_date?: string | null
           id?: string
           mode?: string
           next_action?: string | null
@@ -521,8 +529,12 @@ export type Database = {
           clarifying_options?: Json
           clarifying_question?: string | null
           created_at?: string
+          deadline_checked?: boolean
+          deadline_source?: string | null
           decision_id?: string | null
           description?: string | null
+          due_at?: string | null
+          due_date?: string | null
           id?: string
           mode?: string
           next_action?: string | null
