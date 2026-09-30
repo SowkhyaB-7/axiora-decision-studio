@@ -403,7 +403,7 @@ function WorkDetail({
             <div className="flex items-start gap-2 text-sm">
               <GitBranch className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
               <p>
-                <span className="font-medium">Possible blocker:</span>{" "}
+                <span className="font-medium">Possible blocker (my inference, please confirm):</span>{" "}
                 {item.blocker_label ?? "A prerequisite may need attention first."}
               </p>
             </div>
