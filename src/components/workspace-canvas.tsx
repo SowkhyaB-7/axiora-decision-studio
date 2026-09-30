@@ -322,10 +322,20 @@ function WorkDetail({
 
         <div className="mt-8 border-t border-border pt-6">
           <p className="text-sm leading-relaxed text-foreground/80">{MODE_OPENER[item.mode]}</p>
+          <div className="mt-5">
+            <p className="text-[11px] font-semibold uppercase text-muted-foreground">What you told me</p>
+            <p className="mt-2 text-sm leading-relaxed text-foreground">“{item.raw_goal}”</p>
+            {item.clarifying_answer && (
+              <p className="mt-1 text-sm leading-relaxed text-foreground">Your answer: {item.clarifying_answer}</p>
+            )}
+            <p className="mt-1 text-xs text-muted-foreground">
+              {explicitTimingLabel(item.raw_goal + " " + (item.clarifying_answer ?? "")) ?? "No deadline given"}
+            </p>
+          </div>
           {item.ai_reasoning && (
             <div className="mt-5 bg-surface-muted p-4">
-              <p className="text-[11px] font-semibold uppercase text-muted-foreground">Axiora’s interpretation</p>
-              <p className="mt-2 text-sm leading-relaxed text-foreground/75">{item.ai_reasoning}</p>
+              <p className="text-[11px] font-semibold uppercase text-muted-foreground">What I’m inferring</p>
+              <p className="mt-2 text-sm italic leading-relaxed text-foreground/75">{item.ai_reasoning}</p>
             </div>
           )}
         </div>
@@ -334,7 +344,7 @@ function WorkDetail({
           <div className="mt-8 space-y-7">
             {item.steps.length > 0 && (
               <div>
-                <p className="text-[11px] font-semibold uppercase text-muted-foreground">Proposed approach</p>
+                <p className="text-[11px] font-semibold uppercase text-muted-foreground">Suggested approach · adjust as needed</p>
                 <ol className="mt-3 space-y-3 text-sm text-foreground/80">
                   {item.steps.map((step, index) => (
                     <li key={`${step}-${index}`} className="flex gap-3">
@@ -393,7 +403,7 @@ function WorkDetail({
             <div className="flex items-start gap-2 text-sm">
               <GitBranch className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
               <p>
-                <span className="font-medium">Possible blocker:</span>{" "}
+                <span className="font-medium">Possible blocker (my inference, please confirm):</span>{" "}
                 {item.blocker_label ?? "A prerequisite may need attention first."}
               </p>
             </div>
