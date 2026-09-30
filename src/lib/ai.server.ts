@@ -177,8 +177,8 @@ Return JSON with exactly these keys:
   "next_action": one concrete immediate action for SIMPLE or clarified work; otherwise null,
   "clarifying_question": exactly one question for AMBIGUOUS; otherwise null,
   "clarifying_options": 3-4 short answer options for AMBIGUOUS; otherwise [],
-  "possible_blocker": a concise possible prerequisite for DEPENDENCY; otherwise null,
-  "reasoning": one short sentence explaining why this mode fits, phrased as an inference rather than certainty
+  "possible_blocker": a concise possible prerequisite for DEPENDENCY, only when the goal states or strongly implies it; otherwise null. Never invent a dependency,
+  "reasoning": one short sentence explaining why this mode fits, opening with calibrated language such as "Based on what you've shared..." or "This may indicate...". Never state an inference as fact, and name what is missing when information is insufficient
 }
 
 Interpretation rules:
