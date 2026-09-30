@@ -1,3 +1,4 @@
+import type { Database } from "@/integrations/supabase/types";
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -157,7 +158,7 @@ function Home() {
     onSettled: () => setBusyId(null),
   });
 
-  const updateItem = async (item: WorkItem, patch: Record<string, unknown>, message: string) => {
+  const updateItem = async (item: WorkItem, patch: Database["public"]["Tables"]["work_items"]["Update"], message: string) => {
     setBusyId(item.id);
     const { error } = await supabase.from("work_items").update(patch).eq("id", item.id);
     setBusyId(null);
