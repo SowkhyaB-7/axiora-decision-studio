@@ -465,6 +465,47 @@ export type Database = {
         }
         Relationships: []
       }
+      work_item_attachments: {
+        Row: {
+          created_at: string
+          extracted_text: string | null
+          file_type: string
+          filename: string
+          id: string
+          owner_id: string
+          storage_path: string
+          work_item_id: string
+        }
+        Insert: {
+          created_at?: string
+          extracted_text?: string | null
+          file_type: string
+          filename: string
+          id?: string
+          owner_id?: string
+          storage_path: string
+          work_item_id: string
+        }
+        Update: {
+          created_at?: string
+          extracted_text?: string | null
+          file_type?: string
+          filename?: string
+          id?: string
+          owner_id?: string
+          storage_path?: string
+          work_item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_item_attachments_work_item_id_fkey"
+            columns: ["work_item_id"]
+            isOneToOne: false
+            referencedRelation: "work_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       work_items: {
         Row: {
           ai_reasoning: string | null
@@ -474,6 +515,7 @@ export type Database = {
           clarifying_answer: string | null
           clarifying_options: Json
           clarifying_question: string | null
+          completed_at: string | null
           created_at: string
           deadline_checked: boolean
           deadline_source: string | null
@@ -501,6 +543,7 @@ export type Database = {
           clarifying_answer?: string | null
           clarifying_options?: Json
           clarifying_question?: string | null
+          completed_at?: string | null
           created_at?: string
           deadline_checked?: boolean
           deadline_source?: string | null
@@ -528,6 +571,7 @@ export type Database = {
           clarifying_answer?: string | null
           clarifying_options?: Json
           clarifying_question?: string | null
+          completed_at?: string | null
           created_at?: string
           deadline_checked?: boolean
           deadline_source?: string | null
