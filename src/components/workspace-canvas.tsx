@@ -608,7 +608,6 @@ const TIMING_FILTERS: [TimingFilter, string][] = [
   ["WEEK", "Due this week"],
   ["LATER", "Due later"],
   ["NONE", "No deadline"],
-  ["COMPLETED", "Completed"],
 ];
 
 // Undated and completed work keeps its place at the end; dated work sorts by its real deadline.
