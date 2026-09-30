@@ -187,3 +187,72 @@ export const getBriefing = createServerFn({ method: "POST" })
     const { loadAndBuildBriefing } = await import("@/lib/ai.server");
     return loadAndBuildBriefing(context.supabase, data.decisionId);
   });
+
+export const editWorkItemGoal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ itemId: z.string().uuid(), goal: goalSchema }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: current, error: readError } = await context.supabase
+      .from("work_items")
+      .select("*")
+      .eq("id", data.itemId)
+      .maybeSingle();
+    if (readError) throw readError;
+    if (!current) throw new Error("Work item not found");
+    if (current.raw_goal.trim() === data.goal) return current;
+
+    const { interpretGoalText } = await import("@/lib/ai.server");
+    const interpreted = await interpretGoalText(data.goal);
+
+    // Reuse an existing linked decision so its evidence, overrides and outcomes are preserved.
+    let decisionId: string | null = current.decision_id;
+    if (interpreted.mode === "DECISION" && !decisionId) {
+      const { data: decision, error: decisionError } = await context.supabase
+        .from("decisions")
+        .insert({
+          owner_id: context.userId,
+          title: interpreted.title,
+          context: interpreted.description ?? data.goal,
+        })
+        .select("id")
+        .single();
+      if (decisionError) throw decisionError;
+      decisionId = decision.id;
+    }
+
+    // Keep a blocker the user already confirmed when the revised request still depends on it.
+    const keepConfirmedBlocker =
+      interpreted.mode === "DEPENDENCY" && current.blocker_confirmed === true && current.blocker_label;
+    const corrections = Array.isArray(current.user_corrections) ? current.user_corrections : [];
+
+    const { data: row, error } = await context.supabase
+      .from("work_items")
+      .update({
+        raw_goal: data.goal,
+        title: interpreted.title,
+        description: interpreted.description,
+        workstream: interpreted.workstream,
+        status: interpreted.mode === "DEPENDENCY" ? "BLOCKED" : interpreted.urgency,
+        mode: interpreted.mode,
+        steps: interpreted.steps,
+        next_action: interpreted.nextAction,
+        blocker_label: keepConfirmedBlocker ? current.blocker_label : interpreted.possibleBlocker,
+        blocker_confirmed: keepConfirmedBlocker ? true : interpreted.mode === "DEPENDENCY" ? null : false,
+        clarifying_answer: null,
+        clarifying_question: interpreted.clarifyingQuestion,
+        clarifying_options: interpreted.clarifyingOptions,
+        ai_reasoning: interpreted.reasoning,
+        decision_id: decisionId,
+        user_corrections: [
+          ...corrections,
+          { type: "edit", from: current.raw_goal, to: data.goal, at: new Date().toISOString() },
+        ],
+      })
+      .eq("id", data.itemId)
+      .select("*")
+      .single();
+    if (error) throw error;
+    return row;
+  });

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { GoalInput, WorkspaceCanvas } from "@/components/workspace-canvas";
 import { supabase } from "@/integrations/supabase/client";
-import { clarifyWorkItem, correctWorkItemMode, interpretGoal } from "@/lib/ai.functions";
+import { clarifyWorkItem, correctWorkItemMode, editWorkItemGoal, interpretGoal } from "@/lib/ai.functions";
 import { computeAssessment, VERDICT_LABEL, type EvidenceItem } from "@/lib/verdict";
 import { toWorkItem, type Mode, type WorkItem } from "@/lib/work";
 
@@ -44,6 +44,7 @@ function Home() {
   const runInterpret = useServerFn(interpretGoal);
   const runClarify = useServerFn(clarifyWorkItem);
   const runCorrection = useServerFn(correctWorkItemMode);
+  const runEdit = useServerFn(editWorkItemGoal);
   const [goal, setGoal] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -112,6 +113,19 @@ function Home() {
       toast.success("Work clarified");
     },
     onError: (error: Error) => toast.error(error.message || "Couldn't clarify that work"),
+    onSettled: () => setBusyId(null),
+  });
+
+  const edit = useMutation({
+    mutationFn: async ({ item, goal }: { item: WorkItem; goal: string }) => {
+      setBusyId(item.id);
+      return runEdit({ data: { itemId: item.id, goal } });
+    },
+    onSuccess: async () => {
+      await refresh();
+      toast.success("Request updated");
+    },
+    onError: (error: Error) => toast.error(error.message || "Couldn't update that request"),
     onSettled: () => setBusyId(null),
   });
 
@@ -200,6 +214,7 @@ function Home() {
             busyId={busyId}
             onClarify={(item, answer) => clarify.mutate({ item, answer })}
             onCorrectMode={(item, mode) => correct.mutate({ item, mode })}
+            onEditGoal={(item, goal) => edit.mutateAsync({ item, goal })}
             onBlockerResponse={respondToBlocker}
           />
         )}

@@ -8,6 +8,7 @@ import {
   GitBranch,
   Loader2,
   MoreHorizontal,
+  Pencil,
   RotateCcw,
   Sparkles,
   X,
@@ -39,6 +40,7 @@ export function WorkspaceCanvas({
   onClarify,
   onCorrectMode,
   onBlockerResponse,
+  onEditGoal,
 }: {
   items: WorkItem[];
   decisions: DecisionNode[];
@@ -46,6 +48,7 @@ export function WorkspaceCanvas({
   onClarify: (item: WorkItem, answer: string) => void;
   onCorrectMode: (item: WorkItem, mode: Mode) => void;
   onBlockerResponse: (item: WorkItem, confirmed: boolean) => void;
+  onEditGoal: (item: WorkItem, goal: string) => Promise<unknown>;
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeWorkstream, setActiveWorkstream] = useState<string | null>(null);
@@ -186,6 +189,7 @@ export function WorkspaceCanvas({
           onClarify={onClarify}
           onCorrectMode={onCorrectMode}
           onBlockerResponse={onBlockerResponse}
+          onEditGoal={onEditGoal}
         />
       )}
     </>
@@ -287,9 +291,11 @@ function WorkDetail({
   onClarify,
   onCorrectMode,
   onBlockerResponse,
+  onEditGoal,
 }: {
   item: WorkItem;
   busy: boolean;
+  onEditGoal: (item: WorkItem, goal: string) => Promise<unknown>;
   onClose: () => void;
   onClarify: (item: WorkItem, answer: string) => void;
   onCorrectMode: (item: WorkItem, mode: Mode) => void;
@@ -297,6 +303,8 @@ function WorkDetail({
 }) {
   const [correctionOpen, setCorrectionOpen] = useState(false);
   const [customAnswer, setCustomAnswer] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [draftGoal, setDraftGoal] = useState(item.raw_goal);
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-foreground/15" role="presentation">
@@ -323,8 +331,45 @@ function WorkDetail({
         <div className="mt-8 border-t border-border pt-6">
           <p className="text-sm leading-relaxed text-foreground/80">{MODE_OPENER[item.mode]}</p>
           <div className="mt-5">
-            <p className="text-[11px] font-semibold uppercase text-muted-foreground">What you told me</p>
-            <p className="mt-2 text-sm leading-relaxed text-foreground">“{item.raw_goal}”</p>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[11px] font-semibold uppercase text-muted-foreground">What you told me</p>
+              {!editing && (
+                <Button type="button" variant="ghost" size="sm" className="h-auto px-0 py-0 text-xs" disabled={busy} onClick={() => { setDraftGoal(item.raw_goal); setEditing(true); }}>
+                  <Pencil /> Edit
+                </Button>
+              )}
+            </div>
+            {editing ? (
+              <form
+                className="mt-2"
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  const next = draftGoal.trim();
+                  if (next.length < 3) return;
+                  if (next === item.raw_goal.trim()) return setEditing(false);
+                  try { await onEditGoal(item, next); setEditing(false); } catch { /* toast shown */ }
+                }}
+              >
+                <textarea
+                  value={draftGoal}
+                  onChange={(event) => setDraftGoal(event.target.value)}
+                  rows={3}
+                  maxLength={4000}
+                  autoFocus
+                  aria-label="Edit your request"
+                  className="w-full resize-none rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/20"
+                />
+                <p className="mt-1 text-xs text-muted-foreground">Axiora will re-read your request and update the rest.</p>
+                <div className="mt-2 flex gap-2">
+                  <Button type="submit" size="sm" disabled={busy || draftGoal.trim().length < 3}>
+                    {busy ? <Loader2 className="animate-spin" /> : <Check />} Save
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => setEditing(false)}>Cancel</Button>
+                </div>
+              </form>
+            ) : (
+              <p className="mt-2 text-sm leading-relaxed text-foreground">“{item.raw_goal}”</p>
+            )}
             {item.clarifying_answer && (
               <p className="mt-1 text-sm leading-relaxed text-foreground">Your answer: {item.clarifying_answer}</p>
             )}
