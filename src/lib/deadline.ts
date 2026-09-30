@@ -108,7 +108,7 @@ export function deriveTiming(item: Deadlined, now: Date = new Date()): Timing {
   const daysToSunday = (7 - now.getDay()) % 7;
   const weekday = due.toLocaleDateString("en-US", { weekday: "long" });
   if (days <= daysToSunday) return { bucket: "WEEK", label: `Due ${weekday}`, rank };
-  if (days < 14) return { bucket: "LATER", label: days < 7 ? `Due ${weekday}` : `Due next ${weekday}`.replace(/^Due next (\w+)$/, (_m, w) => (days - daysToSunday <= 7 ? `Due next ${w}` : `Due in ${days} days`)), rank };
+  if (days < 14) return { bucket: "LATER", label: days - daysToSunday <= 7 ? `Due next ${weekday}` : `Due in ${days} days`, rank };
   if (days < 60) return { bucket: "LATER", label: `Due in ${Math.round(days / 7)} weeks`, rank };
   return { bucket: "LATER", label: `Due ${due.toLocaleDateString("en-US", { month: "short", day: "numeric", year: due.getFullYear() !== now.getFullYear() ? "numeric" : undefined })}`, rank };
 }
