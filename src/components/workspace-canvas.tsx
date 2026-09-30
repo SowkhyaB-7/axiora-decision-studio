@@ -69,6 +69,7 @@ export function WorkspaceCanvas({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeWorkstream, setActiveWorkstream] = useState<string | null>(null);
   const [timingFilter, setTimingFilter] = useState<TimingFilter>("ALL");
+  const [view, setView] = useState<"ACTIVE" | "COMPLETED">("ACTIVE");
   const [sortOrder, setSortOrder] = useState<SortOrder>("DEFAULT");
   const linkedDecisions = new Set(items.map((item) => item.decision_id).filter(Boolean));
   const decisionVerdicts = new Map(decisions.map((decision) => [decision.id, decision.verdict]));
@@ -100,14 +101,15 @@ export function WorkspaceCanvas({
   }));
   const allItems = [...items, ...decisionItems];
   const groups = groupByWorkstream(allItems);
+  const completedCount = allItems.filter((item) => item.status === "COMPLETED").length;
   const visibleGroups = (activeWorkstream
     ? groups.filter(([workstream]) => workstream === activeWorkstream)
     : groups
   )
     .map(([workstream, group]) => {
-      // Finished work leaves the active views; it lives under the Completed filter.
+      // Finished work leaves the Active view; it lives under the Completed view.
       const filtered = group.filter((item) =>
-        timingFilter === "COMPLETED"
+        view === "COMPLETED"
           ? item.status === "COMPLETED"
           : item.status !== "COMPLETED" && (timingFilter === "ALL" || deriveTiming(item, now).bucket === timingFilter),
       );
@@ -133,6 +135,19 @@ export function WorkspaceCanvas({
     <>
       <div className="workspace-surface mt-8">
         <div className="workspace-toolbar">
+        <div className="workspace-view-switch" role="group" aria-label="Show active or completed work">
+          {(["ACTIVE", "COMPLETED"] as const).map((v) => (
+            <button
+              key={v}
+              type="button"
+              className="workspace-view-option"
+              aria-pressed={view === v}
+              onClick={() => { setView(v); setSelectedId(null); }}
+            >
+              {v === "ACTIVE" ? "Active" : `Completed${completedCount ? ` · ${completedCount}` : ""}`}
+            </button>
+          ))}
+        </div>
         <nav className="workspace-filters" aria-label="Filter by workstream">
           <Button
             type="button"
@@ -160,13 +175,15 @@ export function WorkspaceCanvas({
         </nav>
 
         <div className="workspace-controls">
-          <WorkspaceSelect
-            label="Filter"
-            ariaLabel="Filter by timing"
-            value={timingFilter}
-            onChange={(v) => setTimingFilter(v as TimingFilter)}
-            options={TIMING_FILTERS}
-          />
+          {view === "ACTIVE" && (
+            <WorkspaceSelect
+              label="Filter"
+              ariaLabel="Filter by timing"
+              value={timingFilter}
+              onChange={(v) => setTimingFilter(v as TimingFilter)}
+              options={TIMING_FILTERS}
+            />
+          )}
           <WorkspaceSelect
             label="Sort"
             ariaLabel="Sort by due date"
@@ -183,7 +200,11 @@ export function WorkspaceCanvas({
 
         <div className={cn("workspace-map", activeWorkstream && "workspace-map-focused")} aria-label="Workspace">
           {visibleGroups.length === 0 && (
-            <p className="workspace-empty">{timingFilter === "COMPLETED" ? "No completed work here yet." : "Nothing here matches this timing."}</p>
+            <p className="workspace-empty">
+              {view === "COMPLETED"
+                ? `No completed work${activeWorkstream ? ` in ${activeWorkstream}` : ""} yet. Open any piece of work in Active and choose "Mark as completed" — it will appear here.`
+                : "Nothing here matches this timing."}
+            </p>
           )}
           {visibleGroups.map(([workstream, group]) => (
             <section key={workstream} className="workspace-cluster">
@@ -587,7 +608,6 @@ const TIMING_FILTERS: [TimingFilter, string][] = [
   ["WEEK", "Due this week"],
   ["LATER", "Due later"],
   ["NONE", "No deadline"],
-  ["COMPLETED", "Completed"],
 ];
 
 // Undated and completed work keeps its place at the end; dated work sorts by its real deadline.
