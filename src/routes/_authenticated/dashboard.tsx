@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/app-shell";
 import { GoalInput, WorkspaceCanvas } from "@/components/workspace-canvas";
 import { supabase } from "@/integrations/supabase/client";
+import { parseDeadline, toInstant, toISODate } from "@/lib/deadline";
 import { clarifyWorkItem, correctWorkItemMode, editWorkItemGoal, interpretGoal } from "@/lib/ai.functions";
 import { computeAssessment, VERDICT_LABEL, type EvidenceItem } from "@/lib/verdict";
 import { toWorkItem, type Mode, type WorkItem } from "@/lib/work";
@@ -57,6 +58,14 @@ function Home() {
         supabase.from("evidence_items").select("*"),
       ]);
       if (work.error) throw work.error;
+      // One-time recovery for items saved before deadlines were stored: read explicit
+      // dates from the original words relative to the day the item was added.
+      const legacy = (work.data ?? []).filter((row) => !row.deadline_checked);
+      for (const row of legacy) {
+        const patch = deadlineFromGoal(row.raw_goal, new Date(row.created_at));
+        await supabase.from("work_items").update(patch).eq("id", row.id);
+        Object.assign(row, patch);
+      }
       if (decisions.error) throw decisions.error;
       if (evidence.error) throw evidence.error;
       const evidenceRows = (evidence.data ?? []) as unknown as (EvidenceItem & {
@@ -90,6 +99,7 @@ function Home() {
     mutationFn: async () => runInterpret({ data: { goal: goal.trim() } }),
     onSuccess: async (row) => {
       setGoal("");
+      await supabase.from("work_items").update(deadlineFromGoal(row.raw_goal, new Date())).eq("id", row.id);
       await refresh();
       const item = toWorkItem(row as unknown as Record<string, unknown>);
       toast.success(
@@ -119,7 +129,12 @@ function Home() {
   const edit = useMutation({
     mutationFn: async ({ item, goal }: { item: WorkItem; goal: string }) => {
       setBusyId(item.id);
-      return runEdit({ data: { itemId: item.id, goal } });
+      const row = await runEdit({ data: { itemId: item.id, goal } });
+      // A date the user set by hand is never overwritten by re-reading the words.
+      if (row.deadline_source !== "USER") {
+        await supabase.from("work_items").update(deadlineFromGoal(goal, new Date())).eq("id", item.id);
+      }
+      return row;
     },
     onSuccess: async () => {
       await refresh();
@@ -141,6 +156,38 @@ function Home() {
     onError: (error: Error) => toast.error(error.message || "Couldn't save that correction"),
     onSettled: () => setBusyId(null),
   });
+
+  const updateItem = async (item: WorkItem, patch: Record<string, unknown>, message: string) => {
+    setBusyId(item.id);
+    const { error } = await supabase.from("work_items").update(patch).eq("id", item.id);
+    setBusyId(null);
+    if (error) return toast.error(error.message);
+    await refresh();
+    toast.success(message);
+  };
+
+  const setDeadline = (item: WorkItem, date: string | null, time: string | null) =>
+    updateItem(
+      item,
+      {
+        due_date: date,
+        due_at: date && time ? toInstant(date, time, new Date(`${date}T${time}`).getTimezoneOffset()) : null,
+        deadline_source: date ? "USER" : null,
+        deadline_checked: true,
+        user_corrections: [
+          ...item.user_corrections,
+          { from: item.due_date ?? "no deadline", to: date ? `${date}${time ? ` ${time}` : ""}` : "no deadline", at: new Date().toISOString() },
+        ],
+      },
+      date ? "Deadline updated" : "Deadline removed",
+    );
+
+  const toggleComplete = (item: WorkItem) =>
+    updateItem(
+      item,
+      { status: item.status === "COMPLETED" ? (item.mode === "DEPENDENCY" && item.blocker_confirmed ? "BLOCKED" : "UNSCHEDULED") : "COMPLETED" },
+      item.status === "COMPLETED" ? "Reopened" : "Marked complete",
+    );
 
   const respondToBlocker = async (item: WorkItem, confirmed: boolean) => {
     setBusyId(item.id);
@@ -216,9 +263,22 @@ function Home() {
             onCorrectMode={(item, mode) => correct.mutate({ item, mode })}
             onEditGoal={(item, goal) => edit.mutateAsync({ item, goal })}
             onBlockerResponse={respondToBlocker}
+            onSetDeadline={setDeadline}
+            onToggleComplete={toggleComplete}
           />
         )}
       </div>
     </AppShell>
   );
+}
+/** Explicit deadlines only; reference is the local day the words were written. */
+function deadlineFromGoal(goal: string, reference: Date) {
+  const refISO = toISODate(reference);
+  const parsed = parseDeadline(goal, refISO);
+  return {
+    due_date: parsed?.date ?? null,
+    due_at: parsed?.time ? toInstant(parsed.date, parsed.time, new Date(`${parsed.date}T${parsed.time}`).getTimezoneOffset()) : null,
+    deadline_source: parsed ? ("GOAL" as const) : null,
+    deadline_checked: true,
+  };
 }
