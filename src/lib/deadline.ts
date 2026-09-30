@@ -7,7 +7,7 @@
 const WEEKDAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
 
-export type ParsedDeadline = { date: string; time: string | null } | null;
+export type ParsedDeadline = { date: string; time: string | null; instant?: string } | null;
 
 const pad = (n: number) => String(n).padStart(2, "0");
 export const toISODate = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -22,8 +22,20 @@ const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), 
  * local date. Vague phrases ("this week", "next month") return null: there is
  * no honest single date for them.
  */
-export function parseDeadline(text: string, todayISO: string): ParsedDeadline {
+export function parseDeadline(text: string, todayISO: string, reference?: Date): ParsedDeadline {
   const t = text.toLowerCase();
+  // Relative deadlines under a day ("in 2 minutes", "within 3 hours", "in an hour")
+  // are exact instants counted from the moment the words were written.
+  const rel = t.match(/\b(?:in|within)\s+(\d{1,4}|an?|half an?)\s*(minutes?|mins?|hours?|hrs?|h)\b/);
+  if (rel) {
+    const base = reference ?? new Date();
+    const n = rel[1] === "a" || rel[1] === "an" ? 1 : rel[1]!.startsWith("half") ? 0.5 : Number(rel[1]);
+    const ms = n * (rel[2]!.startsWith("m") ? 60000 : 3600000);
+    if (ms > 0) {
+      const at = new Date(base.getTime() + ms);
+      return { date: toISODate(at), time: `${pad(at.getHours())}:${pad(at.getMinutes())}`, instant: at.toISOString() };
+    }
+  }
   const today = fromISODate(todayISO);
   let date: Date | null = null;
 
@@ -102,6 +114,10 @@ export function deriveTiming(item: Deadlined, now: Date = new Date()): Timing {
       ? `Overdue since${timeText.replace(" at", "")}`
       : `Overdue by ${late} ${late === 1 ? "day" : "days"}`;
     return { bucket: "OVERDUE", label, rank };
+  }
+  if (exact && exact.getTime() - now.getTime() < 3600000) {
+    const mins = Math.max(1, Math.ceil((exact.getTime() - now.getTime()) / 60000));
+    return { bucket: "SOON", label: `Due in ${mins} ${mins === 1 ? "minute" : "minutes"}`, rank };
   }
   if (days === 0) return { bucket: "SOON", label: `Due today${timeText}`, rank };
   if (days === 1) return { bucket: "SOON", label: `Due tomorrow${timeText}`, rank };
