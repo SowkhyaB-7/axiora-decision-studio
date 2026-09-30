@@ -69,6 +69,7 @@ export function WorkspaceCanvas({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeWorkstream, setActiveWorkstream] = useState<string | null>(null);
   const [timingFilter, setTimingFilter] = useState<TimingFilter>("ALL");
+  const [view, setView] = useState<"ACTIVE" | "COMPLETED">("ACTIVE");
   const [sortOrder, setSortOrder] = useState<SortOrder>("DEFAULT");
   const linkedDecisions = new Set(items.map((item) => item.decision_id).filter(Boolean));
   const decisionVerdicts = new Map(decisions.map((decision) => [decision.id, decision.verdict]));
@@ -100,14 +101,15 @@ export function WorkspaceCanvas({
   }));
   const allItems = [...items, ...decisionItems];
   const groups = groupByWorkstream(allItems);
+  const completedCount = allItems.filter((item) => item.status === "COMPLETED").length;
   const visibleGroups = (activeWorkstream
     ? groups.filter(([workstream]) => workstream === activeWorkstream)
     : groups
   )
     .map(([workstream, group]) => {
-      // Finished work leaves the active views; it lives under the Completed filter.
+      // Finished work leaves the Active view; it lives under the Completed view.
       const filtered = group.filter((item) =>
-        timingFilter === "COMPLETED"
+        view === "COMPLETED"
           ? item.status === "COMPLETED"
           : item.status !== "COMPLETED" && (timingFilter === "ALL" || deriveTiming(item, now).bucket === timingFilter),
       );
