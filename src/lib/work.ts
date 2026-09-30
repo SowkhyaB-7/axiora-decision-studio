@@ -61,6 +61,7 @@ export type WorkItem = {
   due_date: string | null;
   due_at: string | null;
   deadline_source: "GOAL" | "USER" | null;
+  completed_at: string | null;
   created_at: string;
 };
 
@@ -97,6 +98,7 @@ export function toWorkItem(row: Record<string, unknown>): WorkItem {
     due_date: (row["due_date"] as string | null) ?? null,
     due_at: (row["due_at"] as string | null) ?? null,
     deadline_source: (row["deadline_source"] as WorkItem["deadline_source"]) ?? null,
+    completed_at: (row["completed_at"] as string | null) ?? null,
     created_at: String(row["created_at"] ?? ""),
   };
 }

@@ -25,6 +25,7 @@ import {
   type WorkItem,
 } from "@/lib/work";
 import { deriveTiming, type TimingBucket } from "@/lib/deadline";
+import { SupportingMaterials } from "@/components/supporting-materials";
 
 type DecisionNode = {
   id: string;
@@ -94,6 +95,7 @@ export function WorkspaceCanvas({
     due_date: null,
     due_at: null,
     deadline_source: null,
+    completed_at: null,
     created_at: "",
   }));
   const allItems = [...items, ...decisionItems];
@@ -103,7 +105,12 @@ export function WorkspaceCanvas({
     : groups
   )
     .map(([workstream, group]) => {
-      const filtered = group.filter((item) => timingFilter === "ALL" || deriveTiming(item, now).bucket === timingFilter);
+      // Finished work leaves the active views; it lives under the Completed filter.
+      const filtered = group.filter((item) =>
+        timingFilter === "COMPLETED"
+          ? item.status === "COMPLETED"
+          : item.status !== "COMPLETED" && (timingFilter === "ALL" || deriveTiming(item, now).bucket === timingFilter),
+      );
       const ordered = sortOrder === "DEFAULT" ? filtered : sortByTiming(filtered, sortOrder, now);
       return [workstream, ordered] as [string, WorkItem[]];
     })
@@ -176,7 +183,7 @@ export function WorkspaceCanvas({
 
         <div className={cn("workspace-map", activeWorkstream && "workspace-map-focused")} aria-label="Workspace">
           {visibleGroups.length === 0 && (
-            <p className="workspace-empty">Nothing here matches this timing.</p>
+            <p className="workspace-empty">{timingFilter === "COMPLETED" ? "No completed work here yet." : "Nothing here matches this timing."}</p>
           )}
           {visibleGroups.map(([workstream, group]) => (
             <section key={workstream} className="workspace-cluster">
@@ -537,10 +544,17 @@ function WorkDetail({
           </div>
         )}
 
+        <SupportingMaterials workItemId={item.id} />
+
         <div className="mt-10 border-t border-border pt-5">
           <Button type="button" variant="outline" size="sm" className="mb-3" disabled={busy} onClick={() => onToggleComplete(item)}>
-            {item.status === "COMPLETED" ? <><RotateCcw /> Reopen</> : <><Check /> Mark complete</>}
+            {item.status === "COMPLETED" ? <><RotateCcw /> Reopen</> : <><Check /> Mark as completed</>}
           </Button>
+          {item.status === "COMPLETED" && (
+            <p className="mb-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Check className="h-3.5 w-3.5" /> Completed{item.completed_at ? ` ${formatCompleted(item.completed_at)}` : ""}
+            </p>
+          )}
           <br />
           <Button type="button" variant="ghost" size="sm" className="px-0" onClick={() => setCorrectionOpen((open) => !open)}>
             <MoreHorizontal /> Correct interpretation
@@ -563,7 +577,7 @@ function WorkDetail({
   );
 }
 
-type TimingFilter = "ALL" | Exclude<TimingBucket, "COMPLETED">;
+type TimingFilter = "ALL" | TimingBucket;
 type SortOrder = "DEFAULT" | "EARLIEST" | "LATEST";
 
 const TIMING_FILTERS: [TimingFilter, string][] = [
@@ -573,6 +587,7 @@ const TIMING_FILTERS: [TimingFilter, string][] = [
   ["WEEK", "Due this week"],
   ["LATER", "Due later"],
   ["NONE", "No deadline"],
+  ["COMPLETED", "Completed"],
 ];
 
 // Undated and completed work keeps its place at the end; dated work sorts by its real deadline.
@@ -584,7 +599,12 @@ function sortByTiming(group: WorkItem[], order: Exclude<SortOrder, "DEFAULT">, n
   return [...dated, ...undated];
 }
 
+function formatCompleted(iso: string) {
+  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
 function nodeStateLabel(item: WorkItem, now: Date) {
+  if (item.status === "COMPLETED") return item.completed_at ? `Completed ${formatCompleted(item.completed_at)}` : "Completed";
   if (item.mode === "AMBIGUOUS") return "I need your input";
   if (item.mode === "DECISION") return "A decision to make";
   if (item.mode === "DEPENDENCY" && item.blocker_confirmed !== true) return "Possible hold-up";
