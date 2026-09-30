@@ -135,6 +135,19 @@ export function WorkspaceCanvas({
     <>
       <div className="workspace-surface mt-8">
         <div className="workspace-toolbar">
+        <div className="workspace-view-switch" role="group" aria-label="Show active or completed work">
+          {(["ACTIVE", "COMPLETED"] as const).map((v) => (
+            <button
+              key={v}
+              type="button"
+              className="workspace-view-option"
+              aria-pressed={view === v}
+              onClick={() => { setView(v); setSelectedId(null); }}
+            >
+              {v === "ACTIVE" ? "Active" : `Completed${completedCount ? ` · ${completedCount}` : ""}`}
+            </button>
+          ))}
+        </div>
         <nav className="workspace-filters" aria-label="Filter by workstream">
           <Button
             type="button"
@@ -162,13 +175,15 @@ export function WorkspaceCanvas({
         </nav>
 
         <div className="workspace-controls">
-          <WorkspaceSelect
-            label="Filter"
-            ariaLabel="Filter by timing"
-            value={timingFilter}
-            onChange={(v) => setTimingFilter(v as TimingFilter)}
-            options={TIMING_FILTERS}
-          />
+          {view === "ACTIVE" && (
+            <WorkspaceSelect
+              label="Filter"
+              ariaLabel="Filter by timing"
+              value={timingFilter}
+              onChange={(v) => setTimingFilter(v as TimingFilter)}
+              options={TIMING_FILTERS}
+            />
+          )}
           <WorkspaceSelect
             label="Sort"
             ariaLabel="Sort by due date"
@@ -185,7 +200,11 @@ export function WorkspaceCanvas({
 
         <div className={cn("workspace-map", activeWorkstream && "workspace-map-focused")} aria-label="Workspace">
           {visibleGroups.length === 0 && (
-            <p className="workspace-empty">{timingFilter === "COMPLETED" ? "No completed work here yet." : "Nothing here matches this timing."}</p>
+            <p className="workspace-empty">
+              {view === "COMPLETED"
+                ? `No completed work${activeWorkstream ? ` in ${activeWorkstream}` : ""} yet. Open any piece of work in Active and choose "Mark as completed" — it will appear here.`
+                : "Nothing here matches this timing."}
+            </p>
           )}
           {visibleGroups.map(([workstream, group]) => (
             <section key={workstream} className="workspace-cluster">
