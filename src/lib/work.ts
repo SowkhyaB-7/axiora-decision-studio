@@ -58,6 +58,9 @@ export type WorkItem = {
   ai_reasoning: string | null;
   user_corrections: { from: string; to: string; at: string }[];
   decision_id: string | null;
+  due_date: string | null;
+  due_at: string | null;
+  deadline_source: "GOAL" | "USER" | null;
   created_at: string;
 };
 
@@ -91,6 +94,9 @@ export function toWorkItem(row: Record<string, unknown>): WorkItem {
       ? (row["user_corrections"] as WorkItem["user_corrections"])
       : [],
     decision_id: (row["decision_id"] as string | null) ?? null,
+    due_date: (row["due_date"] as string | null) ?? null,
+    due_at: (row["due_at"] as string | null) ?? null,
+    deadline_source: (row["deadline_source"] as WorkItem["deadline_source"]) ?? null,
     created_at: String(row["created_at"] ?? ""),
   };
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
@@ -24,6 +24,7 @@ import {
   type Mode,
   type WorkItem,
 } from "@/lib/work";
+import { deriveTiming, type TimingBucket } from "@/lib/deadline";
 
 type DecisionNode = {
   id: string;
@@ -41,6 +42,8 @@ export function WorkspaceCanvas({
   onCorrectMode,
   onBlockerResponse,
   onEditGoal,
+  onSetDeadline,
+  onToggleComplete,
 }: {
   items: WorkItem[];
   decisions: DecisionNode[];
@@ -49,7 +52,17 @@ export function WorkspaceCanvas({
   onCorrectMode: (item: WorkItem, mode: Mode) => void;
   onBlockerResponse: (item: WorkItem, confirmed: boolean) => void;
   onEditGoal: (item: WorkItem, goal: string) => Promise<unknown>;
+  onSetDeadline: (item: WorkItem, date: string | null, time: string | null) => Promise<unknown>;
+  onToggleComplete: (item: WorkItem) => Promise<unknown>;
 }) {
+  // Timing is derived from the clock, so re-evaluate as time passes.
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const tick = () => setNow(new Date());
+    const id = window.setInterval(tick, 60_000);
+    window.addEventListener("focus", tick);
+    return () => { window.clearInterval(id); window.removeEventListener("focus", tick); };
+  }, []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeWorkstream, setActiveWorkstream] = useState<string | null>(null);
   const [timingFilter, setTimingFilter] = useState<TimingFilter>("ALL");
@@ -76,6 +89,9 @@ export function WorkspaceCanvas({
     ai_reasoning: decision.isDemo ? "Demo decision" : "Existing decision",
     user_corrections: [],
     decision_id: decision.id,
+    due_date: null,
+    due_at: null,
+    deadline_source: null,
     created_at: "",
   }));
   const allItems = [...items, ...decisionItems];
@@ -85,8 +101,8 @@ export function WorkspaceCanvas({
     : groups
   )
     .map(([workstream, group]) => {
-      const filtered = group.filter((item) => timingFilter === "ALL" || timingOf(item).bucket === timingFilter);
-      const ordered = sortOrder === "DEFAULT" ? filtered : sortByTiming(filtered, sortOrder);
+      const filtered = group.filter((item) => timingFilter === "ALL" || deriveTiming(item, now).bucket === timingFilter);
+      const ordered = sortOrder === "DEFAULT" ? filtered : sortByTiming(filtered, sortOrder, now);
       return [workstream, ordered] as [string, WorkItem[]];
     })
     .filter(([, group]) => group.length > 0);
@@ -172,6 +188,7 @@ export function WorkspaceCanvas({
                     key={item.id}
                     item={item}
                     verdict={item.decision_id ? decisionVerdicts.get(item.decision_id) : undefined}
+                    now={now}
                     onOpen={() => setSelectedId(item.id)}
                   />
                 ))}
@@ -190,6 +207,9 @@ export function WorkspaceCanvas({
           onCorrectMode={onCorrectMode}
           onBlockerResponse={onBlockerResponse}
           onEditGoal={onEditGoal}
+          onSetDeadline={onSetDeadline}
+          onToggleComplete={onToggleComplete}
+          now={now}
         />
       )}
     </>
@@ -231,20 +251,23 @@ function WorkspaceSelect({
 function WorkNode({
   item,
   verdict,
+  now,
   onOpen,
 }: {
   item: WorkItem;
   verdict?: string;
+  now: Date;
   onOpen: () => void;
 }) {
-  const prominent = item.status === "NOW" || item.status === "BLOCKED" || item.mode === "AMBIGUOUS";
+  const bucket = deriveTiming(item, now).bucket;
+  const prominent = bucket === "OVERDUE" || bucket === "SOON" || item.status === "BLOCKED" || item.mode === "AMBIGUOUS";
   const summary = getNodeSummary(item, verdict);
   const content = (
     <>
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2 text-[10px] font-semibold uppercase text-muted-foreground">
           <span className={cn("workspace-node-mark", `workspace-node-mark-${item.mode.toLowerCase()}`)} />
-          <span className="truncate">{nodeStateLabel(item)}</span>
+          <span className="truncate">{nodeStateLabel(item, now)}</span>
         </div>
         {item.mode !== "DECISION" && <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
       </div>
@@ -263,7 +286,7 @@ function WorkNode({
     item.mode === "DECISION" && "workspace-node-decision",
     item.mode === "AMBIGUOUS" && "workspace-node-input",
     item.status === "BLOCKED" && "workspace-node-blocked",
-    item.status === "LATER" && "workspace-node-later",
+    bucket === "LATER" && "workspace-node-later",
     item.status === "COMPLETED" && "workspace-node-completed",
   );
 
@@ -292,10 +315,16 @@ function WorkDetail({
   onCorrectMode,
   onBlockerResponse,
   onEditGoal,
+  onSetDeadline,
+  onToggleComplete,
+  now,
 }: {
   item: WorkItem;
   busy: boolean;
+  now: Date;
   onEditGoal: (item: WorkItem, goal: string) => Promise<unknown>;
+  onSetDeadline: (item: WorkItem, date: string | null, time: string | null) => Promise<unknown>;
+  onToggleComplete: (item: WorkItem) => Promise<unknown>;
   onClose: () => void;
   onClarify: (item: WorkItem, answer: string) => void;
   onCorrectMode: (item: WorkItem, mode: Mode) => void;
@@ -305,6 +334,13 @@ function WorkDetail({
   const [customAnswer, setCustomAnswer] = useState("");
   const [editing, setEditing] = useState(false);
   const [draftGoal, setDraftGoal] = useState(item.raw_goal);
+  const [editingDeadline, setEditingDeadline] = useState(false);
+  const currentTime = item.due_at
+    ? new Date(item.due_at).toTimeString().slice(0, 5)
+    : "";
+  const [draftDate, setDraftDate] = useState(item.due_date ?? "");
+  const [draftTime, setDraftTime] = useState(currentTime);
+  const timing = deriveTiming(item, now);
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-foreground/15" role="presentation">
@@ -317,7 +353,7 @@ function WorkDetail({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[11px] font-semibold uppercase text-muted-foreground">
-              {item.workstream} · {nodeStateLabel(item)}
+              {item.workstream} · {nodeStateLabel(item, now)}
             </p>
             <h2 id="work-detail-title" className="mt-2 font-display text-3xl leading-tight">
               {item.title}
@@ -373,9 +409,38 @@ function WorkDetail({
             {item.clarifying_answer && (
               <p className="mt-1 text-sm leading-relaxed text-foreground">Your answer: {item.clarifying_answer}</p>
             )}
-            <p className="mt-1 text-xs text-muted-foreground">
-              {explicitTimingLabel(item.raw_goal + " " + (item.clarifying_answer ?? "")) ?? "No deadline given"}
-            </p>
+            {editingDeadline ? (
+              <form
+                className="mt-2 flex flex-wrap items-center gap-2"
+                onSubmit={async (event) => {
+                  event.preventDefault();
+                  if (!draftDate) return;
+                  await onSetDeadline(item, draftDate, draftTime || null);
+                  setEditingDeadline(false);
+                }}
+              >
+                <input type="date" value={draftDate} onChange={(e) => setDraftDate(e.target.value)} aria-label="Deadline date" className="rounded-md border border-border bg-background px-2 py-1 text-xs" />
+                <input type="time" value={draftTime} onChange={(e) => setDraftTime(e.target.value)} aria-label="Deadline time (optional)" className="rounded-md border border-border bg-background px-2 py-1 text-xs" />
+                <Button type="submit" size="sm" disabled={busy || !draftDate}>Save</Button>
+                {item.due_date && (
+                  <Button type="button" size="sm" variant="outline" disabled={busy} onClick={async () => { await onSetDeadline(item, null, null); setEditingDeadline(false); }}>
+                    Remove deadline
+                  </Button>
+                )}
+                <Button type="button" size="sm" variant="ghost" onClick={() => setEditingDeadline(false)}>Cancel</Button>
+              </form>
+            ) : (
+              <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                <span>
+                  {item.due_date
+                    ? `${timing.bucket === "COMPLETED" ? "Deadline was" : timing.label + " ·"} ${new Date(item.due_at ?? `${item.due_date}T00:00`).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}${item.due_at ? `, ${new Date(item.due_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : ""}${item.deadline_source === "USER" ? " (set by you)" : ""}`
+                    : "No deadline given"}
+                </span>
+                <Button type="button" variant="ghost" size="sm" className="h-auto px-0 py-0 text-xs" disabled={busy} onClick={() => { setDraftDate(item.due_date ?? ""); setDraftTime(currentTime); setEditingDeadline(true); }}>
+                  {item.due_date ? "Change" : "Add deadline"}
+                </Button>
+              </p>
+            )}
           </div>
           {item.ai_reasoning && (
             <div className="mt-5 bg-surface-muted p-4">
@@ -471,6 +536,10 @@ function WorkDetail({
         )}
 
         <div className="mt-10 border-t border-border pt-5">
+          <Button type="button" variant="outline" size="sm" className="mb-3" disabled={busy} onClick={() => onToggleComplete(item)}>
+            {item.status === "COMPLETED" ? <><RotateCcw /> Reopen</> : <><Check /> Mark complete</>}
+          </Button>
+          <br />
           <Button type="button" variant="ghost" size="sm" className="px-0" onClick={() => setCorrectionOpen((open) => !open)}>
             <MoreHorizontal /> Correct interpretation
           </Button>
@@ -492,82 +561,33 @@ function WorkDetail({
   );
 }
 
-type TimingFilter = "ALL" | "SOON" | "WEEK" | "LATER" | "NONE";
+type TimingFilter = "ALL" | Exclude<TimingBucket, "COMPLETED">;
 type SortOrder = "DEFAULT" | "EARLIEST" | "LATEST";
 
 const TIMING_FILTERS: [TimingFilter, string][] = [
   ["ALL", "All timing"],
+  ["OVERDUE", "Overdue"],
   ["SOON", "Due soon"],
   ["WEEK", "Due this week"],
   ["LATER", "Due later"],
   ["NONE", "No deadline"],
 ];
 
-const WEEKDAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-
-// Reads only timing Axiora already has: explicit language in the goal, or the stored status.
-// rank orders dated work relative to other dated work; null means no supported timing.
-function timingOf(item: WorkItem): { bucket: Exclude<TimingFilter, "ALL">; rank: number | null } {
-  const goal = item.raw_goal.toLowerCase();
-  if (/\btoday\b/.test(goal)) return { bucket: "SOON", rank: 0 };
-  if (/\btomorrow\b/.test(goal)) return { bucket: "SOON", rank: 1 };
-  const weekday = goal.match(/\b(?:by|before|on|this)\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/);
-  if (weekday?.[1]) {
-    const from = item.created_at ? new Date(item.created_at).getDay() : 0;
-    const offset = (WEEKDAYS.indexOf(weekday[1]) - from + 7) % 7;
-    return { bucket: "WEEK", rank: 2 + offset / 10 };
-  }
-  if (/\bthis week\b/.test(goal)) return { bucket: "WEEK", rank: 2.8 };
-  if (/\bnext\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/.test(goal)) return { bucket: "LATER", rank: 3 };
-  if (/\bnext week\b/.test(goal)) return { bucket: "LATER", rank: 3.1 };
-  if (/\blater this month\b/.test(goal)) return { bucket: "LATER", rank: 4 };
-  if (/\bnext month\b/.test(goal)) return { bucket: "LATER", rank: 5 };
-  if (item.status === "NOW") return { bucket: "SOON", rank: 1.5 };
-  if (item.status === "NEXT") return { bucket: "LATER", rank: 3.5 };
-  if (item.status === "LATER") return { bucket: "LATER", rank: 6 };
-  return { bucket: "NONE", rank: null };
-}
-
-function sortByTiming(group: WorkItem[], order: Exclude<SortOrder, "DEFAULT">) {
-  const dated = group.filter((item) => timingOf(item).rank !== null);
-  const undated = group.filter((item) => timingOf(item).rank === null);
-  dated.sort((a, b) => {
-    const diff = (timingOf(a).rank ?? 0) - (timingOf(b).rank ?? 0);
-    return order === "EARLIEST" ? diff : -diff;
-  });
+// Undated and completed work keeps its place at the end; dated work sorts by its real deadline.
+function sortByTiming(group: WorkItem[], order: Exclude<SortOrder, "DEFAULT">, now: Date) {
+  const rank = (item: WorkItem) => deriveTiming(item, now).rank;
+  const dated = group.filter((item) => rank(item) !== null);
+  const undated = group.filter((item) => rank(item) === null);
+  dated.sort((a, b) => (order === "EARLIEST" ? rank(a)! - rank(b)! : rank(b)! - rank(a)!));
   return [...dated, ...undated];
 }
 
-function nodeStateLabel(item: WorkItem) {
+function nodeStateLabel(item: WorkItem, now: Date) {
   if (item.mode === "AMBIGUOUS") return "I need your input";
   if (item.mode === "DECISION") return "A decision to make";
   if (item.mode === "DEPENDENCY" && item.blocker_confirmed !== true) return "Possible hold-up";
   if (item.status === "BLOCKED" || item.blocker_confirmed === true) return "Waiting on…";
-  if (item.status === "COMPLETED") return "Completed";
-
-  const timing = explicitTimingLabel(item.raw_goal);
-  if (timing) return timing;
-  if (item.status === "NOW") return "Due soon";
-  if (item.status === "NEXT") return "Coming up";
-  if (item.status === "LATER") return "Later";
-  return "No deadline";
-}
-
-function explicitTimingLabel(goal: string) {
-  const normalized = goal.toLowerCase();
-  const weekday = normalized.match(/\b(?:by|before|on|this|next)\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i);
-  if (weekday?.[1]) return `Due ${titleCase(weekday[1])}`;
-  if (/\btomorrow\b/i.test(normalized)) return "Due tomorrow";
-  if (/\btoday\b/i.test(normalized)) return "Due today";
-  if (/\bnext month\b/i.test(normalized)) return "Next month";
-  if (/\blater this month\b/i.test(normalized)) return "Later this month";
-  if (/\bthis week\b/i.test(normalized)) return "Due this week";
-  if (/\bnext week\b/i.test(normalized)) return "Next week";
-  return null;
-}
-
-function titleCase(value: string) {
-  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+  return deriveTiming(item, now).label;
 }
 
 function getNodeSummary(item: WorkItem, verdict?: string) {
