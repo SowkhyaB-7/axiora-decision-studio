@@ -63,6 +63,8 @@ export function WorkspaceCanvas({
     window.addEventListener("focus", tick);
     return () => { window.clearInterval(id); window.removeEventListener("focus", tick); };
   }, []);
+  // New or edited deadlines are read against the current moment, not the last tick.
+  useEffect(() => { setNow(new Date()); }, [items]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeWorkstream, setActiveWorkstream] = useState<string | null>(null);
   const [timingFilter, setTimingFilter] = useState<TimingFilter>("ALL");

@@ -97,10 +97,16 @@ function Home() {
   };
 
   const create = useMutation({
-    mutationFn: async () => runInterpret({ data: { goal: goal.trim() } }),
+    mutationFn: async () => {
+      // Relative deadlines count from when the user submitted, not when the AI replied.
+      const submittedAt = new Date();
+      const row = await runInterpret({ data: { goal: goal.trim() } });
+      const { error } = await supabase.from("work_items").update(deadlineFromGoal(row.raw_goal, submittedAt)).eq("id", row.id);
+      if (error) throw error;
+      return row;
+    },
     onSuccess: async (row) => {
       setGoal("");
-      await supabase.from("work_items").update(deadlineFromGoal(row.raw_goal, new Date())).eq("id", row.id);
       await refresh();
       const item = toWorkItem(row as unknown as Record<string, unknown>);
       toast.success(
@@ -130,10 +136,12 @@ function Home() {
   const edit = useMutation({
     mutationFn: async ({ item, goal }: { item: WorkItem; goal: string }) => {
       setBusyId(item.id);
+      const editedAt = new Date();
       const row = await runEdit({ data: { itemId: item.id, goal } });
       // A date the user set by hand is never overwritten by re-reading the words.
       if (row.deadline_source !== "USER") {
-        await supabase.from("work_items").update(deadlineFromGoal(goal, new Date())).eq("id", item.id);
+        const { error } = await supabase.from("work_items").update(deadlineFromGoal(goal, editedAt)).eq("id", item.id);
+        if (error) throw error;
       }
       return row;
     },
@@ -275,10 +283,10 @@ function Home() {
 /** Explicit deadlines only; reference is the local day the words were written. */
 function deadlineFromGoal(goal: string, reference: Date) {
   const refISO = toISODate(reference);
-  const parsed = parseDeadline(goal, refISO);
+  const parsed = parseDeadline(goal, refISO, reference);
   return {
     due_date: parsed?.date ?? null,
-    due_at: parsed?.time ? toInstant(parsed.date, parsed.time, new Date(`${parsed.date}T${parsed.time}`).getTimezoneOffset()) : null,
+    due_at: parsed?.instant ?? (parsed?.time ? toInstant(parsed.date, parsed.time, new Date(`${parsed.date}T${parsed.time}`).getTimezoneOffset()) : null),
     deadline_source: parsed ? ("GOAL" as const) : null,
     deadline_checked: true,
   };
