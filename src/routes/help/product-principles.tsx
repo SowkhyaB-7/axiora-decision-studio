@@ -1,55 +1,35 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { HelpShell } from "@/components/help-shell";
+import { helpMeta } from "@/lib/help-meta";
 
 export const Route = createFileRoute("/help/product-principles")({
-  head: () => ({ meta: [{ title: "Product Principles — Axiora Help Center" }] }),
+  head: () =>
+    helpMeta("Product Principles", "The thinking behind the way Axiora is designed."),
   component: Page,
 });
+
+const principles = [
+  ["Start with what the person is trying to accomplish", "The goal comes first. Everything else follows from it."],
+  ["Don't make people organize their work before getting help", "No projects, fields, or categories to fill in up front."],
+  ["Ask for clarification only when it matters", "One question at most, and only when the answer changes the advice."],
+  ["Keep assumptions visible", "What Axiora infers is shown separately from what you said."],
+  ["Don't invent certainty", "No made up deadlines, stakeholders, or approvals. Missing or conflicting information is named."],
+  ["Save deeper analysis for when it's needed", "Decisions get a full briefing. Everyday tasks don't."],
+  ["Keep the user in control", "Every suggestion can be edited, corrected, or ignored."],
+  ["Reduce cognitive load", "Axiora should leave you with less to manage, not more process."],
+];
 
 function Page() {
   return (
     <HelpShell title="Product Principles" crumb="Product Principles" showBackLink>
-      <h2>Evidence before opinion</h2>
-      <p>
-        A readiness assessment is built from logged, dated evidence — not from how
-        confident someone feels in the moment.
-      </p>
-
-      <h2>Explainable over opaque</h2>
-      <p>
-        Every score traces back to specific evidence you can see. Readiness Analysis is
-        deliberately deterministic rather than an AI model, precisely so it stays
-        auditable.
-      </p>
-
-      <h2>One board = one decision</h2>
-      <p>
-        A board frames exactly one decision. Evidence isn't pooled across decisions, and
-        readiness is never averaged across boards.
-      </p>
-
-      <h2>Decisions should be auditable</h2>
-      <p>
-        Recording a decision is a deliberate, visible action. The evidence and analyses
-        behind it remain in place afterward.
-      </p>
-
-      <h2>Preserve historical analyses</h2>
-      <p>
-        Running a new analysis never overwrites a previous one — it adds a new version.
-      </p>
-
-      <h2>Simplicity over feature bloat</h2>
-      <p>
-        Version 1.0 supports one decision type, one owner per board, and a fixed
-        five-dimension framework — deliberately, not as a placeholder.
-      </p>
-
-      <h2>Transparent reasoning</h2>
-      <p>
-        Where a feature is a label without a function yet — like board templates or the
-        visibility setting — Axiora's own documentation says so.
-      </p>
+      <p className="lead">The ideas that shape how Axiora behaves.</p>
+      <ol className="mt-6 space-y-4">
+        {principles.map(([t, d]) => (
+          <li key={t}>
+            <strong>{t}.</strong> {d}
+          </li>
+        ))}
+      </ol>
     </HelpShell>
   );
 }

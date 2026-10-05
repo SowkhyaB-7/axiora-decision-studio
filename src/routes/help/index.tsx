@@ -2,20 +2,39 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   BookOpen,
   Compass,
-  ScrollText,
   Sparkles,
   Layers,
-  Building2,
   Shield,
   Info,
   ClipboardList,
   MessageCircleQuestion,
   Mail,
   FileText,
+  Network,
+  Clock,
+  Scale,
+  History,
 } from "lucide-react";
 import { HelpShell } from "@/components/help-shell";
 
 export const Route = createFileRoute("/help/")({
+  head: () => ({
+    meta: [
+      { title: "Help Center | Axiora" },
+      {
+        name: "description",
+        content:
+          "Learn how Axiora works, how to get the most out of it, and what the current version can and cannot do.",
+      },
+      { property: "og:title", content: "Help Center | Axiora" },
+      {
+        property: "og:description",
+        content: "How Axiora turns what you are trying to accomplish into clear next steps.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: HelpIndex,
 });
 
@@ -33,14 +52,22 @@ const groups: { title: string; cards: Card[] }[] = [
       {
         to: "/help/getting-started",
         title: "Getting Started",
-        description: "Create your first Decision Board and run your first analysis.",
+        description:
+          "Learn how to start with Axiora and turn something you are trying to accomplish into a useful next step.",
         icon: Sparkles,
+      },
+      {
+        to: "/help/how-to-work",
+        title: "How to Work with Axiora",
+        description:
+          "Learn how to describe what you are trying to accomplish and how Axiora works from there.",
+        icon: BookOpen,
       },
       {
         to: "/help/core-concepts",
         title: "Core Concepts",
         description:
-          "The terms Axiora uses — Board, Evidence, Dimension, Readiness, Confidence.",
+          "Understand the ideas behind Axiora, including work, next steps, evidence, decisions, and uncertainty.",
         icon: Compass,
       },
     ],
@@ -49,22 +76,32 @@ const groups: { title: string; cards: Card[] }[] = [
     title: "How Axiora Works",
     cards: [
       {
-        to: "/help/decision-framework",
-        title: "Decision Framework",
-        description: "Why five dimensions exist, and exactly how readiness is scored.",
+        to: "/help/understanding-work",
+        title: "How Axiora Understands Work",
+        description:
+          "See how Axiora interprets what you give it and decides what kind of help you need.",
+        icon: Network,
+      },
+      {
+        to: "/help/workstreams",
+        title: "Workstreams",
+        description:
+          "Learn how Axiora organizes work without asking you to manage the structure yourself.",
         icon: Layers,
       },
       {
-        to: "/help/user-guide",
-        title: "User Guide",
-        description: "Every feature, what it does, and its current limits.",
-        icon: BookOpen,
+        to: "/help/timing",
+        title: "Timing and Next Steps",
+        description:
+          "See how Axiora handles timing and turns a larger goal into something you can act on next.",
+        icon: Clock,
       },
       {
-        to: "/help/architecture",
-        title: "Architecture",
-        description: "How the app is built, end to end — frontend, database, deployment.",
-        icon: Building2,
+        to: "/help/decisions-evidence",
+        title: "Decisions and Evidence",
+        description:
+          "Learn how Axiora handles decisions, evidence, uncertainty, and conflicting information.",
+        icon: Scale,
       },
     ],
   },
@@ -74,26 +111,27 @@ const groups: { title: string; cards: Card[] }[] = [
       {
         to: "/help/about",
         title: "About Axiora",
-        description: "Why Axiora exists, who it's for, and what's in scope today.",
+        description: "Who made Axiora, and why.",
         icon: Info,
       },
       {
         to: "/help/product-principles",
         title: "Product Principles",
-        description: "The judgment calls behind how Axiora is designed.",
+        description: "Understand the thinking behind the way Axiora is designed.",
         icon: Shield,
       },
       {
         to: "/help/limitations",
         title: "Known Limitations",
-        description: "What v1.0 intentionally doesn't do yet.",
+        description:
+          "What Axiora does not do yet and where you should still use your own judgment.",
         icon: ClipboardList,
       },
       {
-        to: "/help/release-notes",
-        title: "Release Notes",
-        description: "What shipped in v1.0.0.",
-        icon: ScrollText,
+        to: "/help/whats-new",
+        title: "What's New in V2",
+        description: "See how Axiora has evolved from the earlier version.",
+        icon: History,
       },
     ],
   },
@@ -103,19 +141,20 @@ const groups: { title: string; cards: Card[] }[] = [
       {
         to: "/help/faq",
         title: "FAQ",
-        description: "Common questions, answered directly.",
+        description: "Answers to common questions about using Axiora.",
         icon: MessageCircleQuestion,
       },
       {
         to: "/help/contact",
         title: "Contact",
-        description: "How to reach out with a question or bug report.",
+        description:
+          "Get in touch if you have a question, spot something that does not look right, or want to share feedback.",
         icon: Mail,
       },
       {
         to: "/help/legal",
         title: "Legal",
-        description: "Where privacy and terms information will live.",
+        description: "Privacy, terms, and other important information.",
         icon: FileText,
       },
     ],
@@ -126,8 +165,8 @@ function HelpIndex() {
   return (
     <HelpShell title="Help Center" crumb="Help Center">
       <p className="lead">
-        Everything Axiora does today — how the product is designed, how readiness is
-        scored, and what v1.0 intentionally leaves out.
+        Learn how Axiora works, how to get the most out of it, and what the current
+        version can and cannot do.
       </p>
 
       <div className="mt-10 space-y-10">

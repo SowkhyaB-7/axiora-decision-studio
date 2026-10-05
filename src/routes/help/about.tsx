@@ -4,13 +4,13 @@ import { HelpShell } from "@/components/help-shell";
 export const Route = createFileRoute("/help/about")({
   head: () => ({
     meta: [
-      { title: "About Axiora — Created by Sowkhya Bovindala" },
+      { title: "About Axiora | Created by Sowkhya Bovindala" },
       {
         name: "description",
         content:
           "Axiora is an independent product exploration by Sowkhya Bovindala: an AI-native workspace for moving from messy intentions to clearer decisions.",
       },
-      { property: "og:title", content: "About Axiora — Created by Sowkhya Bovindala" },
+      { property: "og:title", content: "About Axiora | Created by Sowkhya Bovindala" },
       {
         property: "og:description",
         content:
@@ -25,8 +25,8 @@ export const Route = createFileRoute("/help/about")({
 
 const background = [
   "Electronics & Communication Engineering",
-  "Global MBA — University of Western Australia",
-  "IIM Kozhikode — Professional Certificate Programme",
+  "Global MBA, University of Western Australia",
+  "IIM Kozhikode, Professional Certificate Programme",
   "CSPO Certified",
 ];
 
@@ -53,7 +53,7 @@ function Page() {
         </div>
 
         <p>
-          Axiora is my exploration of that idea — an AI-native workspace designed to help
+          Axiora is my exploration of that idea: an AI-native workspace designed to help
           people move from messy intentions to clearer decisions and meaningful next
           actions, without adding another layer of process.
         </p>

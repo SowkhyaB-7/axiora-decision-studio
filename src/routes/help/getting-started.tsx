@@ -1,8 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { HelpShell } from "@/components/help-shell";
+import { helpMeta } from "@/lib/help-meta";
 
 export const Route = createFileRoute("/help/getting-started")({
-  head: () => ({ meta: [{ title: "Getting Started — Axiora Help Center" }] }),
+  head: () =>
+    helpMeta(
+      "Getting Started",
+      "How to start with Axiora and turn something you are trying to accomplish into a useful next step.",
+    ),
   component: Page,
 });
 
@@ -10,47 +15,42 @@ function Page() {
   return (
     <HelpShell title="Getting Started" crumb="Getting Started" showBackLink>
       <p className="lead">
-        Axiora helps you prepare a launch decision by organizing evidence around five
-        questions that determine whether it's actually ready — then keeping a record of
-        what you decided and why.
+        Axiora starts with one question: what are you trying to accomplish? You don't
+        need to set anything up first.
       </p>
 
-      <h2>What Axiora is</h2>
-      <p>
-        A decision preparation tool for Product Managers. It doesn't manage projects,
-        track tickets, or replace your roadmap — it focuses on one thing: preparing a
-        specific decision before you commit to it.
-      </p>
-
-      <h2>Who it's for</h2>
-      <ul>
-        <li>Product Managers preparing a launch decision</li>
-        <li>Associate Product Managers supporting that preparation</li>
-      </ul>
-
-      <h2>The first-time workflow</h2>
+      <h2>Your first few minutes</h2>
       <ol>
-        <li>Sign up with your email and password</li>
-        <li>Create a Decision Board for the launch decision you're preparing</li>
-        <li>Add evidence to each of the five readiness dimensions</li>
+        <li>Create an account with your email and password, then sign in.</li>
         <li>
-          Run an analysis to see a readiness score and recommendation for each dimension
+          On your workspace, type what you are trying to get done in the box at the top.
+          Write it the way you would say it to a colleague.
         </li>
-        <li>Record your decision once you're ready to move forward</li>
+        <li>
+          Press Enter. Axiora reads it, places it in a workstream, and suggests a first
+          step.
+        </li>
+        <li>Open the card to see what Axiora understood and what it suggests.</li>
       </ol>
 
-      <h2>Creating your first Decision Board</h2>
+      <h2>What you'll see</h2>
       <p>
-        From Home, select <strong>New Decision Board</strong>. You'll be asked for a
-        Decision Title and Context (both required), a Decision Type (only Launch
-        Readiness is functional today), a Target Date, a Template (a label only), and
-        Visibility (shown for context, not functional yet).
+        Each piece of work shows up as a small card. Some cards are ready to act on. Some
+        ask you a quick question first. Some point out that something might be holding
+        the work up. If what you wrote is really a choice you need to make, Axiora
+        treats it as a decision and offers a Decision Briefing.
       </p>
+
+      <h2>A few things to try</h2>
+      <ul>
+        <li>"Fix the checkout bug before Friday"</li>
+        <li>"Prepare for the board meeting"</li>
+        <li>"Launch the pricing page once legal is ready"</li>
+        <li>"Should we launch enterprise SSO now?"</li>
+      </ul>
       <p>
-        Every board automatically gets all five readiness dimensions — Customer
-        Validation, Product &amp; Technical Readiness, Business Readiness, Operational
-        Readiness, and Stakeholder Alignment. You can't remove, add, or reorder them.
-        See <Link to="/help/decision-framework">the Decision Framework</Link> for why.
+        Each of these gets a different kind of help. You can read why in{" "}
+        <Link to="/help/understanding-work">How Axiora Understands Work</Link>.
       </p>
     </HelpShell>
   );
