@@ -25,8 +25,8 @@ export const Route = createFileRoute("/help/about")({
 
 const background = [
   "Electronics & Communication Engineering",
-  "Global MBA — University of Western Australia",
-  "IIM Kozhikode — Professional Certificate Programme",
+  "Global MBA, University of Western Australia",
+  "IIM Kozhikode, Professional Certificate Programme",
   "CSPO Certified",
 ];
 
@@ -53,7 +53,7 @@ function Page() {
         </div>
 
         <p>
-          Axiora is my exploration of that idea — an AI-native workspace designed to help
+          Axiora is my exploration of that idea: an AI-native workspace designed to help
           people move from messy intentions to clearer decisions and meaningful next
           actions, without adding another layer of process.
         </p>
