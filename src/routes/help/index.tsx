@@ -16,7 +16,6 @@ import {
   History,
 } from "lucide-react";
 import { HelpShell } from "@/components/help-shell";
-import { helpMeta } from "@/lib/help-meta";
 
 export const Route = createFileRoute("/help/")({
   head: () => ({
@@ -38,7 +37,6 @@ export const Route = createFileRoute("/help/")({
   }),
   component: HelpIndex,
 });
-void helpMeta;
 
 type Card = {
   to: string;
