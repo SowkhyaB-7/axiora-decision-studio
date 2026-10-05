@@ -4,13 +4,13 @@ import { HelpShell } from "@/components/help-shell";
 export const Route = createFileRoute("/help/about")({
   head: () => ({
     meta: [
-      { title: "About Axiora — Created by Sowkhya Bovindala" },
+      { title: "About Axiora | Created by Sowkhya Bovindala" },
       {
         name: "description",
         content:
           "Axiora is an independent product exploration by Sowkhya Bovindala: an AI-native workspace for moving from messy intentions to clearer decisions.",
       },
-      { property: "og:title", content: "About Axiora — Created by Sowkhya Bovindala" },
+      { property: "og:title", content: "About Axiora | Created by Sowkhya Bovindala" },
       {
         property: "og:description",
         content:

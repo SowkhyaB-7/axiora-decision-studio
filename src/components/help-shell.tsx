@@ -94,7 +94,7 @@ export function HelpShell({
 
       <footer className="border-t border-border">
         <div className="mx-auto max-w-5xl px-4 py-8 md:px-8 text-xs text-muted-foreground flex flex-wrap items-center justify-between gap-3">
-          <span>Axiora v1.0.0 · Decision Intelligence for Product Teams</span>
+          <span>Axiora V2 · A workspace for ambiguous work</span>
           <div className="flex items-center gap-4">
             <Link to="/help/faq" className="hover:text-foreground">
               FAQ

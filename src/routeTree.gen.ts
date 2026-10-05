@@ -9,36 +9,28 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as HelpRouteRouteImport } from './routes/help/route'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as HelpIndexRouteImport } from './routes/help/index'
-import { Route as HelpAboutRouteImport } from './routes/help/about'
-import { Route as HelpArchitectureRouteImport } from './routes/help/architecture'
-import { Route as HelpContactRouteImport } from './routes/help/contact'
-import { Route as HelpCoreConceptsRouteImport } from './routes/help/core-concepts'
-import { Route as HelpDecisionFrameworkRouteImport } from './routes/help/decision-framework'
-import { Route as HelpFaqRouteImport } from './routes/help/faq'
-import { Route as HelpGettingStartedRouteImport } from './routes/help/getting-started'
-import { Route as HelpLegalRouteImport } from './routes/help/legal'
-import { Route as HelpLimitationsRouteImport } from './routes/help/limitations'
 import { Route as HelpProductPrinciplesRouteImport } from './routes/help/product-principles'
-import { Route as HelpReleaseNotesRouteImport } from './routes/help/release-notes'
-import { Route as HelpUserGuideRouteImport } from './routes/help/user-guide'
-import { Route as AuthenticatedDecisionsIdRouteImport } from './routes/_authenticated/decisions.$id'
+import { Route as HelpLimitationsRouteImport } from './routes/help/limitations'
+import { Route as HelpLegalRouteImport } from './routes/help/legal'
+import { Route as HelpGettingStartedRouteImport } from './routes/help/getting-started'
+import { Route as HelpFaqRouteImport } from './routes/help/faq'
+import { Route as HelpCoreConceptsRouteImport } from './routes/help/core-concepts'
+import { Route as HelpContactRouteImport } from './routes/help/contact'
+import { Route as HelpAboutRouteImport } from './routes/help/about'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDecisionsNewRouteImport } from './routes/_authenticated/decisions.new'
+import { Route as AuthenticatedDecisionsIdRouteImport } from './routes/_authenticated/decisions.$id'
 import { Route as AuthenticatedDecisionsIdOutcomeRouteImport } from './routes/_authenticated/decisions.$id_.outcome'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -51,64 +43,18 @@ const HelpRouteRoute = HelpRouteRouteImport.update({
   path: '/help',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const HelpIndexRoute = HelpIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => HelpRouteRoute,
-} as any)
-const HelpAboutRoute = HelpAboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => HelpRouteRoute,
-} as any)
-const HelpArchitectureRoute = HelpArchitectureRouteImport.update({
-  id: '/architecture',
-  path: '/architecture',
-  getParentRoute: () => HelpRouteRoute,
-} as any)
-const HelpContactRoute = HelpContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => HelpRouteRoute,
-} as any)
-const HelpCoreConceptsRoute = HelpCoreConceptsRouteImport.update({
-  id: '/core-concepts',
-  path: '/core-concepts',
-  getParentRoute: () => HelpRouteRoute,
-} as any)
-const HelpDecisionFrameworkRoute = HelpDecisionFrameworkRouteImport.update({
-  id: '/decision-framework',
-  path: '/decision-framework',
-  getParentRoute: () => HelpRouteRoute,
-} as any)
-const HelpFaqRoute = HelpFaqRouteImport.update({
-  id: '/faq',
-  path: '/faq',
-  getParentRoute: () => HelpRouteRoute,
-} as any)
-const HelpGettingStartedRoute = HelpGettingStartedRouteImport.update({
-  id: '/getting-started',
-  path: '/getting-started',
-  getParentRoute: () => HelpRouteRoute,
-} as any)
-const HelpLegalRoute = HelpLegalRouteImport.update({
-  id: '/legal',
-  path: '/legal',
-  getParentRoute: () => HelpRouteRoute,
-} as any)
-const HelpLimitationsRoute = HelpLimitationsRouteImport.update({
-  id: '/limitations',
-  path: '/limitations',
   getParentRoute: () => HelpRouteRoute,
 } as any)
 const HelpProductPrinciplesRoute = HelpProductPrinciplesRouteImport.update({
@@ -116,26 +62,56 @@ const HelpProductPrinciplesRoute = HelpProductPrinciplesRouteImport.update({
   path: '/product-principles',
   getParentRoute: () => HelpRouteRoute,
 } as any)
-const HelpReleaseNotesRoute = HelpReleaseNotesRouteImport.update({
-  id: '/release-notes',
-  path: '/release-notes',
+const HelpLimitationsRoute = HelpLimitationsRouteImport.update({
+  id: '/limitations',
+  path: '/limitations',
   getParentRoute: () => HelpRouteRoute,
 } as any)
-const HelpUserGuideRoute = HelpUserGuideRouteImport.update({
-  id: '/user-guide',
-  path: '/user-guide',
+const HelpLegalRoute = HelpLegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
   getParentRoute: () => HelpRouteRoute,
 } as any)
-const AuthenticatedDecisionsIdRoute =
-  AuthenticatedDecisionsIdRouteImport.update({
-    id: '/decisions/$id',
-    path: '/decisions/$id',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
+const HelpGettingStartedRoute = HelpGettingStartedRouteImport.update({
+  id: '/getting-started',
+  path: '/getting-started',
+  getParentRoute: () => HelpRouteRoute,
+} as any)
+const HelpFaqRoute = HelpFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => HelpRouteRoute,
+} as any)
+const HelpCoreConceptsRoute = HelpCoreConceptsRouteImport.update({
+  id: '/core-concepts',
+  path: '/core-concepts',
+  getParentRoute: () => HelpRouteRoute,
+} as any)
+const HelpContactRoute = HelpContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => HelpRouteRoute,
+} as any)
+const HelpAboutRoute = HelpAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => HelpRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDecisionsNewRoute =
   AuthenticatedDecisionsNewRouteImport.update({
     id: '/decisions/new',
     path: '/decisions/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDecisionsIdRoute =
+  AuthenticatedDecisionsIdRouteImport.update({
+    id: '/decisions/$id',
+    path: '/decisions/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDecisionsIdOutcomeRoute =
@@ -152,17 +128,13 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/help/about': typeof HelpAboutRoute
-  '/help/architecture': typeof HelpArchitectureRoute
   '/help/contact': typeof HelpContactRoute
   '/help/core-concepts': typeof HelpCoreConceptsRoute
-  '/help/decision-framework': typeof HelpDecisionFrameworkRoute
   '/help/faq': typeof HelpFaqRoute
   '/help/getting-started': typeof HelpGettingStartedRoute
   '/help/legal': typeof HelpLegalRoute
   '/help/limitations': typeof HelpLimitationsRoute
   '/help/product-principles': typeof HelpProductPrinciplesRoute
-  '/help/release-notes': typeof HelpReleaseNotesRoute
-  '/help/user-guide': typeof HelpUserGuideRoute
   '/help/': typeof HelpIndexRoute
   '/decisions/$id': typeof AuthenticatedDecisionsIdRoute
   '/decisions/new': typeof AuthenticatedDecisionsNewRoute
@@ -174,17 +146,13 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/help/about': typeof HelpAboutRoute
-  '/help/architecture': typeof HelpArchitectureRoute
   '/help/contact': typeof HelpContactRoute
   '/help/core-concepts': typeof HelpCoreConceptsRoute
-  '/help/decision-framework': typeof HelpDecisionFrameworkRoute
   '/help/faq': typeof HelpFaqRoute
   '/help/getting-started': typeof HelpGettingStartedRoute
   '/help/legal': typeof HelpLegalRoute
   '/help/limitations': typeof HelpLimitationsRoute
   '/help/product-principles': typeof HelpProductPrinciplesRoute
-  '/help/release-notes': typeof HelpReleaseNotesRoute
-  '/help/user-guide': typeof HelpUserGuideRoute
   '/help': typeof HelpIndexRoute
   '/decisions/$id': typeof AuthenticatedDecisionsIdRoute
   '/decisions/new': typeof AuthenticatedDecisionsNewRoute
@@ -199,17 +167,13 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/help/about': typeof HelpAboutRoute
-  '/help/architecture': typeof HelpArchitectureRoute
   '/help/contact': typeof HelpContactRoute
   '/help/core-concepts': typeof HelpCoreConceptsRoute
-  '/help/decision-framework': typeof HelpDecisionFrameworkRoute
   '/help/faq': typeof HelpFaqRoute
   '/help/getting-started': typeof HelpGettingStartedRoute
   '/help/legal': typeof HelpLegalRoute
   '/help/limitations': typeof HelpLimitationsRoute
   '/help/product-principles': typeof HelpProductPrinciplesRoute
-  '/help/release-notes': typeof HelpReleaseNotesRoute
-  '/help/user-guide': typeof HelpUserGuideRoute
   '/help/': typeof HelpIndexRoute
   '/_authenticated/decisions/$id': typeof AuthenticatedDecisionsIdRoute
   '/_authenticated/decisions/new': typeof AuthenticatedDecisionsNewRoute
@@ -224,17 +188,13 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/dashboard'
     | '/help/about'
-    | '/help/architecture'
     | '/help/contact'
     | '/help/core-concepts'
-    | '/help/decision-framework'
     | '/help/faq'
     | '/help/getting-started'
     | '/help/legal'
     | '/help/limitations'
     | '/help/product-principles'
-    | '/help/release-notes'
-    | '/help/user-guide'
     | '/help/'
     | '/decisions/$id'
     | '/decisions/new'
@@ -246,17 +206,13 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/dashboard'
     | '/help/about'
-    | '/help/architecture'
     | '/help/contact'
     | '/help/core-concepts'
-    | '/help/decision-framework'
     | '/help/faq'
     | '/help/getting-started'
     | '/help/legal'
     | '/help/limitations'
     | '/help/product-principles'
-    | '/help/release-notes'
-    | '/help/user-guide'
     | '/help'
     | '/decisions/$id'
     | '/decisions/new'
@@ -270,17 +226,13 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/_authenticated/dashboard'
     | '/help/about'
-    | '/help/architecture'
     | '/help/contact'
     | '/help/core-concepts'
-    | '/help/decision-framework'
     | '/help/faq'
     | '/help/getting-started'
     | '/help/legal'
     | '/help/limitations'
     | '/help/product-principles'
-    | '/help/release-notes'
-    | '/help/user-guide'
     | '/help/'
     | '/_authenticated/decisions/$id'
     | '/_authenticated/decisions/new'
@@ -297,18 +249,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -325,88 +270,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/dashboard': {
-      id: '/_authenticated/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/help/': {
       id: '/help/'
       path: '/'
       fullPath: '/help/'
       preLoaderRoute: typeof HelpIndexRouteImport
-      parentRoute: typeof HelpRouteRoute
-    }
-    '/help/about': {
-      id: '/help/about'
-      path: '/about'
-      fullPath: '/help/about'
-      preLoaderRoute: typeof HelpAboutRouteImport
-      parentRoute: typeof HelpRouteRoute
-    }
-    '/help/architecture': {
-      id: '/help/architecture'
-      path: '/architecture'
-      fullPath: '/help/architecture'
-      preLoaderRoute: typeof HelpArchitectureRouteImport
-      parentRoute: typeof HelpRouteRoute
-    }
-    '/help/contact': {
-      id: '/help/contact'
-      path: '/contact'
-      fullPath: '/help/contact'
-      preLoaderRoute: typeof HelpContactRouteImport
-      parentRoute: typeof HelpRouteRoute
-    }
-    '/help/core-concepts': {
-      id: '/help/core-concepts'
-      path: '/core-concepts'
-      fullPath: '/help/core-concepts'
-      preLoaderRoute: typeof HelpCoreConceptsRouteImport
-      parentRoute: typeof HelpRouteRoute
-    }
-    '/help/decision-framework': {
-      id: '/help/decision-framework'
-      path: '/decision-framework'
-      fullPath: '/help/decision-framework'
-      preLoaderRoute: typeof HelpDecisionFrameworkRouteImport
-      parentRoute: typeof HelpRouteRoute
-    }
-    '/help/faq': {
-      id: '/help/faq'
-      path: '/faq'
-      fullPath: '/help/faq'
-      preLoaderRoute: typeof HelpFaqRouteImport
-      parentRoute: typeof HelpRouteRoute
-    }
-    '/help/getting-started': {
-      id: '/help/getting-started'
-      path: '/getting-started'
-      fullPath: '/help/getting-started'
-      preLoaderRoute: typeof HelpGettingStartedRouteImport
-      parentRoute: typeof HelpRouteRoute
-    }
-    '/help/legal': {
-      id: '/help/legal'
-      path: '/legal'
-      fullPath: '/help/legal'
-      preLoaderRoute: typeof HelpLegalRouteImport
-      parentRoute: typeof HelpRouteRoute
-    }
-    '/help/limitations': {
-      id: '/help/limitations'
-      path: '/limitations'
-      fullPath: '/help/limitations'
-      preLoaderRoute: typeof HelpLimitationsRouteImport
       parentRoute: typeof HelpRouteRoute
     }
     '/help/product-principles': {
@@ -416,25 +298,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpProductPrinciplesRouteImport
       parentRoute: typeof HelpRouteRoute
     }
-    '/help/release-notes': {
-      id: '/help/release-notes'
-      path: '/release-notes'
-      fullPath: '/help/release-notes'
-      preLoaderRoute: typeof HelpReleaseNotesRouteImport
+    '/help/limitations': {
+      id: '/help/limitations'
+      path: '/limitations'
+      fullPath: '/help/limitations'
+      preLoaderRoute: typeof HelpLimitationsRouteImport
       parentRoute: typeof HelpRouteRoute
     }
-    '/help/user-guide': {
-      id: '/help/user-guide'
-      path: '/user-guide'
-      fullPath: '/help/user-guide'
-      preLoaderRoute: typeof HelpUserGuideRouteImport
+    '/help/legal': {
+      id: '/help/legal'
+      path: '/legal'
+      fullPath: '/help/legal'
+      preLoaderRoute: typeof HelpLegalRouteImport
       parentRoute: typeof HelpRouteRoute
     }
-    '/_authenticated/decisions/$id': {
-      id: '/_authenticated/decisions/$id'
-      path: '/decisions/$id'
-      fullPath: '/decisions/$id'
-      preLoaderRoute: typeof AuthenticatedDecisionsIdRouteImport
+    '/help/getting-started': {
+      id: '/help/getting-started'
+      path: '/getting-started'
+      fullPath: '/help/getting-started'
+      preLoaderRoute: typeof HelpGettingStartedRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
+    '/help/faq': {
+      id: '/help/faq'
+      path: '/faq'
+      fullPath: '/help/faq'
+      preLoaderRoute: typeof HelpFaqRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
+    '/help/core-concepts': {
+      id: '/help/core-concepts'
+      path: '/core-concepts'
+      fullPath: '/help/core-concepts'
+      preLoaderRoute: typeof HelpCoreConceptsRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
+    '/help/contact': {
+      id: '/help/contact'
+      path: '/contact'
+      fullPath: '/help/contact'
+      preLoaderRoute: typeof HelpContactRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
+    '/help/about': {
+      id: '/help/about'
+      path: '/about'
+      fullPath: '/help/about'
+      preLoaderRoute: typeof HelpAboutRouteImport
+      parentRoute: typeof HelpRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/decisions/new': {
@@ -442,6 +359,13 @@ declare module '@tanstack/react-router' {
       path: '/decisions/new'
       fullPath: '/decisions/new'
       preLoaderRoute: typeof AuthenticatedDecisionsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/decisions/$id': {
+      id: '/_authenticated/decisions/$id'
+      path: '/decisions/$id'
+      fullPath: '/decisions/$id'
+      preLoaderRoute: typeof AuthenticatedDecisionsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/decisions/$id_/outcome': {
@@ -473,33 +397,25 @@ const AuthenticatedRouteRouteWithChildren =
 
 interface HelpRouteRouteChildren {
   HelpAboutRoute: typeof HelpAboutRoute
-  HelpArchitectureRoute: typeof HelpArchitectureRoute
   HelpContactRoute: typeof HelpContactRoute
   HelpCoreConceptsRoute: typeof HelpCoreConceptsRoute
-  HelpDecisionFrameworkRoute: typeof HelpDecisionFrameworkRoute
   HelpFaqRoute: typeof HelpFaqRoute
   HelpGettingStartedRoute: typeof HelpGettingStartedRoute
   HelpLegalRoute: typeof HelpLegalRoute
   HelpLimitationsRoute: typeof HelpLimitationsRoute
   HelpProductPrinciplesRoute: typeof HelpProductPrinciplesRoute
-  HelpReleaseNotesRoute: typeof HelpReleaseNotesRoute
-  HelpUserGuideRoute: typeof HelpUserGuideRoute
   HelpIndexRoute: typeof HelpIndexRoute
 }
 
 const HelpRouteRouteChildren: HelpRouteRouteChildren = {
   HelpAboutRoute: HelpAboutRoute,
-  HelpArchitectureRoute: HelpArchitectureRoute,
   HelpContactRoute: HelpContactRoute,
   HelpCoreConceptsRoute: HelpCoreConceptsRoute,
-  HelpDecisionFrameworkRoute: HelpDecisionFrameworkRoute,
   HelpFaqRoute: HelpFaqRoute,
   HelpGettingStartedRoute: HelpGettingStartedRoute,
   HelpLegalRoute: HelpLegalRoute,
   HelpLimitationsRoute: HelpLimitationsRoute,
   HelpProductPrinciplesRoute: HelpProductPrinciplesRoute,
-  HelpReleaseNotesRoute: HelpReleaseNotesRoute,
-  HelpUserGuideRoute: HelpUserGuideRoute,
   HelpIndexRoute: HelpIndexRoute,
 }
 
