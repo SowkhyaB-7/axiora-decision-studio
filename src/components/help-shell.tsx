@@ -7,11 +7,13 @@ export function HelpShell({
   title,
   crumb,
   showBackLink = false,
+  eyebrow,
   children,
 }: {
   title: string;
   crumb: string;
   showBackLink?: boolean;
+  eyebrow?: string;
   children: ReactNode;
 }) {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
@@ -80,6 +82,11 @@ export function HelpShell({
           >
             <ArrowLeft className="h-3.5 w-3.5" /> Back to Help Center
           </Link>
+        )}
+        {eyebrow && (
+          <div className="mb-4 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            {eyebrow}
+          </div>
         )}
         <h1 className="font-display text-4xl leading-tight md:text-5xl">{title}</h1>
         <div className="prose-help mt-8">{children}</div>
