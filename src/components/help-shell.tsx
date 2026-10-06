@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { ArrowLeft, ExternalLink, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export function HelpShell({
@@ -61,7 +61,7 @@ export function HelpShell({
               to="/dashboard"
               className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
             >
-              Open App <ExternalLink className="h-3 w-3" />
+              <ArrowLeft className="h-3 w-3" /> Back to Axiora
             </Link>
           ) : (
             <Link
