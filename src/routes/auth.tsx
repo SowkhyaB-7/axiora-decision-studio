@@ -49,12 +49,14 @@ function AuthPage() {
         });
         if (error) throw error;
         setNotice(
-          "If an account exists for that email, a password reset link is on its way.",
+          "Check your email for a password reset link. If an account exists for that address, it's on its way.",
         );
-        toast.success("Reset email sent");
+        toast.success("Check your email for a password reset link.");
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Could not send reset email";
+        const raw = err instanceof Error ? err.message : "";
+        const message = /rate limit|too many|seconds/i.test(raw)
+          ? "We couldn't send the reset email just now because too many were requested. Please wait a few minutes and try again."
+          : "We couldn't send the reset email. Please try again in a moment.";
         toast.error(message);
       } finally {
         setLoading(false);
@@ -92,7 +94,14 @@ function AuthPage() {
         }
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Something went wrong";
+      const raw = err instanceof Error ? err.message : "";
+      const message = /invalid login credentials/i.test(raw)
+        ? "Incorrect email or password. Please try again or reset your password."
+        : /email not confirmed/i.test(raw)
+          ? "Please confirm your email first — check your inbox for the confirmation link."
+          : /rate limit|too many/i.test(raw)
+            ? "Too many attempts right now. Please wait a few minutes and try again."
+            : raw || "Something went wrong. Please try again.";
       toast.error(message);
     } finally {
       setLoading(false);
