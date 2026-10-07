@@ -147,6 +147,7 @@ export type GoalInterpretation = {
   clarifyingQuestion: string | null;
   clarifyingOptions: string[];
   possibleBlocker: string | null;
+  blockerStated: boolean;
   reasoning: string;
 };
 
@@ -174,10 +175,11 @@ Return JSON with exactly these keys:
   "workstream": a concise domain emerging from the goal, such as Product, Security, Marketing, Sales, Operations, Engineering, Finance, or General,
   "urgency": "UNSCHEDULED" | "NOW" | "NEXT" | "LATER",
   "steps": 3-5 concise proposed execution steps for SIMPLE or a clarified goal; otherwise [],
-  "next_action": one concrete immediate action for SIMPLE or clarified work; otherwise null,
+  "next_action": one concrete immediate action for SIMPLE or clarified work. For DEPENDENCY, one action derived directly from the blocker, such as following up on it and confirming when it can be expected; never name a person, team, date, deadline or communication channel the user did not give. Otherwise null,
   "clarifying_question": exactly one question for AMBIGUOUS; otherwise null,
   "clarifying_options": 3-4 short answer options for AMBIGUOUS; otherwise [],
   "possible_blocker": a concise possible prerequisite for DEPENDENCY, only when the goal states or strongly implies it; otherwise null. Never invent a dependency,
+  "blocker_stated_by_user": true only when the user explicitly said this prerequisite or wait exists (e.g. "I am waiting for legal approval"); false when it is only implied. Do not treat the user's own statement as your inference,
   "reasoning": one short sentence explaining why this mode fits, opening with calibrated language such as "Based on what you've shared..." or "This may indicate...". Never state an inference as fact, and name what is missing when information is insufficient
 }
 
@@ -211,11 +213,20 @@ Do not use a keyword-only heuristic. Consider whether the user can act, whether 
     workstream: str(data["workstream"]) ?? "General",
     urgency,
     steps: mode === "SIMPLE" ? stringArray(data["steps"], 5) : [],
-    nextAction: mode === "SIMPLE" ? str(data["next_action"]) : null,
+    nextAction:
+      mode === "SIMPLE"
+        ? str(data["next_action"])
+        : mode === "DEPENDENCY"
+          ? str(data["next_action"]) ??
+            (str(data["possible_blocker"])
+              ? `Follow up on this and confirm when you can expect it: ${str(data["possible_blocker"])}`
+              : null)
+          : null,
     clarifyingQuestion: mode === "AMBIGUOUS" ? str(data["clarifying_question"]) : null,
     clarifyingOptions:
       mode === "AMBIGUOUS" ? stringArray(data["clarifying_options"], 4) : [],
     possibleBlocker: mode === "DEPENDENCY" ? str(data["possible_blocker"]) : null,
+    blockerStated: mode === "DEPENDENCY" && data["blocker_stated_by_user"] === true,
     reasoning: str(data["reasoning"]) ?? "Axiora inferred this from the goal as written.",
   };
 }
