@@ -136,6 +136,19 @@ function hasExplicitTimingContext(value: string): boolean {
   );
 }
 
+/** Drops sentences that merely repeat what the user explicitly said; those belong under "What you told me". */
+function stripRestatedFacts(reasoning: string | null): string {
+  if (!reasoning) return "";
+  const kept = reasoning
+    .split(/(?<=[.!?])\s+/)
+    .filter(
+      (s) =>
+        !/\byou(?:'ve| have)?\s+(?:explicitly\s+|clearly\s+|directly\s+)?(?:stated|said|mentioned|told|noted|indicated)\b/i.test(s) &&
+        !/\b(?:explicitly|directly)\s+(?:stated|said|mentioned)\b/i.test(s),
+    );
+  return kept.join(" ").trim();
+}
+
 export type GoalInterpretation = {
   mode: Mode;
   title: string;
@@ -180,7 +193,7 @@ Return JSON with exactly these keys:
   "clarifying_options": 3-4 short answer options for AMBIGUOUS; otherwise [],
   "possible_blocker": a concise possible prerequisite for DEPENDENCY, only when the goal states or strongly implies it; otherwise null. Never invent a dependency,
   "blocker_stated_by_user": true only when the user explicitly said this prerequisite or wait exists (e.g. "I am waiting for legal approval"); false when it is only implied. Do not treat the user's own statement as your inference,
-  "reasoning": one short sentence explaining why this mode fits, opening with calibrated language such as "Based on what you've shared..." or "This may indicate...". Never state an inference as fact, and name what is missing when information is insufficient
+  "reasoning": one short sentence containing ONLY genuine inference (what you are reading into the goal, or what is missing), opening with calibrated language such as "This may indicate...". Never restate or mention anything the user explicitly said (e.g. never "You stated you are waiting for..."). If there is no genuine inference, return null
 }
 
 Interpretation rules:
@@ -228,7 +241,7 @@ Do not use a keyword-only heuristic. Consider whether the user can act, whether 
       mode === "AMBIGUOUS" ? stringArray(data["clarifying_options"], 4) : [],
     possibleBlocker: mode === "DEPENDENCY" ? str(data["possible_blocker"]) : null,
     blockerStated: mode === "DEPENDENCY" && data["blocker_stated_by_user"] === true,
-    reasoning: str(data["reasoning"]) ?? "Axiora inferred this from the goal as written.",
+    reasoning: stripRestatedFacts(str(data["reasoning"])),
   };
 }
 
