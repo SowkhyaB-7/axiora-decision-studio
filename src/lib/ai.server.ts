@@ -188,6 +188,7 @@ Interpretation rules:
 - After the user has answered one clarification, do not ask another unless no useful next step can be produced without it.
 - Urgency must be UNSCHEDULED unless timing is supported by explicit temporal language, an explicit deadline, user-provided timing context, or a real sequencing constraint. Importance, complexity, and verbs such as deploy or launch do not establish urgency.
 - Steps are proposed execution steps, not facts about the user's process. Do not invent approvals, stakeholders, tools, deadlines, organizational processes, or required deliverables.
+- Anything the user explicitly stated (including a blocker they say they are waiting on) is a fact they told you; never describe it in reasoning as your inference.
 - Distinguish explicitly supplied facts from reasonable inferences and optional suggestions. Keep that calibration concise rather than adding disclaimers to every line.
 
 Do not use a keyword-only heuristic. Consider whether the user can act, whether information is materially missing, whether another condition must be met, and whether a consequential choice is being made. Keep simple work simple.`;
