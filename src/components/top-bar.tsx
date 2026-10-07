@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { ChevronDown, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { MobileNav } from "./app-sidebar";
 
 export function TopBar({ title, subtitle }: { title: string; subtitle?: string }) {
   const navigate = useNavigate();
@@ -43,6 +44,7 @@ export function TopBar({ title, subtitle }: { title: string; subtitle?: string }
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/80 px-4 backdrop-blur md:px-8">
+      <MobileNav />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span>Axiora</span>
