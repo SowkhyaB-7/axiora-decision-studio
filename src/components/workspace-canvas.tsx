@@ -543,7 +543,9 @@ function WorkDetail({
             <div className="flex items-start gap-2 text-sm">
               <GitBranch className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
               <p>
-                <span className="font-medium">Possible blocker (my inference, please confirm):</span>{" "}
+                <span className="font-medium">
+                  {item.blocker_confirmed === true ? "Blocker you told me about:" : "Possible blocker (my inference, please confirm):"}
+                </span>{" "}
                 {item.blocker_label ?? "A prerequisite may need attention first."}
               </p>
             </div>
@@ -559,8 +561,17 @@ function WorkDetail({
             ) : (
               <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
                 {item.blocker_confirmed ? <Check className="h-3.5 w-3.5" /> : <RotateCcw className="h-3.5 w-3.5" />}
-                {item.blocker_confirmed ? "Confirmed by you" : "Corrected by you"}
+                {item.blocker_confirmed ? "From what you told me" : "Corrected by you"}
               </p>
+            )}
+            {item.next_action && (
+              <div className="mt-5 flex items-start gap-3 text-sm">
+                <CornerDownRight className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                <div>
+                  <span className="text-[11px] font-semibold uppercase text-muted-foreground">Suggested next</span>
+                  <p className="mt-1 leading-relaxed">{item.next_action}</p>
+                </div>
+              </div>
             )}
           </div>
         )}
