@@ -20,6 +20,8 @@ function ResetPasswordPage() {
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  // Email comes only from the authenticated recovery session, never the URL.
+  const [accountEmail, setAccountEmail] = useState("");
 
   // The reset link from the email contains a recovery token in the URL hash.
   // Supabase's client picks it up automatically and fires a PASSWORD_RECOVERY
@@ -28,8 +30,9 @@ function ResetPasswordPage() {
     const hash = typeof window !== "undefined" ? window.location.hash : "";
     const isRecovery = hash.includes("type=recovery");
 
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY") {
+        if (session?.user?.email) setAccountEmail(session.user.email);
         setLinkValid(true);
         setReady(true);
       }
@@ -37,6 +40,7 @@ function ResetPasswordPage() {
 
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
+        if (data.session.user?.email) setAccountEmail(data.session.user.email);
         setReady(true);
       } else if (!isRecovery) {
         // Direct visit with no recovery token and no session — the link is
