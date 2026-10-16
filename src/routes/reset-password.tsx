@@ -121,11 +121,30 @@ function ResetPasswordPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              {accountEmail && (
+                // Read-only account identifier so password managers can link
+                // the new password to the right account. Not editable or sent.
+                <input
+                  type="email"
+                  name="username"
+                  autoComplete="username"
+                  value={accountEmail}
+                  readOnly
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  className="sr-only"
+                />
+              )}
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                <label
+                  htmlFor="reset-new-password"
+                  className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                >
                   New password
                 </label>
                 <input
+                  id="reset-new-password"
+                  name="new-password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -137,10 +156,15 @@ function ResetPasswordPage() {
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                <label
+                  htmlFor="reset-confirm-password"
+                  className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                >
                   Confirm new password
                 </label>
                 <input
+                  id="reset-confirm-password"
+                  name="confirm-password"
                   type="password"
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
