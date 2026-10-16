@@ -34,6 +34,14 @@ function AuthPage() {
       });
   }, [navigate]);
 
+  function showExistingAccountGuidance() {
+    setMode("login");
+    setPassword("");
+    setNotice(
+      "This email may already have an Axiora account. Try signing in, or use Forgot password if you don't remember it.",
+    );
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (mode === "forgot") {
@@ -49,9 +57,9 @@ function AuthPage() {
         });
         if (error) throw error;
         setNotice(
-          "Check your email for a password reset link. If an account exists for that address, it's on its way.",
+          "If an account exists for that address, we've requested a reset link. It may take a few minutes; check your spam folder too.",
         );
-        toast.success("Check your email for a password reset link.");
+        toast.success("Reset link requested.");
       } catch (err) {
         const raw = err instanceof Error ? err.message : "";
         const message = /rate limit|too many|seconds/i.test(raw)
@@ -89,16 +97,26 @@ function AuthPage() {
         if (data.session) {
           toast.success("Account created");
           navigate({ to: "/dashboard" });
+        } else if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+          // The backend signals an already-registered email this way without
+          // sending any email. Guide the person to sign in, keeping their email.
+          showExistingAccountGuidance();
         } else {
-          setNotice("Check your email to verify your account.");
+          setNotice(
+            "We've requested a confirmation email for this address. If it doesn't arrive in a few minutes, check your spam folder or try again later.",
+          );
         }
       }
     } catch (err) {
       const raw = err instanceof Error ? err.message : "";
+      if (mode === "signup" && /already registered|already exists|user_already_exists/i.test(raw)) {
+        showExistingAccountGuidance();
+        return;
+      }
       const message = /invalid login credentials/i.test(raw)
         ? "Incorrect email or password. Please try again or reset your password."
         : /email not confirmed/i.test(raw)
-          ? "Please confirm your email first — check your inbox for the confirmation link."
+          ? "Please confirm your email first. Look for the confirmation link in your inbox or spam folder."
           : /rate limit|too many/i.test(raw)
             ? "Too many attempts right now. Please wait a few minutes and try again."
             : raw || "Something went wrong. Please try again.";
@@ -163,13 +181,18 @@ function AuthPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form key={mode} onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                <label
+                  htmlFor="auth-full-name"
+                  className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                >
                   Full name
                 </label>
                 <input
+                  id="auth-full-name"
+                  name="name"
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
@@ -180,23 +203,31 @@ function AuthPage() {
               </div>
             )}
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+              <label
+                htmlFor="auth-email"
+                className="mb-1.5 block text-xs font-medium text-muted-foreground"
+              >
                 Email
               </label>
               <input
+                id="auth-email"
+                name="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent"
                 placeholder="you@company.com"
-                autoComplete="email"
+                autoComplete="username"
                 required
               />
             </div>
             {mode !== "forgot" && (
               <div>
                 <div className="mb-1.5 flex items-center justify-between">
-                  <label className="block text-xs font-medium text-muted-foreground">
+                  <label
+                    htmlFor="auth-password"
+                    className="block text-xs font-medium text-muted-foreground"
+                  >
                     Password
                   </label>
                   {mode === "login" && (
@@ -213,6 +244,8 @@ function AuthPage() {
                   )}
                 </div>
                 <input
+                  id="auth-password"
+                  name="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
