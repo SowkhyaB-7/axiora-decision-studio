@@ -145,7 +145,6 @@ function ResetPasswordPage() {
                   />
                 </div>
               )}
-
               <div>
                 <label
                   htmlFor="reset-new-password"
