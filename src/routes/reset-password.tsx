@@ -122,18 +122,28 @@ function ResetPasswordPage() {
           ) : (
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               {accountEmail && (
-                // Read-only account identifier so password managers can link
-                // the new password to the right account. Not editable or sent.
-                <input
-                  type="email"
-                  name="username"
-                  autoComplete="username"
-                  value={accountEmail}
-                  readOnly
-                  tabIndex={-1}
-                  aria-hidden="true"
-                  className="sr-only"
-                />
+                // Visible, read-only account identifier. It comes only from the
+                // authenticated recovery session, so the person can see whose
+                // password they are changing and a password manager can store
+                // the new password against the right account. Not editable.
+                <div>
+                  <label
+                    htmlFor="reset-account-email"
+                    className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                  >
+                    Account
+                  </label>
+                  <input
+                    id="reset-account-email"
+                    name="username"
+                    type="email"
+                    autoComplete="username"
+                    value={accountEmail}
+                    readOnly
+                    aria-readonly="true"
+                    className="w-full cursor-default select-all rounded-md border border-border bg-surface-muted px-3 py-2 text-sm text-muted-foreground outline-none"
+                  />
+                </div>
               )}
               <div>
                 <label
