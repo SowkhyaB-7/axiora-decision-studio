@@ -19,6 +19,18 @@ export type Briefing = {
   next_action: string;
   /** false when the text came from Axiora's own deterministic copy. */
   ai_generated: boolean;
+  /**
+   * true when generated from the decision's own context with zero evidence
+   * records. Exploratory framing, never an evidence-backed recommendation.
+   * Absent on legacy payloads.
+   */
+  is_exploratory?: boolean;
+  /** Exploratory only: what the user explicitly stated (not verified). */
+  stated?: string[];
+  /** Exploratory only: calibrated inferences and open unknowns. */
+  inferred?: string[];
+  /** Exploratory only: trade-offs and alternatives specific to this decision. */
+  tradeoffs?: string[];
 };
 
 export type BriefingContext = {
