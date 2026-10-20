@@ -213,16 +213,27 @@ function DecisionBriefing() {
           </p>
         </header>
 
-        {assessment.verdict === "INSUFFICIENT_EVIDENCE" && (
-          <Callout
-            tone="muted"
-            icon={HelpCircle}
-            title="Not Enough Evidence to Recommend Anything"
-          >
-            Axiora won't produce a verdict on this little evidence. Add evidence
-            across customer, technical and business ground, then come back.
-          </Callout>
-        )}
+        {assessment.verdict === "INSUFFICIENT_EVIDENCE" &&
+          (briefing?.is_exploratory ? (
+            <Callout
+              tone="muted"
+              icon={HelpCircle}
+              title="Exploratory Briefing, Not a Recommendation"
+            >
+              There's no evidence on record yet, so Axiora won't give a verdict.
+              Below is a first framing of this decision based on what you
+              described. Add evidence that bears on it to get an assessment.
+            </Callout>
+          ) : (
+            <Callout
+              tone="muted"
+              icon={HelpCircle}
+              title="Not Enough Evidence to Recommend Anything"
+            >
+              Axiora won't produce a verdict on this little evidence. Add evidence
+              across customer, technical and business ground, then come back.
+            </Callout>
+          ))}
 
         {assessment.isConflict && (
           <Callout tone="destructive" icon={Scale} title="Evidence Conflict">
@@ -258,6 +269,12 @@ function DecisionBriefing() {
               {briefing.why}
             </p>
           )}
+          {briefing && briefing.is_exploratory && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Exploratory synthesis generated from your decision context. No
+              verified evidence records have been attached yet.
+            </p>
+          )}
           {briefing && !briefing.ai_generated && (
             <p className="mt-2 text-xs text-muted-foreground">
               Written from your stored evidence records without AI assistance.
@@ -265,19 +282,50 @@ function DecisionBriefing() {
           )}
         </Section>
 
+        {briefing?.is_exploratory && (
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <PlainList
+              title="What you told me"
+              items={briefing.stated ?? []}
+              note="As you described it. Not independently verified."
+            />
+            <PlainList
+              title="What I'm inferring"
+              items={briefing.inferred ?? []}
+              italic
+            />
+            {(briefing.tradeoffs?.length ?? 0) > 0 && (
+              <div className="md:col-span-2">
+                <PlainList
+                  title="Trade-offs and alternatives"
+                  items={briefing.tradeoffs ?? []}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
         {briefing && (
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <ClaimList
-              title="Argues For Going Ahead"
+              title={briefing.is_exploratory ? "Could Argue For It" : "Argues For Going Ahead"}
               claims={briefing.supports}
-              emptyText="Nothing on record supports going ahead yet."
+              emptyText={
+                briefing.is_exploratory
+                  ? "Nothing obvious yet."
+                  : "Nothing on record supports going ahead yet."
+              }
               onSelect={focusEvidence}
               activeRefs={highlight}
             />
             <ClaimList
-              title="Argues Against Going Ahead"
+              title={briefing.is_exploratory ? "Could Argue Against It" : "Argues Against Going Ahead"}
               claims={briefing.contradicts}
-              emptyText="No evidence on record argues against going ahead."
+              emptyText={
+                briefing.is_exploratory
+                  ? "Nothing obvious yet."
+                  : "No evidence on record argues against going ahead."
+              }
               onSelect={focusEvidence}
               activeRefs={highlight}
             />
@@ -453,6 +501,39 @@ function Callout({
       <p className="mt-2 text-[15px] leading-relaxed text-foreground/85">
         {children}
       </p>
+    </div>
+  );
+}
+
+function PlainList({
+  title,
+  items,
+  note,
+  italic,
+}: {
+  title: string;
+  items: string[];
+  note?: string;
+  italic?: boolean;
+}) {
+  return (
+    <div className="h-full rounded-xl border border-border bg-surface p-5">
+      <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        {title}
+      </h3>
+      {items.length === 0 ? (
+        <p className="mt-3 text-sm text-muted-foreground">Nothing to add here.</p>
+      ) : (
+        <ul className={cn("mt-3 space-y-1.5 text-[15px] leading-relaxed text-foreground/85", italic && "italic")}>
+          {items.map((t) => (
+            <li key={t} className="flex gap-2">
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
+              {t}
+            </li>
+          ))}
+        </ul>
+      )}
+      {note && <p className="mt-3 text-xs text-muted-foreground">{note}</p>}
     </div>
   );
 }
