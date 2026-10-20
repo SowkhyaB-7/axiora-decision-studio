@@ -400,6 +400,67 @@ ${evidenceBlock || "(no evidence recorded)"}`;
   };
 }
 
+/** Context worth reasoning about: several real words beyond the title itself. */
+function isSubstantiveContext(context: string, title: string): boolean {
+  if (!context) return false;
+  if (context.toLowerCase() === title.trim().toLowerCase()) return false;
+  const words = context.split(/\s+/).filter((w) => /[a-z]{2,}/i.test(w));
+  return words.length >= 8;
+}
+
+/**
+ * Exploratory framing from the decision's own context when no evidence is on
+ * record. It never sets the verdict and never cites evidence numbers.
+ */
+async function generateExploratoryBriefing(
+  title: string,
+  context: string,
+): Promise<Briefing> {
+  const system = `You help a person frame a decision they have described but for which no evidence records exist yet. You do NOT give a recommendation or verdict; a deterministic system has already ruled that there is not enough evidence.
+
+Return JSON with exactly these keys:
+{
+  "why": 2-3 sentences naming the real tension in this decision, in the decision's own domain. State plainly that this is framing, not a recommendation,
+  "stated": array of 1-5 short facts the person explicitly stated, paraphrased faithfully. Do not add anything,
+  "inferred": array of 0-4 short calibrated inferences or unknowns, each opening with language like "This may mean..." or "It's unclear whether...",
+  "tradeoffs": array of 2-4 trade-offs or alternatives specific to this decision (include realistic options beyond the two obvious ones when relevant),
+  "considerations_for": array of 0-3 short sentences on what could argue for the option being considered, phrased as considerations, not evidence,
+  "considerations_against": array of 0-3 short sentences on what could argue against it, phrased as considerations, not evidence,
+  "missing": array of 2-4 specific pieces of information that would most change this decision, phrased as things to find out,
+  "next_action": one concrete step to obtain the most decision-relevant missing information
+}
+
+Rules:
+- Use the decision's actual domain. Never default to customer, technical or business categories unless the decision is genuinely about those.
+- Never claim the person's statements have been verified; they are what they told you.
+- Never cite evidence numbers, sources, statistics or examples not in the text.
+- No scores, no verdict, no "you should".`;
+
+  const user = `Decision: ${title.slice(0, 300)}\n\nWhat the person told Axiora:\n"""${context.slice(0, 4000)}"""`;
+  const data = await callModel(system, user);
+
+  const why = str(data["why"]);
+  if (!why) throw new Error("Malformed AI response");
+  // No evidence exists, so no claim may carry an evidence reference.
+  const toClaims = (v: unknown) =>
+    stringArray(v, 3).map((claim) => ({ claim, evidence_refs: [] as number[] }));
+  const missing = stringArray(data["missing"], 4);
+
+  return {
+    why,
+    supports: toClaims(data["considerations_for"]),
+    contradicts: toClaims(data["considerations_against"]),
+    unresolved: null,
+    missing,
+    next_action: str(data["next_action"]) ?? "Write down the one piece of information that would most change this decision, then go find it.",
+    ai_generated: true,
+    is_exploratory: true,
+    stated: stringArray(data["stated"], 5),
+    inferred: stringArray(data["inferred"], 4),
+    tradeoffs: stringArray(data["tradeoffs"], 4),
+  };
+}
+
 // ---------------------------------------------------------------------------
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -443,7 +504,38 @@ export async function loadAndBuildBriefing(
   const items = (rows ?? []) as unknown as EvidenceItem[];
   const assessment = computeAssessment(items);
 
-  if (items.length === 0) return fallbackBriefing(assessment, items);
+  if (items.length === 0) {
+    const context = decision.context?.trim() ?? "";
+    // Too little to reason about: keep the deterministic copy.
+    if (!isSubstantiveContext(context, decision.title)) {
+      return fallbackBriefing(assessment, items);
+    }
+    // Keyed by title + context so any edit produces a fresh briefing.
+    const exploratoryKey = hash(`exploratory|${decision.title}|${context}`);
+    const { data: cachedExploratory } = await supabase
+      .from("decision_briefings")
+      .select("payload")
+      .eq("decision_id", decisionId)
+      .eq("fingerprint", exploratoryKey)
+      .maybeSingle();
+    if (cachedExploratory?.payload) {
+      return cachedExploratory.payload as unknown as Briefing;
+    }
+    let exploratory: Briefing;
+    try {
+      exploratory = await generateExploratoryBriefing(decision.title, context);
+    } catch (err) {
+      console.error("Exploratory briefing generation failed", err);
+      return fallbackBriefing(assessment, items);
+    }
+    await supabase
+      .from("decision_briefings")
+      .upsert(
+        { decision_id: decisionId, fingerprint: exploratoryKey, payload: exploratory as never },
+        { onConflict: "decision_id,fingerprint" },
+      );
+    return exploratory;
+  }
 
   const fingerprint = hash(evidenceFingerprint(items));
 
