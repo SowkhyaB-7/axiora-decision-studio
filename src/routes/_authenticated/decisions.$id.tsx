@@ -20,7 +20,7 @@ import { EvidenceQuickAdd } from "@/components/evidence-quick-add";
 import { ConfidenceChip, VerdictBadge } from "@/components/verdict-badge";
 import { supabase } from "@/integrations/supabase/client";
 import { getBriefing } from "@/lib/ai.functions";
-import type { Briefing, BriefingClaim } from "@/lib/briefing";
+import { EXPLORATORY_UNAVAILABLE, type Briefing, type BriefingClaim } from "@/lib/briefing";
 import {
   CATEGORY_LABEL,
   DIRECTION_LABEL,
@@ -136,8 +136,13 @@ function DecisionBriefing() {
     queryKey: ["briefing", id, items.map((e) => e.id).join(",")],
     enabled: !!decision,
     staleTime: 5 * 60 * 1000,
+    // No automatic retries: AI failures (e.g. credits) must not be replayed.
+    retry: false,
     queryFn: async () => (await runBriefing({ data: { decisionId: id } })) as Briefing,
   });
+  const exploratoryFailed =
+    !!briefingQuery.error &&
+    String((briefingQuery.error as Error).message ?? "").includes(EXPLORATORY_UNAVAILABLE);
 
   const removeEvidence = useMutation({
     mutationFn: async (evidenceId: string) => {
@@ -214,7 +219,29 @@ function DecisionBriefing() {
         </header>
 
         {assessment.verdict === "INSUFFICIENT_EVIDENCE" &&
-          (briefing?.is_exploratory ? (
+          (briefingQuery.isLoading ? (
+            <Callout tone="muted" icon={Loader2} title="Preparing Your Briefing">
+              Reading what you've described so far…
+            </Callout>
+          ) : exploratoryFailed ? (
+            <Callout
+              tone="muted"
+              icon={HelpCircle}
+              title="Exploratory Briefing Unavailable Right Now"
+            >
+              Axiora couldn't generate a first framing of this decision from your
+              description. Nothing was lost: your decision and any evidence are
+              unchanged, and there is still no verdict without evidence.{" "}
+              <button
+                type="button"
+                onClick={() => briefingQuery.refetch()}
+                disabled={briefingQuery.isFetching}
+                className="text-primary underline disabled:opacity-60"
+              >
+                {briefingQuery.isFetching ? "Trying again…" : "Try again"}
+              </button>
+            </Callout>
+          ) : briefing?.is_exploratory ? (
             <Callout
               tone="muted"
               icon={HelpCircle}
@@ -224,7 +251,7 @@ function DecisionBriefing() {
               Below is a first framing of this decision based on what you
               described. Add evidence that bears on it to get an assessment.
             </Callout>
-          ) : (
+          ) : briefing ? (
             <Callout
               tone="muted"
               icon={HelpCircle}
@@ -233,7 +260,7 @@ function DecisionBriefing() {
               Axiora won't produce a verdict on this little evidence. Add evidence
               across customer, technical and business ground, then come back.
             </Callout>
-          ))}
+          ) : null)}
 
         {assessment.isConflict && (
           <Callout tone="destructive" icon={Scale} title="Evidence Conflict">
@@ -258,7 +285,7 @@ function DecisionBriefing() {
               <Loader2 className="h-4 w-4 animate-spin" /> Reading your evidence…
             </p>
           )}
-          {briefingQuery.error && (
+          {briefingQuery.error && !exploratoryFailed && (
             <p className="mt-3 text-sm text-destructive">
               The reasoning summary couldn't be generated. The verdict above is
               still computed from your evidence.

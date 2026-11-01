@@ -37,3 +37,6 @@ export type BriefingContext = {
   verdict: Verdict;
   confidence: Confidence;
 };
+
+/** Error message thrown when an exploratory briefing could not be generated. */
+export const EXPLORATORY_UNAVAILABLE = "EXPLORATORY_BRIEFING_UNAVAILABLE";
