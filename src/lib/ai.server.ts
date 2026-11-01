@@ -526,7 +526,9 @@ export async function loadAndBuildBriefing(
       exploratory = await generateExploratoryBriefing(decision.title, context);
     } catch (err) {
       console.error("Exploratory briefing generation failed", err);
-      return fallbackBriefing(assessment, items);
+      // Do not substitute the generic evidence copy: this decision qualifies
+      // for an exploratory briefing. Surface a retryable error instead.
+      throw new Error(EXPLORATORY_UNAVAILABLE);
     }
     await supabase
       .from("decision_briefings")
