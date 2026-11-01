@@ -292,6 +292,7 @@ function WorkNode({
   const bucket = deriveTiming(item, now).bucket;
   const prominent = bucket === "OVERDUE" || bucket === "SOON" || item.status === "BLOCKED" || item.mode === "AMBIGUOUS";
   const summary = getNodeSummary(item, verdict);
+  const excerpt = item.mode === "DECISION" ? decisionExcerpt(item) : null;
   const content = (
     <>
       <div className="flex items-center justify-between gap-3">
@@ -304,6 +305,9 @@ function WorkNode({
       <h3 className={cn("mt-2 line-clamp-2 font-display leading-tight", prominent ? "text-lg" : "text-base")}>
         {item.title}
       </h3>
+      {excerpt && (
+        <p className="mt-1.5 line-clamp-1 text-xs leading-relaxed text-foreground/75" title={excerpt}>{excerpt}</p>
+      )}
       {summary && (
         <p className="mt-2 line-clamp-1 text-xs leading-relaxed text-muted-foreground">{summary}</p>
       )}
@@ -610,7 +614,26 @@ function WorkDetail({
 }
 
 type TimingFilter = "ALL" | TimingBucket;
-type SortOrder = "DEFAULT" | "EARLIEST" | "LATEST";
+type SortOrder = "NEWEST" | "UPDATED" | "DEFAULT" | "EARLIEST" | "LATEST";
+
+const PAGE_SIZE = 12;
+
+function orderGroup(group: WorkItem[], order: SortOrder, now: Date) {
+  if (order === "DEFAULT") return group; // groupByWorkstream already orders by status/prominence
+  if (order === "NEWEST") return [...group].sort(byNewest);
+  if (order === "UPDATED") return [...group].sort(byRecentlyUpdated);
+  return sortByTiming(group, order, now);
+}
+
+/** One-line excerpt of the user's own words, so similar generated titles stay distinguishable. */
+function decisionExcerpt(item: WorkItem) {
+  const title = item.title.trim().toLowerCase();
+  for (const text of [item.raw_goal, item.description, item.context]) {
+    const value = text?.trim();
+    if (value && value.toLowerCase() !== title) return value;
+  }
+  return null;
+}
 
 const TIMING_FILTERS: [TimingFilter, string][] = [
   ["ALL", "All timing"],
@@ -622,7 +645,7 @@ const TIMING_FILTERS: [TimingFilter, string][] = [
 ];
 
 // Undated and completed work keeps its place at the end; dated work sorts by its real deadline.
-function sortByTiming(group: WorkItem[], order: Exclude<SortOrder, "DEFAULT">, now: Date) {
+function sortByTiming(group: WorkItem[], order: "EARLIEST" | "LATEST", now: Date) {
   const rank = (item: WorkItem) => deriveTiming(item, now).rank;
   const dated = group.filter((item) => rank(item) !== null);
   const undated = group.filter((item) => rank(item) === null);
