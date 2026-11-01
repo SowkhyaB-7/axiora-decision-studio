@@ -20,7 +20,7 @@ import { EvidenceQuickAdd } from "@/components/evidence-quick-add";
 import { ConfidenceChip, VerdictBadge } from "@/components/verdict-badge";
 import { supabase } from "@/integrations/supabase/client";
 import { getBriefing } from "@/lib/ai.functions";
-import type { Briefing, BriefingClaim } from "@/lib/briefing";
+import { EXPLORATORY_UNAVAILABLE, type Briefing, type BriefingClaim } from "@/lib/briefing";
 import {
   CATEGORY_LABEL,
   DIRECTION_LABEL,
@@ -136,8 +136,13 @@ function DecisionBriefing() {
     queryKey: ["briefing", id, items.map((e) => e.id).join(",")],
     enabled: !!decision,
     staleTime: 5 * 60 * 1000,
+    // No automatic retries: AI failures (e.g. credits) must not be replayed.
+    retry: false,
     queryFn: async () => (await runBriefing({ data: { decisionId: id } })) as Briefing,
   });
+  const exploratoryFailed =
+    !!briefingQuery.error &&
+    String((briefingQuery.error as Error).message ?? "").includes(EXPLORATORY_UNAVAILABLE);
 
   const removeEvidence = useMutation({
     mutationFn: async (evidenceId: string) => {

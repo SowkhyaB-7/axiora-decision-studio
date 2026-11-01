@@ -1,4 +1,4 @@
-import type { Briefing } from "@/lib/briefing";
+import { EXPLORATORY_UNAVAILABLE, type Briefing } from "@/lib/briefing";
 import { MODES, URGENCIES, type Mode, type Urgency } from "@/lib/work";
 import {
   CATEGORIES,
