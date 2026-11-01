@@ -37,8 +37,11 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 type DecisionRow = {
   id: string;
   title: string;
+  context: string | null;
   status: string;
   is_demo: boolean;
+  created_at: string | null;
+  updated_at: string | null;
 };
 
 function Home() {
@@ -55,7 +58,7 @@ function Home() {
     queryFn: async () => {
       const [work, decisions, evidence] = await Promise.all([
         supabase.from("work_items").select("*").order("created_at", { ascending: false }),
-        supabase.from("decisions").select("id, title, status, is_demo"),
+        supabase.from("decisions").select("id, title, context, status, is_demo, created_at, updated_at"),
         supabase.from("evidence_items").select("*"),
       ]);
       if (work.error) throw work.error;
@@ -77,6 +80,9 @@ function Home() {
         decisions: ((decisions.data ?? []) as DecisionRow[]).map((decision) => ({
           id: decision.id,
           title: decision.title,
+          context: decision.context,
+          createdAt: decision.created_at,
+          updatedAt: decision.updated_at,
           isDemo: decision.is_demo,
           verdict: VERDICT_LABEL[
             computeAssessment(

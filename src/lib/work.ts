@@ -63,6 +63,9 @@ export type WorkItem = {
   deadline_source: "GOAL" | "USER" | null;
   completed_at: string | null;
   created_at: string;
+  updated_at?: string | null;
+  /** Standalone decision context, searchable but not part of the work_items row. */
+  context?: string | null;
 };
 
 const asStringArray = (value: unknown): string[] =>
@@ -100,7 +103,33 @@ export function toWorkItem(row: Record<string, unknown>): WorkItem {
     deadline_source: (row["deadline_source"] as WorkItem["deadline_source"]) ?? null,
     completed_at: (row["completed_at"] as string | null) ?? null,
     created_at: String(row["created_at"] ?? ""),
+    updated_at: (row["updated_at"] as string | null) ?? null,
   };
+}
+
+/** Milliseconds for a timestamp; missing or invalid timestamps sort last. */
+export function timeValue(iso: string | null | undefined): number {
+  if (!iso) return Number.NEGATIVE_INFINITY;
+  const t = Date.parse(iso);
+  return Number.isNaN(t) ? Number.NEGATIVE_INFINITY : t;
+}
+
+export function byNewest(a: WorkItem, b: WorkItem): number {
+  return timeValue(b.created_at) - timeValue(a.created_at) || 0;
+}
+
+export function byRecentlyUpdated(a: WorkItem, b: WorkItem): number {
+  const ua = timeValue(a.updated_at ?? a.created_at);
+  const ub = timeValue(b.updated_at ?? b.created_at);
+  return ub - ua || byNewest(a, b);
+}
+
+/** Tokenized, case-insensitive: every query word must appear in some searchable field. */
+export function matchesSearch(item: WorkItem, query: string): boolean {
+  const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return true;
+  const fields = [item.raw_goal, item.title, item.description ?? "", item.context ?? ""].map((f) => f.toLowerCase());
+  return tokens.every((token) => fields.some((field) => field.includes(token)));
 }
 
 /** Visual prominence order used by the workspace: Now loudest, Completed quietest. */
