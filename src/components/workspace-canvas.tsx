@@ -76,15 +76,22 @@ export function WorkspaceCanvas({
   const [activeWorkstream, setActiveWorkstream] = useState<string | null>(null);
   const [timingFilter, setTimingFilter] = useState<TimingFilter>("ALL");
   const [view, setView] = useState<"ACTIVE" | "COMPLETED">("ACTIVE");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("DEFAULT");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("NEWEST");
+  const [query, setQuery] = useState("");
+  const [expanded, setExpanded] = useState<Record<string, number>>({});
+  // Pagination starts fresh whenever what is being looked at changes.
+  useEffect(() => { setExpanded({}); }, [activeWorkstream, timingFilter, view, sortOrder, query]);
+  const searching = query.trim().length > 0;
   const linkedDecisions = new Set(items.map((item) => item.decision_id).filter(Boolean));
   const decisionVerdicts = new Map(decisions.map((decision) => [decision.id, decision.verdict]));
+  const decisionContext = new Map(decisions.map((decision) => [decision.id, decision.context ?? null]));
   const standaloneDecisions = decisions.filter((decision) => !linkedDecisions.has(decision.id));
   const decisionItems: WorkItem[] = standaloneDecisions.map((decision) => ({
     id: `decision-${decision.id}`,
     raw_goal: decision.title,
     title: decision.title,
     description: null,
+    context: decision.context ?? null,
     workstream: "Decisions",
     status: "UNSCHEDULED",
     mode: "DECISION",
@@ -103,9 +110,14 @@ export function WorkspaceCanvas({
     due_at: null,
     deadline_source: null,
     completed_at: null,
-    created_at: "",
+    created_at: decision.createdAt ?? "",
+    updated_at: decision.updatedAt ?? null,
   }));
-  const allItems = [...items, ...decisionItems];
+  // Linked decisions are searchable by their decision context too, without touching raw_goal.
+  const allItems = [
+    ...items.map((item) => (item.decision_id ? { ...item, context: decisionContext.get(item.decision_id) ?? null } : item)),
+    ...decisionItems,
+  ];
   const groups = groupByWorkstream(allItems);
   const completedCount = allItems.filter((item) => item.status === "COMPLETED").length;
   const visibleGroups = (activeWorkstream
@@ -115,12 +127,12 @@ export function WorkspaceCanvas({
     .map(([workstream, group]) => {
       // Finished work leaves the Active view; it lives under the Completed view.
       const filtered = group.filter((item) =>
-        view === "COMPLETED"
+        (view === "COMPLETED"
           ? item.status === "COMPLETED"
-          : item.status !== "COMPLETED" && (timingFilter === "ALL" || deriveTiming(item, now).bucket === timingFilter),
+          : item.status !== "COMPLETED" && (timingFilter === "ALL" || deriveTiming(item, now).bucket === timingFilter))
+        && matchesSearch(item, query),
       );
-      const ordered = sortOrder === "DEFAULT" ? filtered : sortByTiming(filtered, sortOrder, now);
-      return [workstream, ordered] as [string, WorkItem[]];
+      return [workstream, orderGroup(filtered, sortOrder, now)] as [string, WorkItem[]];
     })
     .filter(([, group]) => group.length > 0);
   const selectedItem = allItems.find((item) => item.id === selectedId) ?? null;
