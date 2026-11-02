@@ -10,6 +10,7 @@ import {
   MoreHorizontal,
   Pencil,
   RotateCcw,
+  Search,
   Sparkles,
   X,
 } from "lucide-react";
@@ -193,6 +194,27 @@ export function WorkspaceCanvas({
         </nav>
 
         <div className="workspace-controls">
+          <div className="relative flex items-center">
+            <Search className="pointer-events-none absolute left-2.5 h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={activeWorkstream ? `Search ${activeWorkstream}` : "Search your work"}
+              aria-label="Search work and decisions"
+              className="h-8 w-48 border border-border bg-background pl-8 pr-7 text-xs outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-search-cancel-button]:hidden"
+            />
+            {searching && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                className="absolute right-1.5 p-0.5 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
           {view === "ACTIVE" && (
             <WorkspaceSelect
               label="Filter"
@@ -204,11 +226,13 @@ export function WorkspaceCanvas({
           )}
           <WorkspaceSelect
             label="Sort"
-            ariaLabel="Sort by due date"
+            ariaLabel="Sort work"
             value={sortOrder}
             onChange={(v) => setSortOrder(v as SortOrder)}
             options={[
-              ["DEFAULT", "As organized"],
+              ["NEWEST", "Newest created"],
+              ["UPDATED", "Recently updated"],
+              ["DEFAULT", "By status"],
               ["EARLIEST", "Due date — earliest first"],
               ["LATEST", "Due date — latest first"],
             ]}
@@ -219,19 +243,31 @@ export function WorkspaceCanvas({
         <div className={cn("workspace-map", activeWorkstream && "workspace-map-focused")} aria-label="Workspace">
           {visibleGroups.length === 0 && (
             <p className="workspace-empty">
-              {view === "COMPLETED"
+              {searching ? (
+                <>
+                  Nothing{activeWorkstream ? ` in ${activeWorkstream}` : ""} matches “{query.trim()}”
+                  {view === "ACTIVE" && timingFilter !== "ALL" ? " with this timing" : ""}.{" "}
+                  <button type="button" className="underline underline-offset-2" onClick={() => setQuery("")}>
+                    Clear search
+                  </button>
+                </>
+              ) : view === "COMPLETED"
                 ? `No completed work${activeWorkstream ? ` in ${activeWorkstream}` : ""} yet. Open any piece of work in Active and choose "Mark as completed" — it will appear here.`
                 : "Nothing here matches this timing."}
             </p>
           )}
-          {visibleGroups.map(([workstream, group]) => (
+          {visibleGroups.map(([workstream, group]) => {
+            const limit = searching ? group.length : (expanded[workstream] ?? PAGE_SIZE);
+            const shown = group.slice(0, limit);
+            const remaining = group.length - shown.length;
+            return (
             <section key={workstream} className="workspace-cluster">
               <div className="workspace-cluster-heading">
                 <span>{workstream}</span>
-                <span>{group.length} {group.length === 1 ? "piece of work" : "pieces of work"}</span>
+                <span>{group.length} {searching ? (group.length === 1 ? "match" : "matches") : group.length === 1 ? "piece of work" : "pieces of work"}</span>
               </div>
               <div className="workspace-cluster-nodes">
-                {group.map((item) => (
+                {shown.map((item) => (
                   <WorkNode
                     key={item.id}
                     item={item}
@@ -241,8 +277,20 @@ export function WorkspaceCanvas({
                   />
                 ))}
               </div>
+              {remaining > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2 h-auto px-0 py-1 text-xs text-muted-foreground"
+                  onClick={() => setExpanded((prev) => ({ ...prev, [workstream]: limit + PAGE_SIZE }))}
+                >
+                  Show {Math.min(PAGE_SIZE, remaining)} more · {remaining} remaining
+                </Button>
+              )}
             </section>
-          ))}
+            );
+          })}
         </div>
       </div>
 
