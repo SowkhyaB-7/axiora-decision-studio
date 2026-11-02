@@ -10,6 +10,7 @@ import {
   MoreHorizontal,
   Pencil,
   RotateCcw,
+  Search,
   Sparkles,
   X,
 } from "lucide-react";
@@ -20,7 +21,10 @@ import {
   MODE_LABEL,
   MODE_OPENER,
   MODES,
+  byNewest,
+  byRecentlyUpdated,
   groupByWorkstream,
+  matchesSearch,
   type Mode,
   type WorkItem,
 } from "@/lib/work";
@@ -30,6 +34,9 @@ import { SupportingMaterials } from "@/components/supporting-materials";
 type DecisionNode = {
   id: string;
   title: string;
+  context?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
   verdict: string;
   isDemo: boolean;
   workItemId?: string;
@@ -70,15 +77,22 @@ export function WorkspaceCanvas({
   const [activeWorkstream, setActiveWorkstream] = useState<string | null>(null);
   const [timingFilter, setTimingFilter] = useState<TimingFilter>("ALL");
   const [view, setView] = useState<"ACTIVE" | "COMPLETED">("ACTIVE");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("DEFAULT");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("NEWEST");
+  const [query, setQuery] = useState("");
+  const [expanded, setExpanded] = useState<Record<string, number>>({});
+  // Pagination starts fresh whenever what is being looked at changes.
+  useEffect(() => { setExpanded({}); }, [activeWorkstream, timingFilter, view, sortOrder, query]);
+  const searching = query.trim().length > 0;
   const linkedDecisions = new Set(items.map((item) => item.decision_id).filter(Boolean));
   const decisionVerdicts = new Map(decisions.map((decision) => [decision.id, decision.verdict]));
+  const decisionContext = new Map(decisions.map((decision) => [decision.id, decision.context ?? null]));
   const standaloneDecisions = decisions.filter((decision) => !linkedDecisions.has(decision.id));
   const decisionItems: WorkItem[] = standaloneDecisions.map((decision) => ({
     id: `decision-${decision.id}`,
     raw_goal: decision.title,
     title: decision.title,
     description: null,
+    context: decision.context ?? null,
     workstream: "Decisions",
     status: "UNSCHEDULED",
     mode: "DECISION",
@@ -97,9 +111,14 @@ export function WorkspaceCanvas({
     due_at: null,
     deadline_source: null,
     completed_at: null,
-    created_at: "",
+    created_at: decision.createdAt ?? "",
+    updated_at: decision.updatedAt ?? null,
   }));
-  const allItems = [...items, ...decisionItems];
+  // Linked decisions are searchable by their decision context too, without touching raw_goal.
+  const allItems = [
+    ...items.map((item) => (item.decision_id ? { ...item, context: decisionContext.get(item.decision_id) ?? null } : item)),
+    ...decisionItems,
+  ];
   const groups = groupByWorkstream(allItems);
   const completedCount = allItems.filter((item) => item.status === "COMPLETED").length;
   const visibleGroups = (activeWorkstream
@@ -109,12 +128,12 @@ export function WorkspaceCanvas({
     .map(([workstream, group]) => {
       // Finished work leaves the Active view; it lives under the Completed view.
       const filtered = group.filter((item) =>
-        view === "COMPLETED"
+        (view === "COMPLETED"
           ? item.status === "COMPLETED"
-          : item.status !== "COMPLETED" && (timingFilter === "ALL" || deriveTiming(item, now).bucket === timingFilter),
+          : item.status !== "COMPLETED" && (timingFilter === "ALL" || deriveTiming(item, now).bucket === timingFilter))
+        && matchesSearch(item, query),
       );
-      const ordered = sortOrder === "DEFAULT" ? filtered : sortByTiming(filtered, sortOrder, now);
-      return [workstream, ordered] as [string, WorkItem[]];
+      return [workstream, orderGroup(filtered, sortOrder, now)] as [string, WorkItem[]];
     })
     .filter(([, group]) => group.length > 0);
   const selectedItem = allItems.find((item) => item.id === selectedId) ?? null;
@@ -186,11 +205,13 @@ export function WorkspaceCanvas({
           )}
           <WorkspaceSelect
             label="Sort"
-            ariaLabel="Sort by due date"
+            ariaLabel="Sort work"
             value={sortOrder}
             onChange={(v) => setSortOrder(v as SortOrder)}
             options={[
-              ["DEFAULT", "As organized"],
+              ["NEWEST", "Newest created"],
+              ["UPDATED", "Recently updated"],
+              ["DEFAULT", "By status"],
               ["EARLIEST", "Due date — earliest first"],
               ["LATEST", "Due date — latest first"],
             ]}
@@ -198,22 +219,55 @@ export function WorkspaceCanvas({
         </div>
         </div>
 
+        <div className="relative flex items-center border-b border-border px-4 py-2">
+            <Search className="pointer-events-none absolute left-6.5 h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={activeWorkstream ? `Search ${activeWorkstream}` : "Search your work"}
+              aria-label="Search work and decisions"
+              className="h-8 w-full max-w-sm border border-border bg-background pl-8 pr-7 text-xs outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-search-cancel-button]:hidden"
+            />
+            {searching && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                className="absolute right-5.5 p-0.5 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
         <div className={cn("workspace-map", activeWorkstream && "workspace-map-focused")} aria-label="Workspace">
           {visibleGroups.length === 0 && (
             <p className="workspace-empty">
-              {view === "COMPLETED"
+              {searching ? (
+                <>
+                  Nothing{activeWorkstream ? ` in ${activeWorkstream}` : ""} matches “{query.trim()}”
+                  {view === "ACTIVE" && timingFilter !== "ALL" ? " with this timing" : ""}.{" "}
+                  <button type="button" className="underline underline-offset-2" onClick={() => setQuery("")}>
+                    Clear search
+                  </button>
+                </>
+              ) : view === "COMPLETED"
                 ? `No completed work${activeWorkstream ? ` in ${activeWorkstream}` : ""} yet. Open any piece of work in Active and choose "Mark as completed" — it will appear here.`
                 : "Nothing here matches this timing."}
             </p>
           )}
-          {visibleGroups.map(([workstream, group]) => (
+          {visibleGroups.map(([workstream, group]) => {
+            const limit = searching ? group.length : (expanded[workstream] ?? PAGE_SIZE);
+            const shown = group.slice(0, limit);
+            const remaining = group.length - shown.length;
+            return (
             <section key={workstream} className="workspace-cluster">
               <div className="workspace-cluster-heading">
                 <span>{workstream}</span>
-                <span>{group.length} {group.length === 1 ? "piece of work" : "pieces of work"}</span>
+                <span>{group.length} {searching ? (group.length === 1 ? "match" : "matches") : group.length === 1 ? "piece of work" : "pieces of work"}</span>
               </div>
               <div className="workspace-cluster-nodes">
-                {group.map((item) => (
+                {shown.map((item) => (
                   <WorkNode
                     key={item.id}
                     item={item}
@@ -223,8 +277,20 @@ export function WorkspaceCanvas({
                   />
                 ))}
               </div>
+              {remaining > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2 h-auto px-0 py-1 text-xs text-muted-foreground"
+                  onClick={() => setExpanded((prev) => ({ ...prev, [workstream]: limit + PAGE_SIZE }))}
+                >
+                  Show {Math.min(PAGE_SIZE, remaining)} more · {remaining} remaining
+                </Button>
+              )}
             </section>
-          ))}
+            );
+          })}
         </div>
       </div>
 
