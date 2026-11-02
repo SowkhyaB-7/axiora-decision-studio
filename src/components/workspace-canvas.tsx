@@ -20,7 +20,10 @@ import {
   MODE_LABEL,
   MODE_OPENER,
   MODES,
+  byNewest,
+  byRecentlyUpdated,
   groupByWorkstream,
+  matchesSearch,
   type Mode,
   type WorkItem,
 } from "@/lib/work";
@@ -30,6 +33,9 @@ import { SupportingMaterials } from "@/components/supporting-materials";
 type DecisionNode = {
   id: string;
   title: string;
+  context?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
   verdict: string;
   isDemo: boolean;
   workItemId?: string;
