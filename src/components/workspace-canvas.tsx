@@ -194,27 +194,6 @@ export function WorkspaceCanvas({
         </nav>
 
         <div className="workspace-controls">
-          <div className="relative flex items-center">
-            <Search className="pointer-events-none absolute left-2.5 h-3.5 w-3.5 text-muted-foreground" aria-hidden />
-            <input
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={activeWorkstream ? `Search ${activeWorkstream}` : "Search your work"}
-              aria-label="Search work and decisions"
-              className="h-8 w-48 border border-border bg-background pl-8 pr-7 text-xs outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-search-cancel-button]:hidden"
-            />
-            {searching && (
-              <button
-                type="button"
-                onClick={() => setQuery("")}
-                aria-label="Clear search"
-                className="absolute right-1.5 p-0.5 text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            )}
-          </div>
           {view === "ACTIVE" && (
             <WorkspaceSelect
               label="Filter"
@@ -240,6 +219,27 @@ export function WorkspaceCanvas({
         </div>
         </div>
 
+        <div className="relative flex items-center border-b border-border px-4 py-2">
+            <Search className="pointer-events-none absolute left-6.5 h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={activeWorkstream ? `Search ${activeWorkstream}` : "Search your work"}
+              aria-label="Search work and decisions"
+              className="h-8 w-full max-w-sm border border-border bg-background pl-8 pr-7 text-xs outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-search-cancel-button]:hidden"
+            />
+            {searching && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                className="absolute right-5.5 p-0.5 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
         <div className={cn("workspace-map", activeWorkstream && "workspace-map-focused")} aria-label="Workspace">
           {visibleGroups.length === 0 && (
             <p className="workspace-empty">
